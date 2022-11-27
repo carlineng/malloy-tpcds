@@ -577,3 +577,29 @@ copy web_returns            from './data/web_returns_001.dat' WITH (HEADER 0, DE
 copy web_sales              from './data/web_sales_001.dat' WITH (HEADER 0, DELIMITER '|');
 copy web_site               from './data/web_site_001.dat' WITH (HEADER 0, DELIMITER '|');
 
+copy call_center to            'data/call_center.parquet';
+copy catalog_page to           'data/catalog_page.parquet';
+copy catalog_returns to        'data/catalog_returns.parquet';
+copy catalog_sales to          'data/catalog_sales.parquet';
+copy customer to               'data/customer.parquet';
+copy customer_address to       'data/customer_address.parquet';
+copy customer_demographics to  'data/customer_demographics.parquet';
+copy date_dim to               'data/date_dim.parquet';
+copy dbgen_version to          'data/dbgen_version.parquet';
+copy household_demographics to 'data/household_demographics.parquet';
+copy income_band to            'data/income_band.parquet';
+copy inventory to              'data/inventory.parquet';
+copy item to                   'data/item.parquet';
+copy promotion to              'data/promotion.parquet';
+copy reason to                 'data/reason.parquet';
+copy ship_mode to              'data/ship_mode.parquet';
+copy store to                  'data/store.parquet';
+copy store_returns to          'data/store_returns.parquet';
+copy store_sales to            'data/store_sales.parquet';
+copy time_dim to               'data/time_dim.parquet';
+copy warehouse to              'data/warehouse.parquet';
+copy web_page to               'data/web_page.parquet';
+copy web_returns to            'data/web_returns.parquet';
+copy web_sales to              'data/web_sales.parquet';
+copy web_site to               'data/web_site.parquet';
+
