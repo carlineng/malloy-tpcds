@@ -1,3 +1,7 @@
+
+To load data into DuckDB:
+
+```
 .read D:/tpcds/app/tools/tpcds.sql
 copy call_center from 'd:/tpcds/data/call_center_001.dat' WITH (HEADER 0, DELIMITER '|');
 copy catalog_page from 'd:/tpcds/data/catalog_page_001.dat' WITH (HEADER 0, DELIMITER '|');
@@ -24,3 +28,4 @@ copy web_page from 'd:/tpcds/data/web_page_001.dat' WITH (HEADER 0, DELIMITER '|
 copy web_returns from 'd:/tpcds/data/web_returns_001.dat' WITH (HEADER 0, DELIMITER '|');
 copy web_sales from 'd:/tpcds/data/web_sales_001.dat' WITH (HEADER 0, DELIMITER '|');
 copy web_site from 'd:/tpcds/data/web_site_001.dat' WITH (HEADER 0, DELIMITER '|');
+```
