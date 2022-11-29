@@ -1,0 +1,44 @@
+import "tpcds.malloy";
+
+/* 
+
+Query 1
+
+Find 100 customers who returned 20% more than the per-store average
+for the year 2000 in Tennessee.
+
+The original SQL query uses a correlated subquery to calculate the
+average return amount for each store in the first WHERE clause of the
+final SELECT statement.
+
+The Malloy version uses Ungrouped Aggregates (i.e., the all() function)
+to calculate this quantity.
+
+I was initially tempted to use `all(avg(sr_return_amt), sr_store_sk)`
+to calculate the average, but this computed a different average from the
+original SQL query. The avg() function uses sum(amt)/count(amt), but the query
+as originally written computes sum(amt)/count(distinct customer)
+
+ */ 
+
+query: store_returns -> {
+  group_by:
+    sr_customer_sk
+    sr_store_sk
+    customer.c_customer_id
+  aggregate: 
+    customer_total_returns
+    avg_store_return is all(customer_total_returns / count(distinct sr_customer_sk), sr_store_sk)
+  where:
+    date_dim.d_year = 2000
+    and store.s_state = 'TN'
+    and sr_return_amt != null
+} -> {
+  project:
+    c_customer_id
+  where: 
+    customer_total_returns > avg_store_return * 1.2
+  order_by:
+    c_customer_id
+  limit: 100
+}
