@@ -1,0 +1,24 @@
+import "tpcds.malloy";
+
+// Query 1:
+query: store_returns -> {
+  group_by:
+    sr_customer_sk
+    sr_store_sk
+    customer.c_customer_id
+  aggregate: 
+    customer_total_returns
+    avg_store_return is all(sum(sr_return_amt) / count(distinct sr_customer_sk), sr_store_sk)
+  where:
+    date_dim.d_year = 2000
+    and store.s_state = 'TN'
+    and sr_return_amt != null
+} -> {
+  project:
+    c_customer_id
+  where: 
+    customer_total_returns > avg_store_return * 1.2
+  order_by:
+    c_customer_id
+  limit: 100
+}
