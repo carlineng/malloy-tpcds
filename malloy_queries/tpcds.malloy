@@ -45,8 +45,4 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
 
   measure: customer_total_returns is sum(sr_return_amt)
   measure: avg_returns is avg(sr_return_amt)
-  measure: num_nonnull_return is sum(
-    pick 1 when sr_return_amt != null
-    else 0
-  )
 }
