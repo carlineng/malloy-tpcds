@@ -1,0 +1,29 @@
+---
+layout: post
+title:  "TPC-DS Query 1"
+date:   2022-11-30 15:06:32 -0500
+categories: malloy tpcds query
+---
+[Pull Request](https://github.com/carlineng/malloy-tpcds/pull/1/files)
+
+I'm not super familiar with the TPC-DS queries, so I naïvely expected the queries to start off simple, and increase in difficulty. Opening up the first query quickly disabused me of that notion:
+
+<script src="https://gist.github.com/carlineng/157cae2aedc1d058f0122c7795886306.js?file=tpcds_q01.sql"></script>
+
+The query looks at store returns that occurred in Tennesse in the year 2000, and asks for a list of 100 customers who returned more to a store than that store's average return amount. A customer could appear on the list more than once; for example, if I return $121 to Store A and $241 to Store B, and Store A's average return amount is $100 and Store B's average return amount is $200, then I'll show up twice, once for each of Store A and Store B.
+
+The SQL implementation of Query 1 in the DuckDB repo uses a correlated subquery to compute whether a customer meets the "20% more than per-store average return amount" requirement. In my 10+ years of writing SQL, I've never gotten in the habit of writing correlated subqueries. Even though most modern query optimizers decorrelate these subqueries for performance reasons, I still find them confusing and prefer to express their logic using CTEs and joins.
+
+Since I'm starting from scratch on Malloy, I started writing out a Model file containing all the different dimension and fact tables used by this query. For folks who are familiar with LookML, this looks a lot like Looker Model files. These Sources define the starting point of my queries, encode any relationships (joins) between the tables, and any commonly used business logic or aggregations (measures). The query accesses 1 fact table and 3 dimension tables, and I've defined each of them below, with the appropriate joins and measures:
+
+<script src="https://gist.github.com/carlineng/157cae2aedc1d058f0122c7795886306.js?file=tpcds.malloy"></script>
+
+The Malloy query to compute the results is below:
+
+<script src="https://gist.github.com/carlineng/157cae2aedc1d058f0122c7795886306.js?file=q1.malloy"></script>
+
+The query uses the `store_returns` Fact Source that I defined earlier as a starting point, and immediately we see a few interesting things. The top part of the query should be pretty easy to understand. I'm grouping by `customer`, `store`, and `customer_id`, and calculating the total returns for that customer/store combo. The `->` operator then allows us to take the result of that aggregation, and use it as input to the next query, where we filter for more-than-average returning customers.
+
+But wait, what's that `all` function in `avg_store_return`? That's an interesting piece of functionality in Malloy known as [Ungrouped Aggregates](https://malloydata.github.io/malloy/documentation/language/aggregates.html#ungrouped-aggregates). An Ungrouped Aggregate allows us to compute an aggregation using a group "outside" of the query's existing `GROUP BY` groups; sort of similar to how a window function in SQL allows the definition of a `PARTITION BY` clause that is independent of a function's `GROUP BY` clause. In this case, in addition to calculating the total return amount of a given customer, I'm also calculating the average return amount for the store in each row. I think the Ungrouped Aggregate syntax is significantly nicer and more concise than the correlated subquery. The correlated subquery requires an extra `SELECT`, `FROM`, and `WHERE` clause; and the join condition can be hard to trace since the left side refers to a column outside of the subquery. In contrast, the `all` function is a single line of code that calculates the quantity of interest, with the "group" defined in-line.
+
+That's it for now. If you've made it this far, I'd love to hear what you think! Drop me a line on the [Malloy Slack](https://malloy-community.slack.com), username @carl.
