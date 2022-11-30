@@ -1,3 +1,5 @@
+Implementation of TPC-DS data warehouse benchmark queries using the Malloy query language. Follow along with the adventure [here](https://carlineng.github.io/malloy-tpcds/).
+
 TPC-DS queries are run using DuckDB:
 - https://duckdb.org/
 
