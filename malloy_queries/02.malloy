@@ -1,0 +1,105 @@
+import "tpcds.malloy"
+
+/*
+
+Query 2 
+
+Calculate year-over-year catalog and web gross sales for years
+2001 and 2002 for each day of the week (Sunday - Saturday)
+
+This is kind of a stupid query. It joins date_dim back to the
+weekly aggregated table, which causes a fan-out and each row
+is repeated 7 times (once for each day of the week)
+
+In the Malloy version, I'm doing a GROUP BY on all the columns
+to remove to duplicate rows.
+
+This query showcases a few interesting features of Malloy, namely:
+- The ability to define a source from a SQL block. Currently,
+  Malloy does not support UNION constructs, but provides an escape
+  hatch that lets us use arbitrary SQL to do what we want.
+- The filtered aggregates functionality is really nice. A lot more
+  concise than embedding `CASE` statements inside of aggregates.
+- Great example of Malloy's composability, and how it is both
+  more concise and more readable than SQL. The SQL query is 79
+  lines long. All the Malloy code to generate the result is 55 lines.
+- The Malloy version consists of a SQL query, 3 Source definitions,
+  and 1 Query, all of which build upon each other.
+- I didn't actually update the core TPCDS Malloy model. The model
+  concepts used in this query didn't seem relevant beyond the query.
+  Maybe I'm wrong, and later can refactor `web_catalog_sales` into
+  the primary model.
+- Note the sub-SELECT in the final FROM clause, and how each of the
+  sub-queries (aliased `y` and `z`) are basically identical. In
+  Malloy, I can achieve this effect without repeating code by
+  extending the `weekly_sales` source and creating `yoy_weekly_sales`
+  that includes the self-join clause.
+- This query helped me understand more clearly the distinction between
+  a Source and a Query in Malloy. A Query in Malloy cannot contain
+  explicit joins. The joins are defined in Sources, and performed
+  implicitly in Queries by accessing the joined fields as-needed.
+  This is different from SQL, where there's no concept of a "Source".
+  All CTEs can be thought of as simply flat tables that support any
+  operation.
+- If there's a SQL query that contains "pipelined" CTEs, but 
+  intermediate CTEs access "new" joined tables that aren't present
+  in previous CTEs, is there an easy way to replicate that in Malloy
+  pipelines? Or do we need to define separate Sources for this?
+*/
+
+sql: web_catalog_sales_qry is || 
+  SELECT
+    ws_sold_date_sk as sold_date_sk,
+    ws_ext_sales_price as sales_price
+  FROM read_parquet('../data/web_sales.parquet')
+
+  UNION all
+
+  SELECT
+    cs_sold_date_sk as sold_date_sk,
+    cs_ext_sales_price as sales_price
+  FROM read_parquet('../data/catalog_sales.parquet')
+  ;;
+  on "duckdb"
+  
+source: web_catalog_sales is from_sql(web_catalog_sales_qry) {
+  join_one: date_dim on sold_date_sk = date_dim.d_date_sk
+}
+
+source: weekly_sales is from(
+  web_catalog_sales -> {
+    group_by:
+      date_dim.d_week_seq
+
+    aggregate:
+      sun_sales is sum(sales_price) { where: date_dim.d_day_name = 'Sunday' }
+      mon_sales is sum(sales_price) { where: date_dim.d_day_name = 'Monday' }
+      tue_sales is sum(sales_price) { where: date_dim.d_day_name = 'Tuesday' }
+      wed_sales is sum(sales_price) { where: date_dim.d_day_name = 'Wednesday' }
+      thu_sales is sum(sales_price) { where: date_dim.d_day_name = 'Thursday' }
+      fri_sales is sum(sales_price) { where: date_dim.d_day_name = 'Friday' }
+      sat_sales is sum(sales_price) { where: date_dim.d_day_name = 'Saturday' }
+  }
+) {
+  primary_key: d_week_seq
+}
+
+source: yoy_weekly_sales is weekly_sales {
+  join_many: date_dim on d_week_seq = date_dim.d_week_seq
+  join_one: weekly_sales on d_week_seq = weekly_sales.d_week_seq - 53
+}
+
+query: yoy_weekly_sales -> {
+  group_by: 
+    d_week_seq
+    r_sun is sun_sales / weekly_sales.sun_sales
+    r_mon is mon_sales / weekly_sales.mon_sales
+    r_tue is tue_sales / weekly_sales.tue_sales
+    r_wed is wed_sales / weekly_sales.wed_sales
+    r_thu is thu_sales / weekly_sales.thu_sales
+    r_fri is fri_sales / weekly_sales.fri_sales
+    r_sat is sat_sales / weekly_sales.sat_sales
+  
+  where: date_dim.d_year = 2001
+  order_by: d_week_seq
+}
