@@ -46,3 +46,10 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
   measure: customer_total_returns is sum(sr_return_amt)
   measure: avg_returns is avg(sr_return_amt)
 }
+
+source: store_sales is table('duckdb:../data/store_sales.parquet') {
+  join_one: date_dim on ss_sold_date_sk = date_dim.d_date_sk
+  join_one: item on ss_item_sk = item.i_item_sk
+
+  measure: total_sales_price is sum(ss_ext_sales_price)
+}
