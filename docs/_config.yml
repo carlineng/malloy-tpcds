@@ -22,7 +22,7 @@ title: Malloy TPC-DS
 email: carlineng@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   Implementation of TPC-DS queries using the Malloy query language.
-baseurl: "/docs" # the subpath of your site, e.g. /blog
+# baseurl: "/docs" # the subpath of your site, e.g. /blog
 domain: carlineng.github.io
 url: "https://carlineng.github.io"
 twitter_username: carlineng
