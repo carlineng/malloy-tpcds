@@ -1,25 +1,25 @@
 import "tpcds.malloy"
 
-query: year_total_sales is from (
-  all_sales -> {
-    group_by:
-      customer.c_customer_id
-      customer.c_first_name
-      customer.c_last_name
-      customer.c_preferred_cust_flag
+query: all_sales -> {
+  group_by:
+    customer.c_customer_id
+    customer.c_first_name
+    customer.c_last_name
+    customer.c_preferred_cust_flag
 
-    aggregate:
-      catalog_total_sales_2001 is total_sales { where: date_dim.d_year = 2001 and sale_type = 'c'}
-      catalog_total_sales_2002 is total_sales { where: date_dim.d_year = 2002 and sale_type = 'c'}
-      web_total_sales_2001 is total_sales { where: date_dim.d_year = 2001 and sale_type = 'w'}
-      web_total_sales_2002 is total_sales { where: date_dim.d_year = 2002 and sale_type = 'w'}
-      store_total_sales_2001 is total_sales { where: date_dim.d_year = 2001 and sale_type = 's'}
-      store_total_sales_2002 is total_sales { where: date_dim.d_year = 2002 and sale_type = 's'}
-  }
-) {
-  dimension: store_yoy is store_total_sales_2002 / store_total_sales_2001
-  dimension: catalog_yoy is catalog_total_sales_2002 / catalog_total_sales_2001
-  dimension: web_yoy is web_total_sales_2002 / web_total_sales_2001
+  aggregate:
+    catalog_total_sales_2001 is total_sales { where: date_dim.d_year = 2001 and sale_type = 'c'}
+    catalog_total_sales_2002 is total_sales { where: date_dim.d_year = 2002 and sale_type = 'c'}
+    web_total_sales_2001 is total_sales { where: date_dim.d_year = 2001 and sale_type = 'w'}
+    web_total_sales_2002 is total_sales { where: date_dim.d_year = 2002 and sale_type = 'w'}
+    store_total_sales_2001 is total_sales { where: date_dim.d_year = 2001 and sale_type = 's'}
+    store_total_sales_2002 is total_sales { where: date_dim.d_year = 2002 and sale_type = 's'}
+} -> {
+  project:
+    *
+    catalog_yoy is catalog_total_sales_2002 / catalog_total_sales_2001
+    store_yoy is store_total_sales_2002 / store_total_sales_2001
+    web_yoy is web_total_sales_2002 / web_total_sales_2001
 } -> {
   project:
     c_customer_id
@@ -28,7 +28,7 @@ query: year_total_sales is from (
     c_preferred_cust_flag
 
   where:
-    catalog_yoy > store_yoy 
+    catalog_yoy > store_yoy
     and catalog_yoy > web_yoy
     and store_total_sales_2001 > 0
     and store_total_sales_2002 > 0
