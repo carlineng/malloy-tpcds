@@ -4,7 +4,8 @@ title:  "TPC-DS Query 1"
 date:   2022-11-30 15:06:32 -0500
 categories: malloy tpcds query
 ---
-[Pull Request](https://github.com/carlineng/malloy-tpcds/pull/1/files)
+- [Pull Request](https://github.com/carlineng/malloy-tpcds/pull/1/files)
+- Play with the query and results using the [Fiddle](https://carlineng.github.io/tpcds-fiddle/?q=1+-+Query+01&m=TPC-DS&t=)
 
 I'm not super familiar with the TPC-DS queries, so I naïvely expected the queries to start off simple, and increase in difficulty. Opening up the first query quickly disabused me of that notion:
 
