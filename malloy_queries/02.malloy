@@ -84,12 +84,10 @@ source: weekly_sales is from(
   primary_key: d_week_seq
 }
 
-source: yoy_weekly_sales is weekly_sales {
+query: yoy_weekly_sales is weekly_sales {
   join_many: date_dim on d_week_seq = date_dim.d_week_seq
   join_one: weekly_sales on d_week_seq = weekly_sales.d_week_seq - 53
-}
-
-query: yoy_weekly_sales -> {
+} -> {
   group_by: 
     d_week_seq
     r_sun is sun_sales / weekly_sales.sun_sales
