@@ -1,0 +1,32 @@
+---
+layout: post
+title:  "TPC-DS Query 2"
+date:   2022-12-01 0:00:00 -0800
+categories: malloy tpcds query
+---
+- [Pull Request](https://github.com/carlineng/malloy-tpcds/pull/2/files)
+- Play with the query and results using the [Fiddle](https://carlineng.github.io/tpcds-fiddle/?q=2+-+Query+02&m=TPC-DS&t=)
+
+TPC-DS query 2 calculates year-over-year sales from catalog and web for each week of 2002, and each day of the week (Sunday through Saturday). It's pretty hefty, clocking in at 79 lines, and containing some pipelined CTEs, a few `UNION ALL`s, and a self-join.
+
+<script src="https://gist.github.com/carlineng/2a8f04a3b12e639f490f3126ef74a785.js?file=q02.sql"></script>
+
+The query as originally written contains a join at the end that unnecessarily fans out duplicate rows. This renders the final output really difficult to read. It could easily be fixed by a `DISTINCT` or `GROUP BY` clause, but the query author opted to leave the duplicate rows in. An odd choice, and one that seems like a foreshadowing of what's the come as I tackle the remaining 97 queries in this benchmark.
+
+In writing the Malloy model for this query, I had to create a new Source from a [SQL Block](https://malloydata.github.io/malloy/documentation/language/sql_blocks.html#sql-blocks). Malloy allows you to write arbitrary SQL queries as an escape hatch in case the Malloy language doesn't include a piece of required functionality. In this case, I needed the SQL Block to write a `UNION ALL` query to combine web and catalog sales.
+
+<script src="https://gist.github.com/carlineng/2a8f04a3b12e639f490f3126ef74a785.js?file=tpcds.malloy"></script>
+
+These Sources also showcase Malloy's filtered aggregate syntax (lines 28-34 above), which are really nice. The original SQL query uses `CASE` statements inside of the `SUM` functions, which are verbose and ugly. Unfortunately, this is the standard way to do this on most data warehouses. The Postgres SQL dialect supports a similar [filtered aggregate syntax](https://www.postgresql.org/docs/current/sql-expressions.html#SYNTAX-AGGREGATES), but to my knowledge, none of Snowflake, BigQuery or Redshift currently do. Malloy's simple in-line predicates are easier to write, and much easier to read.
+
+The final Malloy query is as follows:
+
+<script src="https://gist.github.com/carlineng/2a8f04a3b12e639f490f3126ef74a785.js?file=q02.malloy"></script>
+
+The query looks very clean at first glance, but contains some subtleties that might be difficult to pick up for someone not familiar with the language. In the process of writing it, I came to a much better understanding of the difference between a `Source` and a `Query` in Malloy. The first 4 lines define a new `Source` by extending the `weekly_sales` source defined in the modeling portion above. This new `Source` implements the self-join portion of the query that allows us to compute the year-over-year values. This `Source` is the basis for the `Query` starting on line 5 that actually does the year-over-year computation.
+
+A capital-S `Source` in Malloy does not actually produce any output. `Source`s encapsulate semantic information such as joins and measure definitions, and can be used as the basis for capital-Q `Queries`, which *do* produce output. In Malloy, a `Query` does not have an explicit `JOIN` operator. A join must be defined in a `Source` and performed implicitly in a `Query` on that `Source` by referencing a field from a joined-in table via dot notation. For example take a look at `date_dim.d_year` on line 15 or `weekly_sales.sun_sales` on line 7 above.
+
+This is quite different from SQL where query results, tables, and sub-queries can all be thought of as "sources" for a query. Everything is just a query. The addition of a new top-level concept (i.e., `Source`) might be tough for some folks coming from SQL to understand, but I think it's well worth it for the power it affords.
+
+Thanks for tuning in! As always, any feedback, comments, or questions are welcome. Drop me a line on the [Malloy Slack](https://malloy-community.slack.com), username @carl.
