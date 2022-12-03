@@ -21,4 +21,6 @@ The query itself is also quite simple. Rather than doing a six-way self-join lik
 
 <script src="https://gist.github.com/carlineng/9d23494ff83319d7d5fcf38f76a3ffd2.js?file=q04.malloy"></script>
 
+The `declare` clause in the query above uses a construct that doesn't exist in SQL. This clause allows me to create new variables in the query scope that can be re-used elsewhere. In SQL, any new variable declarations must be added to the `SELECT` clause of a query; however, it's fairly common to want to use an intermediate variable in a query, but exclude it from the final result -- for example, when computing row ranks with a window function and selecting the first row of that window. Unfortunately, on most databases, this requires tacking on an additional CTE to exclude the `rank` column from the output resultset. With `declare` in Malloy, I define the variables and use them in the query's filters, but don't include them anywhere in the final output (`group_by` and `aggregate` clauses). Pretty slick!
+
 Thanks for tuning in! As always, any feedback, comments, or questions are welcome. Drop me a line on the [Malloy Slack](https://malloy-community.slack.com), username @carl.

@@ -116,7 +116,6 @@ sql: all_sales_qry is ||
   FROM read_parquet('../data/store_sales.parquet')
   ;;
   on "duckdb"
-  ;
 
 source: all_sales is from_sql(all_sales_qry) {
   join_one: date_dim on sold_date_sk = date_dim.d_date_sk
