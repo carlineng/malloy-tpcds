@@ -21,6 +21,4 @@ The query itself is also quite simple. Rather than doing a six-way self-join lik
 
 <script src="https://gist.github.com/carlineng/9d23494ff83319d7d5fcf38f76a3ffd2.js?file=q04.malloy"></script>
 
-I had to add one additional pipeline (lines 23-45) to apply the final filters to the year-over-year values. Some SQL dialects (like Snowflake) allow the `WHERE` clause of a query to reference a column alias created in the same query. Malloy doesn't support this yet, but if it did, I would be able to specify `where: catalog_yoy > store_yoy` after line 22 above and make the query slightly more concise by removing that final pipeline.
-
 Thanks for tuning in! As always, any feedback, comments, or questions are welcome. Drop me a line on the [Malloy Slack](https://malloy-community.slack.com), username @carl.
