@@ -1,4 +1,13 @@
 // Dimensions
+
+source: catalog_page is table('duckdb:../data/catalog_page.parquet') {
+  primary_key: cp_catalog_page_sk
+}
+
+source: customer is table('duckdb:../data/customer.parquet') {
+  primary_key: c_customer_sk
+}
+
 source: customer_address is table('duckdb:../data/customer_address.parquet') {
   primary_key: ca_address_sk
 }
@@ -147,3 +156,32 @@ source: all_sales is from_sql(all_sales_qry) {
   measure: avg_coupon_amt is avg(coupon_amt)
   measure: avg_sales_price is avg(sales_price)
 }
+
+sql: all_returns_qry is ||
+SELECT
+    sr_returned_date_sk,
+    sr_return_time_sk,
+    sr_item_sk,
+    sr_customer_sk,
+    sr_cdemo_sk,
+    sr_hdemo_sk,
+    sr_addr_sk,
+    sr_store_sk,
+    sr_reason_sk,
+    sr_ticket_number,
+    sr_return_quantity,
+    sr_return_amt,
+    sr_return_tax,
+    sr_return_amt_inc_tax,
+    sr_fee,
+    sr_return_ship_cost,
+    sr_refunded_cash,
+    sr_reversed_charge,
+    sr_store_credit,
+    sr_net_loss
+FROM read_parquet('../data/store_returns.parquet')
+
+;;
+on "duckdb"
+
+
