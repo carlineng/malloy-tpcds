@@ -1,0 +1,20 @@
+---
+layout: post
+title:  "TPC-DS Query 3"
+date:   2022-12-03 0:00:00 -0800
+categories: malloy tpcds query
+---
+- [Pull Request](https://github.com/carlineng/malloy-tpcds/pull/3/files)
+- Play with the query and results using the [Fiddle](https://carlineng.github.io/tpcds-fiddle/?q=3+-+Query+03&m=TPC-DS&t=)
+
+A simple and straightforward query, both in SQL and Malloy. Query 3 asks "which brands have the most gross store sales in November from items with Manufacturer ID 128?" The implementation is two joins and one aggregation.
+
+<script src="https://gist.github.com/carlineng/8e2d0712b58f3406a265966f283e8603.js?file=q03.sql"></script>
+
+In the Malloy docs, there's a section entitled [The Tao of Malloy](https://malloydata.github.io/malloy/documentation/tao.html), which describes some of the fundamental principles of the language. The first one is "feels familiar to someone coming from SQL". That certainly rings true here. I think anyone with basic knowledge of SQL would be able to understand what this Malloy query is doing.
+
+<script src="https://gist.github.com/carlineng/8e2d0712b58f3406a265966f283e8603.js?file=tpcds.malloy"></script>
+
+<script src="https://gist.github.com/carlineng/8e2d0712b58f3406a265966f283e8603.js?file=q03.malloy"></script>
+
+Thanks for tuning in! As always, any feedback, comments, or questions are welcome. Drop me a line on the [Malloy Slack](https://malloy-community.slack.com), username @carl.
