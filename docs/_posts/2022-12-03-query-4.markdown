@@ -1,0 +1,26 @@
+---
+layout: post
+title:  "TPC-DS Query 4"
+date:   2022-12-03 01:00:00 -0800
+categories: malloy tpcds query
+---
+- [Pull Request](https://github.com/carlineng/malloy-tpcds/pull/8/files)
+- Play with the query and results using the [Fiddle](https://carlineng.github.io/tpcds-fiddle/?q=4+-+Query+04&t=&m=TPC-DS). Unfortunately, the Fiddle uses a downsampled dataset, and Query 4 doesn't return any results on it.
+
+Query 4 is a headscratcher. The motivating business question is only moderately complex, but the SQL implementation is needlessly complicated. The Malloy version is a LOT simpler, but to be fair to SQL, I'm pretty sure I could rewrite the SQL to be much easier to understand.
+
+The query returns a list of customers from 2002 whose year-over-year growth in catalog sales exceeds their year-over-year growth in both either store and web sales. The query unions the `sales` tables from each of catalog, web, and store, and then does a six-way self-join to compute the year-over-year values.
+
+<script src="https://gist.github.com/carlineng/9d23494ff83319d7d5fcf38f76a3ffd2.js?file=q04.sql"></script>
+
+The Malloy model for this query is pretty straightforward. Similar to the approach in query 2, I'm using a SQL Block to construct a Source from a union of the `catalog_sales`, `web_sales` and `store_sales` tables, and joining in the appropriate dimension tables.
+
+<script src="https://gist.github.com/carlineng/9d23494ff83319d7d5fcf38f76a3ffd2.js?file=tpcds.malloy"></script>
+
+The query itself is also quite simple. Rather than doing a six-way self-join like the SQL implementation, I use filtered aggregations to calculate sales for each year, then pipeline the results (using the `->` operator) to divide 2002 sales by 2001 sales.
+
+<script src="https://gist.github.com/carlineng/9d23494ff83319d7d5fcf38f76a3ffd2.js?file=q04.malloy"></script>
+
+I had to add one additional pipeline (lines 23-45) to apply the final filters to the year-over-year values. Some SQL dialects (like Snowflake) allow the `WHERE` clause of a query to reference a column alias created in the same query. Malloy doesn't support this yet, but if it did, I would be able to specify `where: catalog_yoy > store_yoy` after line 22 above and make the query slightly more concise by removing that final pipeline.
+
+Thanks for tuning in! As always, any feedback, comments, or questions are welcome. Drop me a line on the [Malloy Slack](https://malloy-community.slack.com), username @carl.
