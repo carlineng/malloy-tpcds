@@ -1,11 +1,11 @@
 // Dimensions
+source: customer_address is table('duckdb:../data/customer_address.parquet') {
+  primary_key: ca_address_sk
+}
 
 source: customer is table('duckdb:../data/customer.parquet') {
   primary_key: c_customer_sk
-}
-
-source: customer_address is table('duckdb:../data/customer_address.parquet') {
-  primary_key: ca_address_sk
+  join_one: customer_address with c_current_addr_sk
 }
 
 source: customer_demographics is table('duckdb:../data/customer_demographics.parquet') {

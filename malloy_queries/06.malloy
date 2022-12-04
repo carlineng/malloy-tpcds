@@ -1,0 +1,35 @@
+import "tpcds.malloy"
+
+source: category_avg is from(
+  item -> {
+    group_by:
+      i_category
+
+    aggregate:
+      avg_category_price is avg(i_current_price)
+  }
+) {}
+
+query: all_sales_with_category_avg is all_sales {
+  join_one: category_avg on item.i_category = category_avg.i_category
+} -> {
+  group_by:
+    customer.customer_address.ca_state
+
+  where:
+    date_dim.d_year = 2001
+    and date_dim.d_moy = 1
+    and item.i_current_price > 1.2 * category_avg.avg_category_price
+    and sale_type = 's'
+    and customer.c_customer_sk != null
+
+  aggregate:
+    cnt is count(*)
+
+  having:
+    count(*) >= 10
+
+  order_by:
+    cnt
+    ca_state
+}

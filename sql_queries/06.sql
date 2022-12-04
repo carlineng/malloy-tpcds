@@ -1,3 +1,10 @@
+-- Look at the month of January 2001
+-- Count how many store purchases occurred
+-- where the item cost more than 20% of the average purchase price in the category
+-- rollup the count by the home state of the customer making the purchase
+-- and filter out any states where the count is < 10
+
+
 SELECT a.ca_state state,
        count(*) cnt
 FROM customer_address a ,
