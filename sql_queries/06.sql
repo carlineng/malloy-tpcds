@@ -1,5 +1,20 @@
-SELECT a.ca_state state,
-       count(*) cnt
+-- Look at the month of January 2001
+-- Count how many store purchases occurred
+-- where the item cost more than 20% of the average purchase price in the category
+-- rollup the count by the home state of the customer making the purchase
+-- and filter out any states where the count is < 10
+
+
+SELECT 
+  c_customer_sk
+  , c_customer_id
+  , c_first_name
+  , c_last_name
+  , ss_sold_date_sk
+  , d_date
+  , i_item_sk
+  , i_category
+  , ca.
 FROM customer_address a ,
      customer c ,
      store_sales s ,
@@ -18,9 +33,6 @@ WHERE a.ca_address_sk = c.c_current_addr_sk
     (SELECT avg(j.i_current_price)
      FROM item j
      WHERE j.i_category = i.i_category)
-GROUP BY a.ca_state
-HAVING count(*) >= 10
-ORDER BY cnt NULLS FIRST,
-         a.ca_state NULLS FIRST
+     AND a.ca_state is null
 LIMIT 100;
 
