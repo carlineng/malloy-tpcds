@@ -1,0 +1,26 @@
+import "tpcds.malloy"
+
+query: all_sales -> {
+  group_by:
+    item.i_item_id
+  
+  aggregate:
+    avg_quantity
+    avg_list_price
+    avg_coupon_amt
+    avg_sales_price
+
+  where:
+    sale_type = 's'
+    and customer.c_customer_sk != null
+    and customer_demographics.cd_gender = 'M'
+    and customer_demographics.cd_marital_status = 'S'
+    and customer_demographics.cd_education_status = 'College'
+    and (promotion.p_channel_email = 'N' or promotion.p_channel_event = 'N')
+    and date_dim.d_year = 2000
+
+  order_by:
+    i_item_id
+
+  limit: 100
+}
