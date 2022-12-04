@@ -5,16 +5,8 @@
 -- and filter out any states where the count is < 10
 
 
-SELECT 
-  c_customer_sk
-  , c_customer_id
-  , c_first_name
-  , c_last_name
-  , ss_sold_date_sk
-  , d_date
-  , i_item_sk
-  , i_category
-  , ca.
+SELECT a.ca_state state,
+       count(*) cnt
 FROM customer_address a ,
      customer c ,
      store_sales s ,
@@ -33,6 +25,9 @@ WHERE a.ca_address_sk = c.c_current_addr_sk
     (SELECT avg(j.i_current_price)
      FROM item j
      WHERE j.i_category = i.i_category)
-     AND a.ca_state is null
+GROUP BY a.ca_state
+HAVING count(*) >= 10
+ORDER BY cnt NULLS FIRST,
+         a.ca_state NULLS FIRST
 LIMIT 100;
 
