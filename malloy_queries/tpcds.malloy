@@ -47,7 +47,8 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
   measure: avg_returns is avg(sr_return_amt)
 }
 
-sql: all_sales_qry is ||
+sql: all_sales_qry is {
+  select: """
   SELECT
     ws_sold_date_sk as sold_date_sk,
     ws_sold_time_sk as sold_time_sk,
@@ -114,8 +115,9 @@ sql: all_sales_qry is ||
     ss_net_profit as net_profit,
     's' as sale_type
   FROM read_parquet('../data/store_sales.parquet')
-  ;;
-  on "duckdb"
+  """
+  connection: "duckdb"
+ }
 
 source: all_sales is from_sql(all_sales_qry) {
   join_one: date_dim on sold_date_sk = date_dim.d_date_sk
