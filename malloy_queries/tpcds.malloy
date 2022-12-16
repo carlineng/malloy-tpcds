@@ -50,12 +50,19 @@ source: time_dim is table('duckdb:../data/time_dim.parquet') {
   primary_key: t_time_sk
 }
 
+source: web_site is table('duckdb:../data/web_site.parquet') {
+  primary_key: web_site_sk
+}
+
 // Facts
 
 source: store_returns is table('duckdb:../data/store_returns.parquet') {
-  join_one: date_dim on sr_returned_date_sk = date_dim.d_date_sk
-  join_one: store on sr_store_sk = store.s_store_sk
-  join_one: customer on sr_customer_sk = customer.c_customer_sk
+  join_one: date_dim with sr_returned_date_sk
+  join_one: store with sr_store_sk
+  join_one: customer with sr_customer_sk
+
+  dimension: channel_category is 's'
+  dimension: channel_id is concat('store', store.s_store_id)
 
   measure: customer_total_returns is sum(sr_return_amt)
   measure: avg_returns is avg(sr_return_amt)
@@ -157,31 +164,10 @@ source: all_sales is from_sql(all_sales_qry) {
   measure: avg_sales_price is avg(sales_price)
 }
 
-sql: all_returns_qry is ||
-SELECT
-    sr_returned_date_sk,
-    sr_return_time_sk,
-    sr_item_sk,
-    sr_customer_sk,
-    sr_cdemo_sk,
-    sr_hdemo_sk,
-    sr_addr_sk,
-    sr_store_sk,
-    sr_reason_sk,
-    sr_ticket_number,
-    sr_return_quantity,
-    sr_return_amt,
-    sr_return_tax,
-    sr_return_amt_inc_tax,
-    sr_fee,
-    sr_return_ship_cost,
-    sr_refunded_cash,
-    sr_reversed_charge,
-    sr_store_credit,
-    sr_net_loss
-FROM read_parquet('../data/store_returns.parquet')
+  dimension: channel_category is 'w'
+  dimension: channel_id is concat('web_site', web_sales.web_site.web_site_id)
 
-;;
-on "duckdb"
-
+  measure: customer_total_returns is sum(wr_return_amt)
+  measure: avg_returns is avg(wr_return_amt)
+}
 
