@@ -1,2 +1,19 @@
 import "tpcds.malloy"
 
+query: web_profit_loss -> {
+  group_by:
+    channel_category
+    channel_id
+  
+  aggregate:
+    total_ext_sales
+    web_returns.total_returns
+    web_returns.total_loss
+    profit is total_profit - web_returns.total_loss
+
+  where:
+    date_dim.d_date >= '2000-08-23' AND date_dim.d_date <= '2000-09-06'
+
+  order_by:
+    channel_id
+}
