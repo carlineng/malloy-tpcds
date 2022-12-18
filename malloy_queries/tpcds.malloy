@@ -78,6 +78,8 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
       total_profit
       return_amt is 0
       net_loss is 0
+
+    where: store.s_store_id != null
   }
 }
   
@@ -104,6 +106,8 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
       total_profit is 0
       return_amt is total_returns
       net_loss is total_loss
+
+    where: store.s_store_id != null
   }
 }
 
@@ -223,5 +227,7 @@ source: all_sales is from_sql(all_sales_qry) {
       total_profit is 0
       return_amt is total_returns
       net_loss is total_loss
+
+    where: web_sales.web_site.web_site_id != null
   }
 }

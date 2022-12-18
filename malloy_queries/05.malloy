@@ -23,11 +23,23 @@ source: daily_profit_loss is from_sql(daily_profit_loss_sql) {
   measure: total_returns is sum(return_amt)
   measure: net_profit is sum(total_profit) - sum(net_loss)
 
-  query: summarize is {
+  query: by_category is {
+    group_by: channel_category
     aggregate:
       total_sales
       total_returns
       net_profit
+    order_by: channel_category
+  }
+
+  query: by_channel_id is {
+    group_by: channel_id
+    aggregate:
+      total_sales
+      total_returns
+      net_profit
+    order_by: channel_id
+    limit: 100
   }
 }
 
@@ -38,32 +50,9 @@ query: daily_profit_loss -> {
     total_returns
     net_profit
 
-  nest: by_category is {
-    group_by:
-      channel_category
-
-    aggregate:
-      total_sales
-      total_returns
-      net_profit
-
-    nest: by_channel_id is {
-      group_by: 
-        channel_id
-
-      aggregate:
-        total_sales
-        total_returns
-        net_profit
-
-      order_by:
-        channel_id
-      
-      limit: 100
-    }
-
-    order_by:
-      channel_category
+  nest: by_category + {
+    nest: by_channel_id
+    order_by: channel_category
   }
 
   where:
