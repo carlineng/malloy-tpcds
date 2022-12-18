@@ -1,19 +1,71 @@
 import "tpcds.malloy"
 
-query: web_profit_loss -> {
-  group_by:
-    channel_category
-    channel_id
-  
+
+sql: daily_profit_loss_sql is {
+  select: """
+  SELECT * FROM (%{ catalog_sales -> daily_profit_loss }%)
+  UNION ALL
+  SELECT * FROM (%{ catalog_returns -> daily_profit_loss }%)
+  UNION ALL
+  SELECT * FROM (%{ web_sales -> daily_profit_loss }%)
+  UNION ALL
+  SELECT * FROM (%{ web_returns -> daily_profit_loss }%)
+  UNION ALL
+  SELECT * FROM (%{ store_sales -> daily_profit_loss }%)
+  UNION ALL
+  SELECT * FROM (%{ store_returns -> daily_profit_loss }%)
+  """
+  connection: "duckdb"
+}
+
+source: daily_profit_loss is from_sql(daily_profit_loss_sql) {
+  measure: total_sales is sum(sales)
+  measure: total_returns is sum(return_amt)
+  measure: net_profit is sum(total_profit) - sum(net_loss)
+
+  query: summarize is {
+    aggregate:
+      total_sales
+      total_returns
+      net_profit
+  }
+}
+
+query: daily_profit_loss -> {
+
   aggregate:
-    total_ext_sales
-    web_returns.total_returns
-    web_returns.total_loss
-    profit is total_profit - web_returns.total_loss
+    total_sales
+    total_returns
+    net_profit
+
+  nest: by_category is {
+    group_by:
+      channel_category
+
+    aggregate:
+      total_sales
+      total_returns
+      net_profit
+
+    nest: by_channel_id is {
+      group_by: 
+        channel_id
+
+      aggregate:
+        total_sales
+        total_returns
+        net_profit
+
+      order_by:
+        channel_id
+      
+      limit: 100
+    }
+
+    order_by:
+      channel_category
+  }
 
   where:
-    date_dim.d_date >= '2000-08-23' AND date_dim.d_date <= '2000-09-06'
-
-  order_by:
-    channel_id
+    d_date >= '2000-08-23' and d_date <= '2000-09-06'
 }

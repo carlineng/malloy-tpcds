@@ -61,8 +61,24 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
   join_one: store with ss_store_sk
   join_one: customer with ss_customer_sk
 
-  dimension: channel_category is 's'
+  dimension: channel_category is 'store channel'
   dimension: channel_id is concat('store', store.s_store_id)
+
+  measure: total_ext_sales is sum(ss_ext_sales_price)
+  measure: total_profit is sum(ss_net_profit)
+
+  query: daily_profit_loss is {
+    group_by:
+      channel_category
+      channel_id
+      date_dim.d_date
+
+    aggregate:
+      sales is total_ext_sales
+      total_profit
+      return_amt is 0
+      net_loss is 0
+  }
 }
   
 source: store_returns is table('duckdb:../data/store_returns.parquet') {
@@ -70,11 +86,25 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
   join_one: store with sr_store_sk
   join_one: customer with sr_customer_sk
 
-  dimension: channel_category is 's'
+  dimension: channel_category is 'store channel'
   dimension: channel_id is concat('store', store.s_store_id)
 
-  measure: customer_total_returns is sum(sr_return_amt)
+  measure: total_returns is sum(sr_return_amt)
   measure: avg_returns is avg(sr_return_amt)
+  measure: total_loss is sum(sr_net_loss)
+
+  query: daily_profit_loss is {
+    group_by:
+      channel_category
+      channel_id
+      date_dim.d_date
+
+    aggregate:
+      sales is 0
+      total_profit is 0
+      return_amt is total_returns
+      net_loss is total_loss
+  }
 }
 
 sql: all_sales_qry is {
@@ -179,10 +209,13 @@ source: all_sales is from_sql(all_sales_qry) {
   measure: customer_total_returns is sum(wr_return_amt)
   measure: avg_returns is avg(wr_return_amt)
 
+  dimension: channel_category is 'web channel'
+  dimension: channel_id is concat('web_site', web_sales.web_site.web_site_id)
+
   query: daily_profit_loss is {
     group_by:
-      channel_category is 'w'
-      web_site_sk is web_sales.ws_web_site_sk
+      channel_category
+      channel_id
       date_dim.d_date
 
     aggregate:
@@ -190,34 +223,5 @@ source: all_sales is from_sql(all_sales_qry) {
       total_profit is 0
       return_amt is total_returns
       net_loss is total_loss
-  }
-}
-
-sql: web_profit_loss_qry is {
-  select: """
-    SELECT * FROM (%{ web_returns -> daily_profit_loss}%)
-    UNION ALL 
-    SELECT * FROM (%{ web_sales -> daily_profit_loss}%)
-  """
-  connection: "duckdb"
-}
-
-source: web_profit_loss is from_sql(web_profit_loss_qry) {
-
-  join_one: web_site with web_site_sk
-
-  query: web_pl is {
-    group_by:
-      web_site.web_site_id
-
-    aggregate:
-      total_sales is sum(sales)
-      return_amt is sum(return_amt)
-      net_profit is sum(total_profit) - sum(net_loss)
-
-    where:
-      d_date >= '2000-08-23' and d_date <= '2000-09-06'
-
-    order_by: web_site_id
   }
 }
