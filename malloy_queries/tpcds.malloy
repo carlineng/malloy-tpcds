@@ -60,6 +60,9 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
   join_one: date_dim with ss_sold_date_sk
   join_one: store with ss_store_sk
   join_one: customer with ss_customer_sk
+  join_one: item with ss_item_sk
+  join_one: promotion with ss_promo_sk
+
 
   dimension: channel_category is 'store channel'
   dimension: channel_id is concat('store', store.s_store_id)
@@ -230,4 +233,21 @@ source: all_sales is from_sql(all_sales_qry) {
 
     where: web_sales.web_site.web_site_id != null
   }
+}
+
+sql: all_sales_sql is {
+  select: """
+  SELECT * FROM (%{ catalog_sales -> daily_profit_loss }%)
+  UNION ALL
+  SELECT * FROM (%{ catalog_returns -> daily_profit_loss }%)
+  UNION ALL
+  SELECT * FROM (%{ web_sales -> daily_profit_loss }%)
+  UNION ALL
+  SELECT * FROM (%{ web_returns -> daily_profit_loss }%)
+  UNION ALL
+  SELECT * FROM (%{ store_sales -> daily_profit_loss }%)
+  UNION ALL
+  SELECT * FROM (%{ store_returns -> daily_profit_loss }%)
+  """
+  connection: "duckdb"
 }
