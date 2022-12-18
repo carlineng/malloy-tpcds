@@ -27,8 +27,8 @@ query: store_returns -> {
     sr_store_sk
     customer.c_customer_id
   aggregate: 
-    customer_total_returns
-    avg_store_return is all(customer_total_returns / count(distinct sr_customer_sk), sr_store_sk)
+    customer_total_returns is total_returns
+    avg_store_return is all(total_returns / count(distinct sr_customer_sk), sr_store_sk)
   where:
     date_dim.d_year = 2000
     and store.s_state = 'TN'
