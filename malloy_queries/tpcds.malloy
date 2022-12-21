@@ -121,6 +121,18 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
 
     where: store.s_store_id != null
   }
+
+    query: projection is {
+      project:
+        channel_category
+        channel_id
+        customer_sk is sr_customer_sk
+        returned_date_sk is sr_returned_date_sk
+        return_amt is sr_return_amt
+        net_loss is sr_net_loss
+
+      where: store.s_store_id != null
+  }
 }
 
 source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
@@ -188,6 +200,19 @@ source: catalog_returns is table('duckdb:../data/catalog_returns.parquet') {
     
     where: catalog_page.cp_catalog_page_id != null
   }
+
+  query: projection is {
+    project:
+      channel_category
+      channel_id
+      customer_sk is cr_refunded_customer_sk
+      returned_date_sk is cr_returned_date_sk
+      return_amt is cr_return_amount
+      net_loss is cr_net_loss
+
+    where: catalog_page.cp_catalog_page_id != null
+  }
+
 }
 
 source: web_sales is table('duckdb:../data/web_sales.parquet') {
@@ -255,6 +280,18 @@ source: web_returns is table('duckdb:../data/web_returns.parquet') {
 
     where: web_sales.web_site.web_site_id != null
   }
+
+  query: projection is {
+    project:
+      channel_category
+      channel_id
+      customer_sk is wr_refunded_customer_sk
+      returned_date_sk is wr_returned_date_sk
+      return_amt is wr_return_amt
+      net_loss is wr_net_loss
+
+    where: web_sales.web_site.web_site_id != null
+  }
 }
 
 sql: all_sales_sql is {
@@ -264,6 +301,17 @@ sql: all_sales_sql is {
   SELECT * FROM (%{ catalog_sales -> projection }%)
   UNION ALL
   SELECT * FROM (%{ store_sales -> projection }%)
+  """
+  connection: "duckdb"
+}
+
+sql: all_returns_sql is {
+  select: """
+  SELECT * FROM (%{ web_returns -> projection }%)
+  UNION ALL
+  SELECT * FROM (%{ catalog_returns -> projection }%)
+  UNION ALL
+  SELECT * FROM (%{ store_returns -> projection }%)
   """
   connection: "duckdb"
 }
@@ -294,5 +342,26 @@ source: all_sales is from_sql(all_sales_sql) {
       total_profit
       return_amt is 0
       net_loss is 0
+  }
+}
+
+source: all_returns is from_sql(all_returns_sql) {
+  join_one: date_dim with returned_date_sk
+  join_one: customer with customer_sk
+
+  measure: total_returns is sum(return_amt)
+  measure: total_loss is sum(net_loss)
+
+  query: daily_profit_loss is {
+    group_by:
+      channel_category
+      channel_id
+      date_dim.d_date
+
+    aggregate:
+      sales is 0
+      total_profit is 0
+      return_amt is total_returns
+      net_loss is total_loss
   }
 }

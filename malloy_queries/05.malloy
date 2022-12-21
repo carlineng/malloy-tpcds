@@ -3,17 +3,9 @@ import "tpcds.malloy"
 
 sql: daily_profit_loss_sql is {
   select: """
-  SELECT * FROM (%{ catalog_sales -> daily_profit_loss }%)
+  SELECT * FROM (%{ all_sales -> daily_profit_loss }%)
   UNION ALL
-  SELECT * FROM (%{ catalog_returns -> daily_profit_loss }%)
-  UNION ALL
-  SELECT * FROM (%{ web_sales -> daily_profit_loss }%)
-  UNION ALL
-  SELECT * FROM (%{ web_returns -> daily_profit_loss }%)
-  UNION ALL
-  SELECT * FROM (%{ store_sales -> daily_profit_loss }%)
-  UNION ALL
-  SELECT * FROM (%{ store_returns -> daily_profit_loss }%)
+  SELECT * FROM (%{ all_returns -> daily_profit_loss }%)
   """
   connection: "duckdb"
 }
