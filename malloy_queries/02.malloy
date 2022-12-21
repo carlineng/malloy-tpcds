@@ -47,7 +47,8 @@ This query showcases a few interesting features of Malloy, namely:
   pipelines? Or do we need to define separate Sources for this?
 */
 
-sql: web_catalog_sales_qry is || 
+sql: web_catalog_sales_qry is {
+  select: """
   SELECT
     ws_sold_date_sk as sold_date_sk,
     ws_ext_sales_price as sales_price
@@ -59,8 +60,9 @@ sql: web_catalog_sales_qry is ||
     cs_sold_date_sk as sold_date_sk,
     cs_ext_sales_price as sales_price
   FROM read_parquet('../data/catalog_sales.parquet')
-  ;;
-  on "duckdb"
+  """
+  connection: "duckdb"
+}
   
 source: web_catalog_sales is from_sql(web_catalog_sales_qry) {
   join_one: date_dim on sold_date_sk = date_dim.d_date_sk

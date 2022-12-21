@@ -14,20 +14,19 @@ SQL.
 
  */
 
-query: all_sales -> {
+query: store_sales -> {
   group_by: 
     d_year is date_dim.d_year
     brand_id is item.i_brand_id
     brand is item.i_brand
 
   aggregate:
-    total_ext_sales_price
+    total_ext_sales
 
   where:
     item.i_manufact_id = 128
     and date_dim.d_moy = 11
-    and sale_type = 's'
   
-  order_by: d_year, total_ext_sales_price DESC, brand_id
+  order_by: d_year, total_ext_sales DESC, brand_id
   limit: 100
 }

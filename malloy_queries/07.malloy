@@ -11,7 +11,7 @@ query: all_sales -> {
     avg_sales_price
 
   where:
-    sale_type = 's'
+    channel_category = 'store channel'
     and customer_demographics.cd_gender = 'M'
     and customer_demographics.cd_marital_status = 'S'
     and customer_demographics.cd_education_status = 'College'

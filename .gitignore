@@ -1,1 +1,3 @@
 data/*.parquet
+data/*.dat
+data/duckdb
