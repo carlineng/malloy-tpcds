@@ -2,12 +2,12 @@ import "tpcds.malloy"
 
 query: all_sales -> {
   declare:
-    catalog_total_sales_2001 is total_sales { where: date_dim.d_year = 2001 and sale_type = 'c'}
-    catalog_total_sales_2002 is total_sales { where: date_dim.d_year = 2002 and sale_type = 'c'}
-    web_total_sales_2001 is total_sales { where: date_dim.d_year = 2001 and sale_type = 'w'}
-    web_total_sales_2002 is total_sales { where: date_dim.d_year = 2002 and sale_type = 'w'}
-    store_total_sales_2001 is total_sales { where: date_dim.d_year = 2001 and sale_type = 's'}
-    store_total_sales_2002 is total_sales { where: date_dim.d_year = 2002 and sale_type = 's'}
+    catalog_total_sales_2001 is total_sales { where: date_dim.d_year = 2001 and channel_category = 'catalog channel'}
+    catalog_total_sales_2002 is total_sales { where: date_dim.d_year = 2002 and channel_category = 'catalog channel'}
+    web_total_sales_2001 is total_sales { where: date_dim.d_year = 2001 and channel_category = 'web channel'}
+    web_total_sales_2002 is total_sales { where: date_dim.d_year = 2002 and channel_category = 'web channel'}
+    store_total_sales_2001 is total_sales { where: date_dim.d_year = 2001 and channel_category = 'store channel'}
+    store_total_sales_2002 is total_sales { where: date_dim.d_year = 2002 and channel_category = 'store channel'}
 
     catalog_yoy is catalog_total_sales_2002 / catalog_total_sales_2001
     store_yoy is store_total_sales_2002 / store_total_sales_2001
