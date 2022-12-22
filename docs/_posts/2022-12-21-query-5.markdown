@@ -1,0 +1,30 @@
+---
+layout: post
+title:  "TPC-DS Query 5"
+date:   2022-12-21 01:00:00 -0800
+categories: malloy tpcds query
+---
+- [Pull Request](https://github.com/carlineng/malloy-tpcds/pull/11)
+- Play with the query and results using the [Fiddle](https://carlineng.github.io/tpcds-fiddle/?q=5+-+Query+05&t=&m=TPC-DS).
+
+Query 5 was somewhat challenging to implement, and initially required some functionality that didn't yet exist in Malloy. As luck would have it, the necessary feature was literally in the works as I was asking for it, and landed a couple of days later.
+
+The query computes the total profit (sum of sales) and total loss (sum of returns), aggregated at three different levels of granularity: overall, by channel category (store, web, or catalog), and by channel ID (e.g., catalog page, store ID, or web site). It does this by liberal use of the `UNION ALL` operator, first unioning sales and returns for each of the channel categories, then again unioning the combined outputs of each category to create an overall result.
+
+<script src="https://gist.github.com/carlineng/29580731e882496d5b29668a7a0d27cc.js?file=q05.sql"></script>
+
+Malloy doesn't currently have a native `UNION ALL` construct. It does however provide the ability to construct a Source based off of a SQL query, which is a useful escape hatch in cases like this where a specific piece of functionality isn't available. I started out writing a fairly large SQL block to perform the `UNION ALL` between each of the `store`, `web`, and `catalog` tables, but the `web` subquery (lines 75-77 in the SQL query) contains a `JOIN` clause to get the web site for a particular return. It felt a bit like cheating to include this join in a SQL block, since in my mind, any joins should be expressed as part of the semantic model. Lucky for me, the Malloy team recently released what they called the "SQL Turducken", or the ability to embed a reference to a Malloy query inside of a SQL block. This would allow me to define the join between `web_returns` and `web_sales` in a Malloy source, and then perform the `UNION ALL` within the SQL block. Each of `catalog`, `web` and `store` has a set of sources defined like the following:
+
+<script src="https://gist.github.com/carlineng/29580731e882496d5b29668a7a0d27cc.js?file=sales_and_returns.malloy"></script>
+
+I `UNION` them together to get `all_sales` and `all_returns`, combining each of the channel categories into a single table for sales and single table for returns:
+
+<script src="https://gist.github.com/carlineng/29580731e882496d5b29668a7a0d27cc.js?file=union_all_model.malloy"></script>
+
+I used one final Turducken to create a single source that combines data from the `sales` and `returns` sources, and defined aggregation queries for each of the two levels of granularity, `channel_category` and `channel_id`
+
+<script src="https://gist.github.com/carlineng/29580731e882496d5b29668a7a0d27cc.js?file=q05.malloy"></script>
+
+The nested aggregations in the Malloy query are much nicer than the equivalent SQL `GROUP BY ROLLUP` output. I wrote about the problems with `GROUP BY ROLLUP` [here](https://carlineng.com/?postid=sql-bad-syntax#blog). In a nutshell, because the value column (e.g., `sales` or `profit` in the query above) of a `GROUP BY ROLLUP` result contains values at different levels of granularity, the output cannot be used by downstream queries unless filters are applied to restrict the output to a single level of granularity. Malloy avoids this by using `struct` data types in nested columns to embed sub-tables. This allows Malloy to respect the hierarchical relationship of data, and most crucially, preserves the composability of resultsets. The output of a nested Malloy query can be used freely by downstream queries or transformations without having to worry about hidden traps.
+
+Thanks for tuning in! As always, any feedback, comments, or questions are welcome. Drop me a line on the [Malloy Slack](https://malloy-community.slack.com), username @carl.
