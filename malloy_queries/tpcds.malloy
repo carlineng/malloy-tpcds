@@ -107,31 +107,16 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
   measure: avg_returns is avg(sr_return_amt)
   measure: total_loss is sum(sr_net_loss)
 
-  query: daily_profit_loss is {
-    group_by:
+  query: projection is {
+    project:
       channel_category
       channel_id
-      date_dim.d_date
-
-    aggregate:
-      sales is 0
-      total_profit is 0
-      return_amt is total_returns
-      net_loss is total_loss
+      customer_sk is sr_customer_sk
+      returned_date_sk is sr_returned_date_sk
+      return_amt is sr_return_amt
+      net_loss is sr_net_loss
 
     where: store.s_store_id != null
-  }
-
-    query: projection is {
-      project:
-        channel_category
-        channel_id
-        customer_sk is sr_customer_sk
-        returned_date_sk is sr_returned_date_sk
-        return_amt is sr_return_amt
-        net_loss is sr_net_loss
-
-      where: store.s_store_id != null
   }
 }
 
@@ -185,21 +170,6 @@ source: catalog_returns is table('duckdb:../data/catalog_returns.parquet') {
   measure: total_returns is sum(cr_return_amount)
   measure: avg_returns is avg(cr_return_amount)
   measure: total_loss is sum(cr_net_loss)
-
-  query: daily_profit_loss is {
-    group_by:
-      channel_category
-      channel_id
-      date_dim.d_date
-
-    aggregate:
-      sales is 0
-      total_profit is 0
-      return_amt is total_returns
-      net_loss is total_loss
-    
-    where: catalog_page.cp_catalog_page_id != null
-  }
 
   query: projection is {
     project:
@@ -265,21 +235,6 @@ source: web_returns is table('duckdb:../data/web_returns.parquet') {
 
   dimension: channel_category is 'web channel'
   dimension: channel_id is concat('web_site', web_sales.web_site.web_site_id)
-
-  query: daily_profit_loss is {
-    group_by:
-      channel_category
-      channel_id
-      date_dim.d_date
-
-    aggregate:
-      sales is 0
-      total_profit is 0
-      return_amt is total_returns
-      net_loss is total_loss
-
-    where: web_sales.web_site.web_site_id != null
-  }
 
   query: projection is {
     project:
