@@ -438,5 +438,4 @@ query: store_sales + {
     preferred_customer_zip.ca_zip != null
     and date_dim.d_qoy = 2
     and date_dim.d_year = 1998
-  
 }
