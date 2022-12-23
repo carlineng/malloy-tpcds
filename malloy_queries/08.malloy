@@ -1,6 +1,5 @@
 import "tpcds.malloy"
 
-
 source: preferred_customer_zip is from(
   customer -> {
     declare:
