@@ -1,0 +1,20 @@
+---
+layout: post
+title:  "TPC-DS Query 7"
+date:   2022-12-23 02:00:00 -0800
+categories: malloy tpcds query
+---
+- [Pull Request](https://github.com/carlineng/malloy-tpcds/pull/10)
+- Play with the query and results using the [Fiddle](https://carlineng.github.io/tpcds-fiddle/?q=7+-+Query+07&t=&m=TPC-DS).
+
+Query 7 gets items purchased by single, college-educated men in the year 2000 that did not come from email or event promotional channels, and asks for each item, what was the average quantity, list price, coupon amount, and sales price for purchases of that item.
+
+It's a simple query in both SQL and Malloy, containing a join between a few tables and one level of aggregation.
+
+<script src="https://gist.github.com/carlineng/62b4e721debb9c69eb59662e25eb5e0b.js?file=q07.sql"></script>
+
+The Malloy version is simple, and a good example of where the semantic modeling layer comes in handy. In writing the query, I don't have to remember the primary/foreign key relationships between the `sales` table and the 4 tables it needs to join with (`customer_demographics`, `date_dim`, `item`, and `promotion`). All those joins are already defined in the model, and I can just access the fields directly. Easier to write, and less room for error.
+
+<script src="https://gist.github.com/carlineng/62b4e721debb9c69eb59662e25eb5e0b.js?file=q07.malloy"></script>
+
+Thanks for tuning in! As always, any feedback, comments, or questions are welcome. Drop me a line on the [Malloy Slack](https://malloy-community.slack.com), username @carl.
