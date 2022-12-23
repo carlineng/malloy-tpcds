@@ -434,6 +434,9 @@ query: store_sales + {
   aggregate:
     net_profit is sum(ss_net_profit)
 
-  where: preferred_customer_zip.ca_zip != null
+  where:
+    preferred_customer_zip.ca_zip != null
+    and date_dim.d_qoy = 2
+    and date_dim.d_year = 1998
   
 }
