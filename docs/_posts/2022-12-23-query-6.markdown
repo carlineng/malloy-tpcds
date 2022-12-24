@@ -17,4 +17,10 @@ Implementing the query did not require any changes to the Model. I wrote an ad-h
 
 It's worth understanding what L13-15 are doing exactly. `all_sales_with_category_avg` is the name of a new ad-hoc source I'm defining in the query. The `is` keyword is equivalent to aliasing or assignment. `all_sales { ... }` means the new ad-hoc source is based on the `all_sales` source, and the curly braces contain whatever extensions I need to make. Finally the `-> { ... }` on L15 represents the start of a new query that uses `all_sales_with_category_avg` as the source. From there, it's a simple `GROUP BY` with some filters.
 
+# Update
+
+Based on some feedback from [Lloyd](https://twitter.com/lloydtabb) in the Malloy Slack, I refactored Q6 to no longer need to ad-hoc source + join. I can instead use the `all` function to create a "level-of-detail" aggregation that can be used to calculate the per-category average item price. This is much more concise. The `all` function is really powerful for situations like this, and not something I'm used to reaching for by default, but clearly something that should be in everyone's toolbelt. Thanks for the tip Lloyd!
+
+<script src="https://gist.github.com/carlineng/b8521900a6aa92cd2b349326e9f36937.js?file=q06.refactor.malloy"></script>
+
 Thanks for tuning in! As always, any feedback, comments, or questions are welcome. Drop me a line on the [Malloy Slack](https://malloy-community.slack.com), username @carl.
