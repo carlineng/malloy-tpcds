@@ -281,6 +281,7 @@ source: all_sales is from_sql(all_sales_sql) {
   measure: total_sales is sum((ext_list_price - ext_wholesale_cost - ext_discount_amt + ext_sales_price) / 2)
   measure: total_ext_sales_price is sum(ext_sales_price)
   measure: total_profit is sum(net_profit)
+  measure: total_list_minus_discount is sum(ext_list_price - ext_discount_amt)
   measure: avg_quantity is avg(quantity)
   measure: avg_list_price is avg(list_price)
   measure: avg_coupon_amt is avg(coupon_amt)
