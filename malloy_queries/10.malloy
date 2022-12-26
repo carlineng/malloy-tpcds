@@ -1,0 +1,46 @@
+import "tpcds.malloy"
+
+query: all_sales -> {
+  group_by:
+    customer.customer_demographics.cd_gender
+    customer.customer_demographics.cd_marital_status
+    customer.customer_demographics.cd_education_status
+    customer.customer_demographics.cd_purchase_estimate
+    customer.customer_demographics.cd_credit_rating
+    customer.customer_demographics.cd_dep_count
+    customer.customer_demographics.cd_dep_employed_count
+    customer.customer_demographics.cd_dep_college_count
+
+  aggregate:
+    customer_count is count(distinct customer_sk)
+
+  where:
+    date_dim.d_year = 2002
+    and date_dim.d_moy >= 1
+    and date_dim.d_moy <= 4
+    and (
+      customer.customer_address.ca_county = 'Rush County'
+      or customer.customer_address.ca_county = 'Toole County'
+      or customer.customer_address.ca_county = 'Jefferson County'
+      or customer.customer_address.ca_county = 'Dona Ana County'
+      or customer.customer_address.ca_county = 'La Porte County'
+    )
+    and customer.customer_demographics.cd_gender != null
+  
+  having:
+    count_store_sales > 0
+    and (
+      count_web_sales > 0
+      or count_catalog_sales > 0
+    )
+  
+  order_by: 
+    cd_gender
+    cd_marital_status
+    cd_education_status
+    cd_purchase_estimate
+    cd_credit_rating
+    cd_dep_count
+    cd_dep_employed_count
+    cd_dep_college_count
+}
