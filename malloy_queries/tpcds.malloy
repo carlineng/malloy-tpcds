@@ -286,6 +286,10 @@ source: all_sales is from_sql(all_sales_sql) {
   measure: avg_coupon_amt is avg(coupon_amt)
   measure: avg_sales_price is avg(sales_price)
 
+  measure: count_store_sales is count(*) { where: channel_category = 'store channel' }
+  measure: count_web_sales is count(*) { where: channel_category = 'web channel' }
+  measure: count_catalog_sales is count(*) { where: channel_category = 'catalog channel' }
+
   query: daily_profit_loss is {
     group_by:
       channel_category

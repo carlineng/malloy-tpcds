@@ -1,3 +1,8 @@
+-- For people in the given counties,
+-- Find all users who had at least one store sale or at least one sale in either catalog or web
+-- in the first 4 months of 2002
+-- Group by a bunch of demographic info, and get counts for each
+
 SELECT cd_gender,
        cd_marital_status,
        cd_education_status,
