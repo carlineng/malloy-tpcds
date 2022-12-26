@@ -1,3 +1,7 @@
+-- For web sales in a specific set of categories and a specific date range
+-- get the total revenue and
+-- ratio of that item's revenue relative to the overall revenue of its item class
+
 SELECT i_item_id,
        i_item_desc,
        i_category,
