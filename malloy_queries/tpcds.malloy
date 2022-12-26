@@ -189,6 +189,7 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
   join_one: date_dim with ws_sold_date_sk
   join_one: customer with ws_bill_customer_sk
   join_one: web_site with ws_web_site_sk
+  join_one: item with ws_item_sk
 
   dimension: channel_category is 'web channel'
   dimension: channel_id is concat('web_site', web_site.web_site_id)
