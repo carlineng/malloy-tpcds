@@ -1,0 +1,67 @@
+import "tpcds.malloy"
+
+query: store_sales -> {
+  aggregate:
+    avg1 is avg(ss_quantity)
+    avg2 is avg(ss_ext_sales_price)
+    avg3 is avg(ss_ext_wholesale_cost)
+    sum1 is sum(ss_ext_wholesale_cost)
+
+  where:
+    date_dim.d_year = 2001
+    and (
+      (
+        customer_demographics.cd_marital_status = 'M'
+        and customer_demographics.cd_education_status = 'Advanced Degree'
+        and ss_sales_price >= 100.0
+        and ss_sales_price <= 150.0
+        and household_demographics.hd_dep_count = 3
+      )
+      OR (
+        customer_demographics.cd_marital_status = 'S'
+        and customer_demographics.cd_education_status = 'College'
+        and ss_sales_price >= 50.0
+        and ss_sales_price <= 100.0
+        and household_demographics.hd_dep_count = 1
+      )
+      OR (
+        customer_demographics.cd_marital_status = 'W'
+        and customer_demographics.cd_education_status = '2 yr Degree'
+        and ss_sales_price >= 150.0
+        and ss_sales_price <= 200.0
+        and household_demographics.hd_dep_count = 1
+      )
+    )
+    and (
+      (
+        customer_address.ca_country = 'United States'
+        and (
+          customer_address.ca_state = 'TX'
+          or customer_address.ca_state = 'OH'
+          or customer_address.ca_state = 'TX'
+        )
+        and ss_net_profit >= 100
+        and ss_net_profit <= 200
+      )
+      or (
+        customer_address.ca_country = 'United States'
+        and (
+          customer_address.ca_state = 'OR'
+          or customer_address.ca_state = 'NM'
+          or customer_address.ca_state = 'KY'
+        )
+        and ss_net_profit >= 150
+        and ss_net_profit <= 300
+      )
+      or (
+        customer_address.ca_country = 'United States'
+        and (
+          customer_address.ca_state = 'VA'
+          or customer_address.ca_state = 'TX'
+          or customer_address.ca_state = 'MS'
+        )
+        and ss_net_profit >= 50
+        and ss_net_profit <= 250
+      )
+    )
+}
