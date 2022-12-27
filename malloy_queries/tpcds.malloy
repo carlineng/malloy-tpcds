@@ -1,4 +1,7 @@
 // Dimensions
+source: call_center is table('duckdb:../data/call_center.parquet') {
+  primary_key: cc_call_center_sk
+}
 
 source: catalog_page is table('duckdb:../data/catalog_page.parquet') {
   primary_key: cp_catalog_page_sk
@@ -122,10 +125,39 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
   }
 }
 
+source: catalog_returns is table('duckdb:../data/catalog_returns.parquet') {
+  join_one: date_dim with cr_returned_date_sk
+  join_one: catalog_page with cr_catalog_page_sk
+  join_one: customer with cr_refunded_customer_sk
+
+  dimension: channel_category is 'catalog channel'
+  dimension: channel_id is concat('catalog_page', catalog_page.cp_catalog_page_id)
+
+  measure: total_returns is sum(cr_return_amount)
+  measure: avg_returns is avg(cr_return_amount)
+  measure: total_loss is sum(cr_net_loss)
+
+  query: projection is {
+    project:
+      channel_category
+      channel_id
+      customer_sk is cr_refunded_customer_sk
+      returned_date_sk is cr_returned_date_sk
+      return_amt is cr_return_amount
+      net_loss is cr_net_loss
+
+    where: catalog_page.cp_catalog_page_id != null
+  }
+}
+
 source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
   join_one: date_dim with cs_sold_date_sk
   join_one: catalog_page with cs_catalog_page_sk
   join_one: customer with cs_bill_customer_sk
+  join_one: ship_address is customer_address with cs_ship_addr_sk
+  join_one: ship_date is date_dim with cs_ship_date_sk
+  join_one: call_center with cs_call_center_sk
+  join_one: catalog_returns on cs_order_number = catalog_returns.cr_order_number
 
   dimension: channel_category is 'catalog channel'
   dimension: channel_id is concat('catalog_page', catalog_page.cp_catalog_page_id)
@@ -159,32 +191,6 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
 
     where: catalog_page.cp_catalog_page_id != null
   }
-}
-
-source: catalog_returns is table('duckdb:../data/catalog_returns.parquet') {
-  join_one: date_dim with cr_returned_date_sk
-  join_one: catalog_page with cr_catalog_page_sk
-  join_one: customer with cr_refunded_customer_sk
-
-  dimension: channel_category is 'catalog channel'
-  dimension: channel_id is concat('catalog_page', catalog_page.cp_catalog_page_id)
-
-  measure: total_returns is sum(cr_return_amount)
-  measure: avg_returns is avg(cr_return_amount)
-  measure: total_loss is sum(cr_net_loss)
-
-  query: projection is {
-    project:
-      channel_category
-      channel_id
-      customer_sk is cr_refunded_customer_sk
-      returned_date_sk is cr_returned_date_sk
-      return_amt is cr_return_amount
-      net_loss is cr_net_loss
-
-    where: catalog_page.cp_catalog_page_id != null
-  }
-
 }
 
 source: web_sales is table('duckdb:../data/web_sales.parquet') {
