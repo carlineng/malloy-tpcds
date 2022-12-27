@@ -24,15 +24,18 @@ query: store_sales + {
   aggregate:
     store_sales_quantitycount is count(*) { where: ss_quantity != null }
     store_sales_quantityave is avg(ss_quantity)
-    -- TODO: add stddev aggregates
+    store_sales_quantity_stddev is sum(0) + stddev_samp(ss_quantity)
+    store_sales_quantitycov is sum(0) + stddev_samp(ss_quantity) / avg(ss_quantity)
 
     store_returns_quantitycount is count(*) { where: sr.sr_return_quantity != null }
     store_returns_quantityave is avg(sr.sr_return_quantity)
-    -- TODO: add stddev aggregates
+    store_returns_quantity_stddev is sum(0) + stddev_samp(sr.sr_return_quantity)
+    store_returns_quantitycov is sum(0) + stddev_samp(sr.sr_return_quantity) / avg(sr.sr_return_quantity)
 
     catalog_sales_quantitycount is count(*) { where: cs.cs_bill_customer_sk != null }
     catalog_sales_quantity_ave is avg(cs.cs_quantity)
-    -- TODO: add stddev aggregates
+    catalog_sales_quantity_stddev is sum(0) + stddev_samp(cs.cs_quantity)
+    catalog_sales_quantitycov is sum(0) + stddev_samp(cs.cs_quantity) / avg(cs.cs_quantity)
 
   where:
     sr.sr_customer_sk != null
