@@ -1,0 +1,102 @@
+import "tpcds.malloy"
+
+// Ugh, the `projection` query in the sales sources has a 
+// "not null" clause in it that is messing things up in the `avg_sales` query
+// TODO: fix that later...
+
+source: item_properties is from(
+  all_sales -> {
+    group_by:
+      item.i_brand_id
+      item.i_class_id
+      item.i_category_id
+
+    where:
+      date_dim.d_year >= 1999
+      and date_dim.d_year <= 2001
+    
+    having:
+      count_store_sales > 0
+      and count_web_sales > 0
+      and count_catalog_sales > 0
+
+    order_by:
+      i_brand_id
+      i_class_id
+      i_category_id
+  }
+)
+
+source: relevant_items is from(
+  item + {
+    join_one: item_properties 
+      on i_brand_id = item_properties.i_brand_id
+      and i_class_id = item_properties.i_class_id
+      and i_category_id = item_properties.i_category_id
+  } -> {
+    group_by: item_sk is i_item_sk
+    where: 
+      item_properties.i_brand_id != null
+      and item_properties.i_class_id != null
+      and item_properties.i_category_id != null
+  }
+) {
+  primary_key: item_sk
+}
+
+// TODO: this number isn't matching up due to some null filtering that's happening
+// in the `web/catalog/store_sales.projection` query
+source: avg_sales is from(
+  all_sales -> {
+    aggregate: 
+      average_sales is avg(quantity * list_price)
+    where: date_dim.d_year >= 1999 and date_dim.d_year <= 2001
+  }
+)
+
+query: all_sales + {
+  join_one: relevant_items with item_sk
+  join_one: avg_sales on true
+} -> {
+  declare:
+    sales is sum(quantity * list_price)
+    number_sales is count(*)
+
+  aggregate:
+    sales
+    number_sales
+
+  nest: by_channel is {
+    group_by: channel_category
+    aggregate:
+      sales
+      number_sales
+
+    // nest: by_brand is {
+    //   group_by: item.i_brand_id
+    //   aggregate:
+    //     sales
+    //     number_sales
+
+      // nest: by_class is {
+      //   group_by: item.i_class_id
+      //   aggregate:
+      //     sales
+      //     number_sales
+
+      //   nest: by_category_id is {
+      //     group_by: item.i_category_id
+      //     aggregate:
+      //       sales
+      //       number_sales
+      //   }
+      // }
+    // }
+  }
+
+  where: relevant_items.item_sk != null
+    and date_dim.d_year = 2001
+    and date_dim.d_moy = 11
+
+  having: sum(quantity * list_price) > max(avg_sales.average_sales)
+}
