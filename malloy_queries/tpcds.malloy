@@ -58,7 +58,9 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
   join_one: customer with ss_customer_sk
   join_one: item with ss_item_sk
   join_one: promotion with ss_promo_sk
-
+  join_one: household_demographics with ss_hdemo_sk
+  join_one: customer_demographics with ss_cdemo_sk
+  join_one: customer_address with ss_addr_sk
 
   dimension: channel_category is 'store channel'
   dimension: channel_id is concat('store', store.s_store_id)
