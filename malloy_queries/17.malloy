@@ -1,0 +1,56 @@
+import "tpcds.malloy"
+
+query: store_sales + {
+  join_one: sr is store_returns on
+    ss_customer_sk = sr.sr_customer_sk
+    and ss_item_sk = sr.sr_item_sk
+    and ss_ticket_number = sr.sr_ticket_number
+
+  join_one: cs is catalog_sales on
+    sr.sr_customer_sk = cs.cs_bill_customer_sk
+    and sr.sr_item_sk = cs.cs_item_sk
+
+  join_one: d2 is date_dim on 
+    d2.d_date_sk = sr.sr_returned_date_sk
+
+  join_one: d3 is date_dim on
+    d3.d_date_sk = cs.cs_sold_date_sk
+} -> {
+  group_by:
+    item.i_item_id
+    item.i_item_desc
+    store.s_state
+
+  aggregate:
+    store_sales_quantitycount is count(*) { where: ss_quantity != null }
+    store_sales_quantityave is avg(ss_quantity)
+    -- TODO: add stddev aggregates
+
+    store_returns_quantitycount is count(*) { where: sr.sr_return_quantity != null }
+    store_returns_quantityave is avg(sr.sr_return_quantity)
+    -- TODO: add stddev aggregates
+
+    catalog_sales_quantitycount is count(*) { where: cs.cs_bill_customer_sk != null }
+    catalog_sales_quantity_ave is avg(cs.cs_quantity)
+    -- TODO: add stddev aggregates
+
+  where:
+    sr.sr_customer_sk != null
+    and cs.cs_bill_customer_sk != null
+    and date_dim.d_quarter_name = '2001Q1'
+    and (
+      d2.d_quarter_name = '2001Q1'
+      or d2.d_quarter_name = '2001Q2'
+      or d2.d_quarter_name = '2001Q3'
+    )
+    and (
+      d3.d_quarter_name = '2001Q1'
+      or d3.d_quarter_name = '2001Q2'
+      or d3.d_quarter_name = '2001Q3'
+    )
+
+  order_by:
+    i_item_id
+    i_item_desc
+    s_state
+}
