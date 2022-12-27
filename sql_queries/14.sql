@@ -1,12 +1,5 @@
--- get brand, class, and cateogries of items
---   purchased during 1999 and 2001
--- get items in those brands/classes/categories
-
-WITH 
-
-cross_items AS 
-(
-   SELECT i_item_sk ss_item_sk
+WITH cross_items AS
+  (SELECT i_item_sk ss_item_sk
    FROM item,
      (SELECT iss.i_brand_id brand_id,
              iss.i_class_id class_id,
@@ -36,8 +29,7 @@ cross_items AS
    WHERE i_brand_id = brand_id
      AND i_class_id = class_id
      AND i_category_id = category_id ),
-
-avg_sales AS
+     avg_sales AS
   (SELECT avg(quantity*list_price) average_sales
    FROM
      (SELECT ss_quantity quantity,
@@ -58,7 +50,6 @@ avg_sales AS
            date_dim
       WHERE ws_sold_date_sk = d_date_sk
         AND d_year BETWEEN 1999 AND 1999 + 2) sq2)
-
 SELECT channel,
        i_brand_id,
        i_class_id,
@@ -66,7 +57,6 @@ SELECT channel,
        sum(sales) AS sum_sales,
        sum(number_sales) AS sum_number_sales
 FROM
-
   (SELECT 'store' channel,
                   i_brand_id,
                   i_class_id,
@@ -76,7 +66,9 @@ FROM
    FROM store_sales,
         item,
         date_dim
-   WHERE ss_item_sk IN (SELECT ss_item_sk FROM cross_items)
+   WHERE ss_item_sk IN
+       (SELECT ss_item_sk
+        FROM cross_items)
      AND ss_item_sk = i_item_sk
      AND ss_sold_date_sk = d_date_sk
      AND d_year = 1999+2
@@ -84,8 +76,9 @@ FROM
    GROUP BY i_brand_id,
             i_class_id,
             i_category_id
-   HAVING sum(ss_quantity*ss_list_price) > (SELECT average_sales FROM avg_sales)
-
+   HAVING sum(ss_quantity*ss_list_price) >
+     (SELECT average_sales
+      FROM avg_sales)
    UNION ALL SELECT 'catalog' channel,
                               i_brand_id,
                               i_class_id,
@@ -95,7 +88,9 @@ FROM
    FROM catalog_sales,
         item,
         date_dim
-   WHERE cs_item_sk IN (SELECT ss_item_sk FROM cross_items)
+   WHERE cs_item_sk IN
+       (SELECT ss_item_sk
+        FROM cross_items)
      AND cs_item_sk = i_item_sk
      AND cs_sold_date_sk = d_date_sk
      AND d_year = 1999+2
@@ -103,8 +98,9 @@ FROM
    GROUP BY i_brand_id,
             i_class_id,
             i_category_id
-   HAVING sum(cs_quantity*cs_list_price) > (SELECT average_sales FROM avg_sales)
-
+   HAVING sum(cs_quantity*cs_list_price) >
+     (SELECT average_sales
+      FROM avg_sales)
    UNION ALL SELECT 'web' channel,
                           i_brand_id,
                           i_class_id,
@@ -114,7 +110,9 @@ FROM
    FROM web_sales,
         item,
         date_dim
-   WHERE ws_item_sk IN (SELECT ss_item_sk FROM cross_items)
+   WHERE ws_item_sk IN
+       (SELECT ss_item_sk
+        FROM cross_items)
      AND ws_item_sk = i_item_sk
      AND ws_sold_date_sk = d_date_sk
      AND d_year = 1999+2
@@ -122,8 +120,9 @@ FROM
    GROUP BY i_brand_id,
             i_class_id,
             i_category_id
-   HAVING sum(ws_quantity*ws_list_price) > (SELECT average_sales FROM avg_sales)) y
-
+   HAVING sum(ws_quantity*ws_list_price) >
+     (SELECT average_sales
+      FROM avg_sales)) y
 GROUP BY ROLLUP (channel,
                  i_brand_id,
                  i_class_id,
