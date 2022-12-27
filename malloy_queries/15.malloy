@@ -1,0 +1,33 @@
+import "tpcds.malloy"
+
+query: catalog_sales -> {
+  declare: 
+    zip is substring(customer.customer_address.ca_zip, 1, 5)
+    state is customer.customer_address.ca_state
+
+  group_by: customer.customer_address.ca_zip
+  aggregate: price_sum is sum(cs_sales_price)
+  where:
+    date_dim.d_qoy = 2
+    and date_dim.d_year = 2001
+    and (
+      zip = '85669'
+      or zip = '86197'
+      or zip = '88274'
+      or zip = '83405'
+      or zip = '86475'
+      or zip = '85392'
+      or zip = '85460'
+      or zip = '80348'
+      or zip = '81792'
+      or (
+        state = 'CA'
+        or state = 'WA'
+        or state = 'GA'
+      )
+      or cs_sales_price > 500
+    )
+
+  order_by: ca_zip
+  limit: 100
+}
