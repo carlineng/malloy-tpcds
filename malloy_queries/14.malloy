@@ -72,26 +72,26 @@ query: all_sales + {
       sales
       number_sales
 
-    // nest: by_brand is {
-    //   group_by: item.i_brand_id
-    //   aggregate:
-    //     sales
-    //     number_sales
+    nest: by_brand is {
+      group_by: item.i_brand_id
+      aggregate:
+        sales
+        number_sales
 
-      // nest: by_class is {
-      //   group_by: item.i_class_id
-      //   aggregate:
-      //     sales
-      //     number_sales
+      nest: by_class is {
+        group_by: item.i_class_id
+        aggregate:
+          sales
+          number_sales
 
-      //   nest: by_category_id is {
-      //     group_by: item.i_category_id
-      //     aggregate:
-      //       sales
-      //       number_sales
-      //   }
-      // }
-    // }
+        nest: by_category_id is {
+          group_by: item.i_category_id
+          aggregate:
+            sales
+            number_sales
+        }
+      }
+    }
   }
 
   where: relevant_items.item_sk != null
