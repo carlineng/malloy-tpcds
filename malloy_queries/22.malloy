@@ -1,0 +1,32 @@
+import "tpcds.malloy"
+
+query: inventory -> {
+  declare: qoh is avg(inv_quantity_on_hand)
+
+  aggregate: qoh
+  nest: by_product_name is {
+    group_by: item.i_product_name
+    aggregate: qoh
+    nest: by_brand is {
+      group_by: item.i_brand
+      aggregate: qoh
+      nest: by_class is {
+        group_by: item.i_class
+        aggregate: qoh
+        nest: by_category is {
+          group_by: item.i_category
+          aggregate: qoh
+          order_by: i_category
+        }
+        order_by: i_class
+      }
+      order_by: i_brand
+    }
+  order_by: i_product_name
+  limit: 100
+  }
+
+  where:
+    date_dim.d_month_seq >= 1200
+    and date_dim.d_month_seq <= 1211
+}
