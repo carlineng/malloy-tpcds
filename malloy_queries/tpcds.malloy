@@ -49,11 +49,21 @@ source: time_dim is table('duckdb:../data/time_dim.parquet') {
   primary_key: t_time_sk
 }
 
+source: warehouse is table('duckdb:../data/warehouse.parquet') {
+  primary_key: w_warehouse_sk
+}
+
 source: web_site is table('duckdb:../data/web_site.parquet') {
   primary_key: web_site_sk
 }
 
 // Facts
+
+source: inventory is table('duckdb:../data/inventory.parquet') {
+  join_one: date_dim with inv_date_sk
+  join_one: item with inv_item_sk
+  join_one: warehouse with inv_warehouse_sk
+}
 
 source: store_sales is table('duckdb:../data/store_sales.parquet') {
   join_one: date_dim with ss_sold_date_sk
