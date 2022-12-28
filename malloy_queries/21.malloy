@@ -1,0 +1,32 @@
+import "tpcds.malloy"
+
+query: inventory -> {
+  declare: 
+    inv_before is sum(inv_quantity_on_hand) { where: date_dim.d_date < '2000-03-11' }
+    inv_after is sum(inv_quantity_on_hand) { where: date_dim.d_date >= '2000-03-11' }
+
+  group_by:
+    warehouse.w_warehouse_name
+    item.i_item_id
+
+  aggregate:
+    inv_before
+    inv_after
+
+  where:
+    date_dim.d_date >= '2000-02-10'
+    and date_dim.d_date <= '2000-04-10'
+    and item.i_current_price >= 0.99
+    and item.i_current_price <= 1.49
+
+  having:
+    inv_before > 0
+    and inv_after / inv_before >= 2.0 / 3.0
+    and inv_after / inv_before <= 3.0 / 2.0
+
+  order_by:
+    w_warehouse_name
+    i_item_id
+
+  limit: 100
+}
