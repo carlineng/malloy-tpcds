@@ -59,5 +59,12 @@ query: cs is catalog_sales + {
       or customer.customer_address.ca_state = 'MS'
     )
     and item.i_item_sk != null
+
+    // TODO: top level results aren't matching up with SQL results
+    // I think its because of the `LEFT JOIN` on demographics here is
+    // an `INNER JOIN` in the SQL version, and in this case, we need to
+    // add a `NULL` filter. Unfortunately the query below seems to crash
+    // DuckDB:
+    // 
     // and customer.customer_demographics.cd_demo_sk != null
 }
