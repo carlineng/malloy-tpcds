@@ -58,4 +58,6 @@ query: cs is catalog_sales + {
       or customer.customer_address.ca_state = 'VA'
       or customer.customer_address.ca_state = 'MS'
     )
+    and item.i_item_sk != null
+    // and customer.customer_demographics.cd_demo_sk != null
 }
