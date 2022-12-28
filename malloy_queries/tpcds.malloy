@@ -158,6 +158,8 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
   join_one: ship_date is date_dim with cs_ship_date_sk
   join_one: call_center with cs_call_center_sk
   join_one: catalog_returns on cs_order_number = catalog_returns.cr_order_number
+  join_one: customer_demographics with cs_bill_cdemo_sk
+  join_one: item with cs_item_sk
 
   dimension: channel_category is 'catalog channel'
   dimension: channel_id is concat('catalog_page', catalog_page.cp_catalog_page_id)

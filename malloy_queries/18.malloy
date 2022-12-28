@@ -1,0 +1,61 @@
+import "tpcds.malloy"
+
+query: cs is catalog_sales + {
+  query: aggregations is {
+    aggregate:
+      agg1 is avg(cs_quantity)
+      agg2 is avg(cs_list_price)
+      agg3 is avg(cs_coupon_amt)
+      agg4 is avg(cs_sales_price)
+      agg5 is avg(cs_net_profit)
+      agg6 is avg(customer.c_birth_year)
+      agg7 is avg(customer_demographics.cd_dep_count)
+  }
+} -> {
+  nest:
+    aggregations
+
+  nest: by_item is {
+    group_by: item.i_item_id
+    nest: aggregations
+    nest: by_country is {
+      group_by: customer.customer_address.ca_country
+      nest: aggregations
+      nest: by_state is {
+        group_by: customer.customer_address.ca_state
+        nest: aggregations
+        nest: by_county is {
+          group_by: customer.customer_address.ca_county
+          nest: aggregations
+          order_by: ca_county
+        }
+        order_by: ca_state
+      }
+      order_by: ca_country
+    }
+    order_by: i_item_id
+    limit: 100
+  }
+
+  where:
+    customer_demographics.cd_gender = 'F'
+    and customer_demographics.cd_education_status = 'Unknown'
+    and (
+      customer.c_birth_month = 1
+      or customer.c_birth_month = 6
+      or customer.c_birth_month = 8
+      or customer.c_birth_month = 9
+      or customer.c_birth_month = 12
+      or customer.c_birth_month = 2
+    )
+    and date_dim.d_year = 1998
+    and (
+      customer.customer_address.ca_state = 'MS'
+      or customer.customer_address.ca_state = 'IN'
+      or customer.customer_address.ca_state = 'ND'
+      or customer.customer_address.ca_state = 'OK'
+      or customer.customer_address.ca_state = 'NM'
+      or customer.customer_address.ca_state = 'VA'
+      or customer.customer_address.ca_state = 'MS'
+    )
+}
