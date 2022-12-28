@@ -1,0 +1,35 @@
+import "tpcds.malloy"
+
+query: catalog_sales -> {
+  declare:
+    item_class_revenue is all(sum(cs_ext_sales_price), i_class)
+
+  group_by: 
+    item.i_item_id
+    item.i_item_desc
+    item.i_category
+    item.i_class
+    item.i_current_price
+
+  aggregate:
+    itemrevenue is sum(cs_ext_sales_price)
+    revenueratio is 100.0 * sum(cs_ext_sales_price) / item_class_revenue
+
+  where:
+    (
+      item.i_category = 'Sports'
+      or item.i_category = 'Books'
+      or item.i_category = 'Home'
+    )
+    and date_dim.d_date >= '1999-02-22'
+    and date_dim.d_date <= '1999-03-24'
+
+  order_by: 
+    i_category
+    i_class
+    i_item_id
+    i_item_desc
+    revenueratio
+
+  limit: 100
+}
