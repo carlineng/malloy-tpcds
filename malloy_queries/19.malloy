@@ -1,0 +1,27 @@
+import "tpcds.malloy"
+
+query: store_sales -> {
+  group_by:
+    item.i_brand_id
+    item.i_brand
+    item.i_manufact_id
+    item.i_manufact
+
+  aggregate:
+    total_ext_sales
+
+  where:
+    item.i_manager_id = 8
+    and date_dim.d_moy = 11
+    and date_dim.d_year = 1998
+    and substring(customer.customer_address.ca_zip, 1, 5) != substring(store.s_zip, 1, 5)
+
+  order_by: 
+    total_ext_sales desc 
+    i_brand
+    i_brand_id
+    i_manufact_id
+    i_manufact
+  
+  limit: 100
+}
