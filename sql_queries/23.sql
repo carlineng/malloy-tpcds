@@ -1,4 +1,7 @@
-WITH frequent_ss_items AS
+WITH 
+
+-- Items that are sold more than 4 times per day between 2000 and 2003
+frequent_ss_items AS
   (SELECT itemdesc,
           i_item_sk item_sk,
           d_date solddate,
@@ -18,7 +21,9 @@ WITH frequent_ss_items AS
             i_item_sk,
             d_date
    HAVING count(*) >4),
-     max_store_sales AS
+
+-- Amount purchased by customer that bought the most from store_sales
+max_store_sales AS
   (SELECT max(csales) tpcds_cmax
    FROM
      (SELECT c_customer_sk,
@@ -33,7 +38,9 @@ WITH frequent_ss_items AS
                        2000+2,
                        2000+3)
       GROUP BY c_customer_sk) sq2),
-     best_ss_customer AS
+
+-- Customers that spent at least half of what the best customer spent
+best_ss_customer AS
   (SELECT c_customer_sk,
           sum(ss_quantity*ss_sales_price) ssales
    FROM store_sales,
@@ -42,6 +49,9 @@ WITH frequent_ss_items AS
    WHERE ss_customer_sk = c_customer_sk
    GROUP BY c_customer_sk
    HAVING sum(ss_quantity*ss_sales_price) > (50/100.0) * max(tpcds_cmax))
+
+-- How much did each of the best store customers spend in Feb 2000 on frequent
+-- items from catalog and web?
 SELECT c_last_name,
        c_first_name,
        sales
