@@ -1,3 +1,9 @@
+-- calculate avg quantitiy, list price, coupon, sales price
+-- for store sales
+-- grouped by item id and state
+-- purchased by male, single, college educated customers
+-- with a hacky GROUP BY ROLLUP type clause using UNION statements
+
 WITH results AS
   (SELECT i_item_id,
           s_state,

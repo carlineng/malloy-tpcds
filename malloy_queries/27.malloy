@@ -1,0 +1,29 @@
+import "tpcds.malloy"
+
+query: store_sales + {
+  query: aggregations is {
+    aggregate:
+      agg1 is avg(ss_quantity)
+      agg2 is avg(ss_list_price)
+      agg3 is avg(ss_coupon_amt)
+      agg4 is avg(ss_sales_price)
+  }
+} -> aggregations + {
+  nest: by_item is aggregations + {
+    group_by: item.i_item_id
+    order_by: i_item_id
+    limit: 100
+
+    nest: by_state is aggregations + {
+      group_by: store.s_state
+      order_by: s_state
+    }
+  }
+
+  where:
+    customer_demographics.cd_gender = 'M'
+    and customer_demographics.cd_marital_status = 'S'
+    and customer_demographics.cd_education_status = 'College'
+    and date_dim.d_year = 2002
+    and store.s_state = 'TN'
+}
