@@ -1,3 +1,11 @@
+-- Get the avg quantity, list price, coupon, and sales price
+-- per item
+-- for items purchased in catalogs by single, college-educated males
+-- where the promitional channel was not in email or event
+-- in the year 2000
+
+-- This seems almost identical to query 7
+-- except on catalog sales instead of store sales
 SELECT i_item_id,
        avg(cs_quantity) agg1,
        avg(cs_list_price) agg2,
