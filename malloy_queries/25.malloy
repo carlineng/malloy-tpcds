@@ -1,15 +1,9 @@
 import "tpcds.malloy"
 
 query: store_sales + {
-  join_one: sr is store_returns 
-    on ss_customer_sk = sr.sr_customer_sk
-    and ss_item_sk = sr.sr_item_sk
-    and ss_ticket_number = sr.sr_ticket_number
-
   join_one: cs is catalog_sales
-    on sr.sr_customer_sk = cs.cs_bill_customer_sk
-    and sr.sr_item_sk = cs.cs_item_sk
-  
+    on store_returns.sr_customer_sk = cs.cs_bill_customer_sk
+    and store_returns.sr_item_sk = cs.cs_item_sk
 } -> {
   group_by:
     item.i_item_id
@@ -19,17 +13,17 @@ query: store_sales + {
 
   aggregate:
     store_sales_profit is sum(ss_net_profit)
-    store_returns_loss is sum(sr.sr_net_loss)
+    store_returns_loss is sum(store_returns.sr_net_loss)
     catalog_sales_profit is sum(cs.cs_net_profit)
 
   where: 
-    sr.sr_customer_sk != null
+    store_returns.sr_customer_sk != null
     and cs.cs_bill_customer_sk != null
     and date_dim.d_year = 2001
     and date_dim.d_moy = 4
-    and sr.date_dim.d_year = 2001
-    and sr.date_dim.d_moy >= 4
-    and sr.date_dim.d_moy <= 10
+    and store_returns.date_dim.d_year = 2001
+    and store_returns.date_dim.d_moy >= 4
+    and store_returns.date_dim.d_moy <= 10
     and cs.date_dim.d_year = 2001
     and cs.date_dim.d_moy >= 4
     and cs.date_dim.d_moy <= 10

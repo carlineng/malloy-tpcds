@@ -1,0 +1,29 @@
+import "tpcds.malloy"
+
+query: store_sales + {
+  join_one: cs is catalog_sales
+    on store_returns.sr_customer_sk = cs.cs_bill_customer_sk
+    and store_returns.sr_item_sk = cs.cs_item_sk
+} -> {
+  group_by:
+    item.i_item_id
+    item.i_item_desc
+    store.s_store_id
+    store.s_store_name
+
+  aggregate:
+    store_sales_quantity is sum(ss_quantity)
+    store_returns_quantity is sum(store_returns.sr_return_quantity)
+    catalog_sales_quantity is sum(cs.cs_quantity)
+
+  where: 
+    store_returns.sr_customer_sk != null
+    and cs.cs_bill_customer_sk != null
+    and date_dim.d_year = 1999
+    and date_dim.d_moy = 9
+    and store_returns.date_dim.d_year = 1999
+    and store_returns.date_dim.d_moy >= 9
+    and store_returns.date_dim.d_moy <= 12
+    and cs.date_dim.d_year >= 1999
+    and cs.date_dim.d_year <= 2001
+}

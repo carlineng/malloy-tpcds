@@ -1,3 +1,5 @@
+-- Looks almost the same as query 25
+
 SELECT i_item_id,
        i_item_desc,
        s_store_id,
