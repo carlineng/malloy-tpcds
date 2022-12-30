@@ -1,3 +1,8 @@
+-- Calculate total store profit, total store returns, and catalog sales net profit
+-- For:
+-- Store sales in April of 2001
+-- Store returns between April and October 2001
+-- and catalog sales of those same items by those returning customers between April and October 2001
 
 SELECT i_item_id ,
        i_item_desc ,
