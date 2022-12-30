@@ -65,6 +65,31 @@ source: inventory is table('duckdb:../data/inventory.parquet') {
   join_one: warehouse with inv_warehouse_sk
 }
 
+source: store_returns is table('duckdb:../data/store_returns.parquet') {
+  join_one: date_dim with sr_returned_date_sk
+  join_one: store with sr_store_sk
+  join_one: customer with sr_customer_sk
+
+  dimension: channel_category is 'store channel'
+  dimension: channel_id is concat('store', store.s_store_id)
+
+  measure: total_returns is sum(sr_return_amt)
+  measure: avg_returns is avg(sr_return_amt)
+  measure: total_loss is sum(sr_net_loss)
+
+  query: projection is {
+    project:
+      channel_category
+      channel_id
+      customer_sk is sr_customer_sk
+      returned_date_sk is sr_returned_date_sk
+      return_amt is sr_return_amt
+      net_loss is sr_net_loss
+
+    where: store.s_store_id != null
+  }
+}
+
 source: store_sales is table('duckdb:../data/store_sales.parquet') {
   join_one: date_dim with ss_sold_date_sk
   join_one: store with ss_store_sk
@@ -74,6 +99,10 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
   join_one: household_demographics with ss_hdemo_sk
   join_one: customer_demographics with ss_cdemo_sk
   join_one: customer_address with ss_addr_sk
+  join_one: store_returns
+    on ss_customer_sk = store_returns.sr_customer_sk
+    and ss_item_sk = store_returns.sr_item_sk
+    and ss_ticket_number = store_returns.sr_ticket_number
 
   dimension: channel_category is 'store channel'
   dimension: channel_id is concat('store', store.s_store_id)
@@ -108,31 +137,6 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
     where: store.s_store_id != null
   }
 
-}
-  
-source: store_returns is table('duckdb:../data/store_returns.parquet') {
-  join_one: date_dim with sr_returned_date_sk
-  join_one: store with sr_store_sk
-  join_one: customer with sr_customer_sk
-
-  dimension: channel_category is 'store channel'
-  dimension: channel_id is concat('store', store.s_store_id)
-
-  measure: total_returns is sum(sr_return_amt)
-  measure: avg_returns is avg(sr_return_amt)
-  measure: total_loss is sum(sr_net_loss)
-
-  query: projection is {
-    project:
-      channel_category
-      channel_id
-      customer_sk is sr_customer_sk
-      returned_date_sk is sr_returned_date_sk
-      return_amt is sr_return_amt
-      net_loss is sr_net_loss
-
-    where: store.s_store_id != null
-  }
 }
 
 source: catalog_returns is table('duckdb:../data/catalog_returns.parquet') {
