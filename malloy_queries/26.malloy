@@ -1,5 +1,5 @@
 import "tpcds.malloy"
 
 query: all_sales -> stats_by_item + {
-   where: channel_category = 'store channel'
+  where: channel_category = 'catalog channel'
 }

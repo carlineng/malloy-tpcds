@@ -324,6 +324,29 @@ source: all_sales is from_sql(all_sales_sql) {
       return_amt is 0
       net_loss is 0
   }
+
+  query: stats_by_item is {
+    group_by:
+      item.i_item_id
+    
+    aggregate:
+      avg_quantity
+      avg_list_price
+      avg_coupon_amt
+      avg_sales_price
+
+    where:
+      customer_demographics.cd_gender = 'M'
+      and customer_demographics.cd_marital_status = 'S'
+      and customer_demographics.cd_education_status = 'College'
+      and (promotion.p_channel_email = 'N' or promotion.p_channel_event = 'N')
+      and date_dim.d_year = 2000
+
+    order_by:
+      i_item_id
+
+    limit: 100
+  }
 }
 
 source: all_returns is from_sql(all_returns_sql) {
