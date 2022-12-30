@@ -1,0 +1,83 @@
+import "tpcds.malloy"
+
+query: store_sales -> {
+  declare:
+    b1_filters is (
+      ss_quantity >= 0 and ss_quantity <= 5
+      and (
+        (ss_list_price >= 8 and ss_list_price <= 18)
+        or (ss_coupon_amt >= 459 and ss_coupon_amt <= 1459)
+        or (ss_wholesale_cost >= 57 and ss_wholesale_cost <= 77)
+      )
+    )
+
+    b2_filters is (
+      ss_quantity >= 6 and ss_quantity <= 10
+      and (
+        (ss_list_price >= 90 and ss_list_price <= 100)
+        or (ss_coupon_amt >= 2323 and ss_coupon_amt <= 3323)
+        or (ss_wholesale_cost >= 31 and ss_wholesale_cost <= 51)
+      )
+    )
+
+    b3_filters is (
+      ss_quantity >= 11 and ss_quantity <= 15
+      and (
+        (ss_list_price >= 142 and ss_list_price <= 152)
+        or (ss_coupon_amt >= 12214 and ss_coupon_amt <= 13214)
+        or (ss_wholesale_cost >= 79 and ss_wholesale_cost <= 99)
+      )
+    )
+
+    b4_filters is (
+      ss_quantity >= 16 and ss_quantity <= 20 
+      and (
+        (ss_list_price >= 135 and ss_list_price <= 145)
+        or (ss_coupon_amt >= 6071 and ss_coupon_amt <= 7071)
+        or (ss_wholesale_cost >= 38 and ss_wholesale_cost <= 58)
+      )
+    )
+
+    b5_filters is (
+      ss_quantity >= 21 and ss_quantity <= 25
+      and (
+        (ss_list_price >= 122 and ss_list_price <= 132)
+        or (ss_coupon_amt >= 836 and ss_coupon_amt <= 1836)
+        or (ss_wholesale_cost >= 17 and ss_wholesale_cost <= 37)
+      )
+    )
+
+    b6_filters is (
+      ss_quantity >= 26 and ss_quantity <= 30
+      and (
+        (ss_list_price >= 154 and ss_list_price <= 164)
+        or (ss_coupon_amt >= 7326 and ss_coupon_amt <= 8326)
+        or (ss_wholesale_cost >= 7 and ss_wholesale_cost <= 27)
+      )
+    )
+
+  aggregate:
+    b1_lp is avg(ss_list_price) { where: b1_filters }
+    b1_cnt is count(*) { where: b1_filters and ss_list_price != null }
+    b1_cntd is count(distinct ss_list_price) { where: b1_filters }
+
+    b2_lp is avg(ss_list_price) { where: b2_filters }
+    b2_cnt is count(*) { where: b2_filters and ss_list_price != null }
+    b2_cntd is count(distinct ss_list_price) { where: b2_filters }
+
+    b3_lp is avg(ss_list_price) { where: b3_filters }
+    b3_cnt is count(*) { where: b3_filters and ss_list_price != null }
+    b3_cntd is count(distinct ss_list_price) { where: b3_filters }
+
+    b4_lp is avg(ss_list_price) { where: b4_filters }
+    b4_cnt is count(*) { where: b4_filters and ss_list_price != null }
+    b4_cntd is count(distinct ss_list_price) { where: b4_filters }
+
+    b5_lp is avg(ss_list_price) { where: b5_filters }
+    b5_cnt is count(*) { where: b5_filters and ss_list_price != null }
+    b5_cntd is count(distinct ss_list_price) { where: b5_filters }
+
+    b6_lp is avg(ss_list_price) { where: b6_filters }
+    b6_cnt is count(*) { where: b6_filters and ss_list_price != null }
+    b6_cntd is count(distinct ss_list_price) { where: b6_filters }
+}
