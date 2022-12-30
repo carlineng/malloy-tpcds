@@ -1,3 +1,11 @@
+-- Find customers who's current country is different from birth country
+-- and who returned an item they purchased from a store in market ID 8,
+-- and where the store ZIP code is in that customer's current ZIP code, and
+-- where the item color is "peach".
+--
+-- Filter down for customers who's total "net paid" amount is at least 5% of
+-- the overall average net paid
+
 WITH ssales AS
   (SELECT c_last_name,
           c_first_name,
