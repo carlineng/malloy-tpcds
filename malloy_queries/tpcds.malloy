@@ -118,6 +118,7 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
       sold_time_sk is ss_sold_time_sk
       item_sk is ss_item_sk
       customer_sk is ss_customer_sk 
+      addr_sk is ss_addr_sk
       cdemo_sk is ss_cdemo_sk
       promo_sk is ss_promo_sk
       quantity is ss_quantity
@@ -189,6 +190,7 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
       sold_time_sk is cs_sold_time_sk
       item_sk is cs_item_sk
       customer_sk is cs_bill_customer_sk 
+      addr_sk is cs_bill_addr_sk
       cdemo_sk is cs_bill_cdemo_sk
       promo_sk is cs_promo_sk
       quantity is cs_quantity
@@ -229,6 +231,7 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
       sold_time_sk is ws_sold_time_sk
       item_sk is ws_item_sk
       customer_sk is ws_bill_customer_sk 
+      addr_sk is ws_bill_addr_sk
       cdemo_sk is ws_bill_cdemo_sk
       promo_sk is ws_promo_sk
       quantity is ws_quantity
@@ -304,6 +307,7 @@ source: all_sales is from_sql(all_sales_sql) {
   join_one: customer with customer_sk
   join_one: item with item_sk
   join_one: promotion with promo_sk
+  join_one: customer_address with addr_sk
 
   measure: total_sales is sum((ext_list_price - ext_wholesale_cost - ext_discount_amt + ext_sales_price) / 2)
   measure: total_ext_sales_price is sum(ext_sales_price)
