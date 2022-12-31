@@ -1,0 +1,53 @@
+import "tpcds.malloy"
+
+query: web_returns -> {
+  group_by:
+    wr_returning_customer_sk
+    returning_addr.ca_state
+    returning_customer.c_customer_id
+    returning_customer.c_salutation
+    returning_customer.c_first_name
+    returning_customer.c_last_name
+    returning_customer.c_preferred_cust_flag
+    returning_customer.c_birth_day
+    returning_customer.c_birth_month
+    returning_customer.c_birth_year
+    returning_customer.c_birth_country
+    returning_customer.c_login
+    returning_customer.c_email_address
+    returning_customer.c_last_review_date
+    returning_customer_state is returning_customer.customer_address.ca_state
+
+  aggregate: 
+    customer_total_returns is total_returns
+    avg_web_return is all(total_returns / count(distinct wr_returning_customer_sk), ca_state)
+  where:
+    date_dim.d_year = 2002
+    and wr_return_amt != null
+    and returning_customer.c_customer_id != null
+    and returning_addr.ca_state != null
+} -> {
+  project:
+    c_customer_id
+    c_salutation
+    c_first_name
+    c_last_name
+    c_preferred_cust_flag
+    c_birth_day
+    c_birth_month
+    c_birth_year
+    c_birth_country
+    c_login
+    c_email_address
+    c_last_review_date
+    customer_total_returns
+    avg_web_return
+
+  where: 
+    customer_total_returns > avg_web_return * 1.2
+    and returning_customer_state = 'GA'
+
+  order_by:
+    c_customer_id
+  limit: 100
+}

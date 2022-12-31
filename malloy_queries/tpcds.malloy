@@ -252,7 +252,9 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
 source: web_returns is table('duckdb:../data/web_returns.parquet') {
   join_one: date_dim with wr_returned_date_sk
   join_one: customer with wr_refunded_customer_sk
+  join_one: returning_customer is customer with wr_returning_customer_sk
   join_one: web_sales on wr_item_sk = web_sales.ws_item_sk and wr_order_number = web_sales.ws_order_number
+  join_one: returning_addr is customer_address with wr_returning_addr_sk
 
   measure: total_returns is sum(wr_return_amt)
   measure: total_loss is sum(wr_net_loss)
