@@ -1,3 +1,7 @@
+-- Compute the sum of discounts on catalog sales
+-- where the discount is greater than 1.3x the avg discount
+-- for the item during the period
+
 SELECT sum(cs_ext_discount_amt) AS "excess discount amount"
 FROM catalog_sales ,
      item ,
