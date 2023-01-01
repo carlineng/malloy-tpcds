@@ -1,0 +1,50 @@
+import "tpcds.malloy"
+
+// TODO: This one isn't quite right. Getting different answers
+// in SQL and Malloy. Will need to revisit.
+
+query: all_sales -> {
+  group_by:
+    customer.customer_address.ca_state
+    customer.customer_demographics.cd_gender
+    customer.customer_demographics.cd_marital_status
+    customer.customer_demographics.cd_dep_count
+    customer.customer_demographics.cd_dep_employed_count
+    customer.customer_demographics.cd_dep_college_count
+
+  aggregate:
+    cnt is count(*)
+    min1 is min(customer.customer_demographics.cd_dep_count)
+    max1 is max(customer.customer_demographics.cd_dep_count)
+    avg1 is avg(customer.customer_demographics.cd_dep_count)
+
+    min2 is min(customer.customer_demographics.cd_dep_employed_count)
+    max2 is max(customer.customer_demographics.cd_dep_employed_count)
+    avg2 is avg(customer.customer_demographics.cd_dep_employed_count)
+
+    min3 is min(customer.customer_demographics.cd_dep_college_count)
+    max3 is max(customer.customer_demographics.cd_dep_college_count)
+    avg3 is avg(customer.customer_demographics.cd_dep_college_count)
+
+  where:
+    date_dim.d_year = 2002
+    and date_dim.d_qoy < 4
+    and customer.c_customer_sk != null
+    and customer.customer_address.ca_address_sk != null
+    and customer.customer_demographics.cd_demo_sk != null
+
+  having:
+    count_store_sales > 0
+    and (
+      count_catalog_sales > 0
+      or count_web_sales > 0
+    )
+
+  order_by:
+    ca_state
+    cd_gender
+    cd_marital_status
+    cd_dep_count
+    cd_dep_employed_count
+    cd_dep_college_count
+} -> { aggregate: cnt is count(*) }

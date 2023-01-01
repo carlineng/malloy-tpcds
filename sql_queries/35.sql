@@ -1,3 +1,10 @@
+-- Get stats for customers who made a store purchase and one of web or catalog
+-- in the first 3 quarters of 2002
+
+-- This one is annoying because the catalog_sales customer is `cs_ship_customer_sk`
+-- but my "all_sales" source assumes that `cs_bill_customer_sk` is the customer key
+-- The web sales portion uses the "correct" customer FK
+
 SELECT ca_state,
        cd_gender,
        cd_marital_status,
