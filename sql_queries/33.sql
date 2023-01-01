@@ -1,3 +1,7 @@
+-- Get total sales by manufacturer
+-- For all manufacturers who sell electronics.
+-- Include sales of items from those manufacturers that are not electronics
+
 WITH ss AS
   ( SELECT i_manufact_id,
            sum(ss_ext_sales_price) total_sales

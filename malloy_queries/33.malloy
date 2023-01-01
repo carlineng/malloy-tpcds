@@ -1,0 +1,25 @@
+import "tpcds.malloy"
+
+-- This one is a fun demonstration --
+-- query an ad-hoc extension to a source, using an ad-hoc query
+
+query: all_sales + {
+  join_one: manufacturers is from(
+    item -> {
+      group_by: i_manufact_id
+      where: i_category = 'Electronics'
+    }
+  ) on item.i_manufact_id = manufacturers.i_manufact_id
+} -> {
+  group_by: item.i_manufact_id
+  aggregate: total_ext_sales_price
+
+  where:
+    date_dim.d_year = 1998
+    and date_dim.d_moy = 5
+    and customer_address.ca_gmt_offset = -5
+    and manufacturers.i_manufact_id != null
+
+  order_by: total_ext_sales_price
+  limit: 100
+}
