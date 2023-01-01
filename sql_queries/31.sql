@@ -1,3 +1,8 @@
+-- Get all counties
+-- where increase in web sales from q1 to q2, and q2 to q3
+-- is greater than the associated increase in store sales
+-- in the year 2000
+
 WITH ss AS
   (SELECT ca_county,
           d_qoy,

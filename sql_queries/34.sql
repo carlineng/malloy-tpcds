@@ -1,3 +1,8 @@
+-- Get first, last name, salutation, flag and ticket number
+-- of customers who made between 15 and 20 store sales
+-- in certain dates in Williamson County
+-- and who conform to certain demographic characteristics
+
 SELECT c_last_name ,
        c_first_name ,
        c_salutation ,
