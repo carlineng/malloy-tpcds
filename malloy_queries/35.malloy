@@ -1,10 +1,13 @@
 import "tpcds.malloy"
 
-// TODO: This one isn't quite right. Getting different answers
-// in SQL and Malloy. Will need to revisit.
+// This one is *slightly* different from the SQL version.
+// The Malloy model creates the `all_sales` source using
+// a join on `cs_bill_customer_sk` when joining `catalog_sales`
+// to `customers`. The SQL version uses `cs_ship_customer_sk`.
 
 query: all_sales -> {
   group_by:
+    customer.c_customer_sk
     customer.customer_address.ca_state
     customer.customer_demographics.cd_gender
     customer.customer_demographics.cd_marital_status
@@ -39,6 +42,28 @@ query: all_sales -> {
       count_catalog_sales > 0
       or count_web_sales > 0
     )
+} -> { 
+  group_by: 
+    ca_state
+    cd_gender
+    cd_marital_status
+    cd_dep_count
+    cd_dep_employed_count
+    cd_dep_college_count
+
+  aggregate:
+    cnt is count(*) 
+    min1 is min(cd_dep_count)
+    max1 is max(cd_dep_count)
+    avg1 is avg(cd_dep_count)
+
+    min2 is min(cd_dep_employed_count)
+    max2 is max(cd_dep_employed_count)
+    avg2 is avg(cd_dep_employed_count)
+
+    min3 is min(cd_dep_college_count)
+    max3 is max(cd_dep_college_count)
+    avg3 is avg(cd_dep_college_count)
 
   order_by:
     ca_state
@@ -47,4 +72,4 @@ query: all_sales -> {
     cd_dep_count
     cd_dep_employed_count
     cd_dep_college_count
-} -> { aggregate: cnt is count(*) }
+}
