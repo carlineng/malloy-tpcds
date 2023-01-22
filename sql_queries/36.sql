@@ -1,4 +1,11 @@
+-- Weird query that does a manual GROUP BY with grouping sets
+-- Computes "gross margin" aggregation for category+class, category, and overall.
+
 WITH results AS
+
+-- sum of net profit, ext_sales_price, "gross_margin"
+-- by category and class
+-- in year 2001, stores in state of tennessee
   (SELECT sum(ss_net_profit) AS ss_net_profit,
           sum(ss_ext_sales_price) AS ss_ext_sales_price,
           (sum(ss_net_profit)*1.0000)/sum(ss_ext_sales_price) AS gross_margin ,
@@ -17,15 +24,22 @@ WITH results AS
      AND s_state ='TN'
    GROUP BY i_category,
             i_class) ,
+
      results_rollup AS
-  (SELECT gross_margin,
+  (
+    -- Gross margin by category and class
+    SELECT gross_margin,
           i_category,
           i_class,
           0 AS t_category,
           0 AS t_class,
           0 AS lochierarchy
    FROM results
-   UNION SELECT (sum(ss_net_profit)*1.0000)/sum(ss_ext_sales_price) AS gross_margin,
+
+   UNION 
+   
+   -- Gross margin by category
+   SELECT (sum(ss_net_profit)*1.0000)/sum(ss_ext_sales_price) AS gross_margin,
                 i_category,
                 NULL AS i_class,
                 0 AS t_category,
@@ -33,13 +47,20 @@ WITH results AS
                 1 AS lochierarchy
    FROM results
    GROUP BY i_category
-   UNION SELECT (sum(ss_net_profit)*1.0000)/sum(ss_ext_sales_price) AS gross_margin,
+
+   UNION 
+   
+   -- Overall gross_margin
+   SELECT (sum(ss_net_profit)*1.0000)/sum(ss_ext_sales_price) AS gross_margin,
                 NULL AS i_category,
                 NULL AS i_class,
                 1 AS t_category,
                 1 AS t_class,
                 2 AS lochierarchy
-   FROM results)
+   FROM results
+   
+   )
+
 SELECT gross_margin,
        i_category,
        i_class,
