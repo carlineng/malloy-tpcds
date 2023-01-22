@@ -1,0 +1,27 @@
+import "tpcds.malloy"
+
+query: inventory + {
+  join_one: catalog_sales on item.i_item_sk = catalog_sales.cs_item_sk
+} -> {
+  group_by:
+    item.i_item_id
+    item.i_item_desc
+    item.i_current_price
+
+  where:
+    item.i_current_price >= 68
+    and item.i_current_price <= 98
+    and date_dim.d_date >= '2000-02-01'
+    and date_dim.d_date <= '2000-04-01'
+    and (
+      item.i_manufact_id = 677
+      or item.i_manufact_id = 940
+      or item.i_manufact_id = 694
+      or item.i_manufact_id = 808
+    )
+    and inv_quantity_on_hand >= 100
+    and inv_quantity_on_hand <= 500
+    and catalog_sales.cs_item_sk != null
+
+  limit: 100
+}
