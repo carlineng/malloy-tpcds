@@ -1,0 +1,22 @@
+import "tpcds.malloy"
+
+query: store_sales + {
+  query: margin_agg is {
+    aggregate:
+      gross_margin is total_profit / total_ext_sales
+  }
+} -> {
+  nest: margin_agg
+  nest: by_category is {
+    group_by: item.i_category
+    nest: margin_agg
+    nest: by_class is {
+      group_by: item.i_class
+      nest: margin_agg
+    }
+  }
+
+  where:
+    date_dim.d_year = 2001
+    and store.s_state = 'TN'
+}
