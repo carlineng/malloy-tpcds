@@ -1,3 +1,7 @@
+-- Get items where price is between 68 and 98
+-- and we had between 100 and 500 on hand, between the dates of 2000-02-01 and 2000-04-01
+-- and the item was sold via catalog
+
 SELECT i_item_id,
        i_item_desc,
        i_current_price

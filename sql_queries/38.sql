@@ -1,3 +1,8 @@
+-- Get the count of customers who had at least one of each of store/web/catalog sales on the same day
+-- during the time period
+
+-- Not convinced that this implementation is correct
+-- All first/last names are null in the result set.
 SELECT count(*)
 FROM
   (SELECT DISTINCT c_last_name,
@@ -8,7 +13,10 @@ FROM
         customer
    WHERE store_sales.ss_sold_date_sk = date_dim.d_date_sk
      AND store_sales.ss_customer_sk = customer.c_customer_sk
-     AND d_month_seq BETWEEN 1200 AND 1200 + 11 INTERSECT
+     AND d_month_seq BETWEEN 1200 AND 1200 + 11 
+     
+     INTERSECT
+
      SELECT DISTINCT c_last_name,
                      c_first_name,
                      d_date
@@ -16,7 +24,10 @@ FROM
           date_dim,
           customer WHERE catalog_sales.cs_sold_date_sk = date_dim.d_date_sk
      AND catalog_sales.cs_bill_customer_sk = customer.c_customer_sk
-     AND d_month_seq BETWEEN 1200 AND 1200 + 11 INTERSECT
+     AND d_month_seq BETWEEN 1200 AND 1200 + 11 
+     
+     INTERSECT
+
      SELECT DISTINCT c_last_name,
                      c_first_name,
                      d_date
@@ -26,4 +37,3 @@ FROM
      AND web_sales.ws_bill_customer_sk = customer.c_customer_sk
      AND d_month_seq BETWEEN 1200 AND 1200 + 11 ) hot_cust
 LIMIT 100;
-
