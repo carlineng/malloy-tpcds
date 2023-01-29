@@ -1,3 +1,8 @@
+-- Calculate sales minus refunds
+-- for each state and item
+-- split into before/after 2000-03-11
+-- during time period 2000-02-10 to 2000-04-10
+
 SELECT w_state,
        i_item_id,
        sum(CASE
