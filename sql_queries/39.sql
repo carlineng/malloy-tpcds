@@ -1,4 +1,10 @@
+-- For items held in inventory during both
+-- month 1 and month 2 of 2001, calculate
+-- mean and stdev of quantity on hand during
+-- those months.
+
 WITH inv AS
+
   (SELECT w_warehouse_name,
           w_warehouse_sk,
           i_item_sk,
@@ -10,6 +16,7 @@ WITH inv AS
               ELSE stdev/mean
           END cov
    FROM
+
      (SELECT w_warehouse_name,
              w_warehouse_sk,
              i_item_sk,
@@ -28,10 +35,12 @@ WITH inv AS
                w_warehouse_sk,
                i_item_sk,
                d_moy) foo
+
    WHERE CASE mean
              WHEN 0 THEN 0
              ELSE stdev/mean
          END > 1)
+
 SELECT inv1.w_warehouse_sk wsk1,
        inv1.i_item_sk isk1,
        inv1.d_moy dmoy1,

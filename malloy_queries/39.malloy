@@ -1,0 +1,44 @@
+import "tpcds.malloy"
+
+query: inventory -> {
+  group_by:
+    warehouse.w_warehouse_name
+    warehouse.w_warehouse_sk
+    item.i_item_sk
+    date_dim.d_moy
+  
+  aggregate:
+    stdev is stddev_samp(inv_quantity_on_hand) + sum(0)
+    mean is avg(inv_quantity_on_hand)
+
+  where:
+    date_dim.d_year = 2001
+} -> {
+  declare: cov is stdev / mean
+  project: *
+  where:
+    cov > 1
+    and (
+      d_moy = 1
+      or d_moy = 2
+    )
+} -> {
+  group_by:
+    w_warehouse_sk
+    i_item_sk
+
+  aggregate:
+    mean1 is sum(mean) { where: d_moy = 1 }
+    cov1 is sum(cov) { where: d_moy = 1 }
+    mean2 is sum(mean) { where: d_moy = 2 }
+    cov2 is sum(cov) { where: d_moy = 2 }
+
+  having: count(*) { where: d_moy = 1 } > 0
+  having: count(*) { where: d_moy = 2 } > 0
+
+  order_by:
+    w_warehouse_sk
+    i_item_sk
+
+  limit: 250
+}
