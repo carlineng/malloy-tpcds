@@ -1,0 +1,74 @@
+import "tpcds.malloy"
+
+query: item -> {
+  group_by:
+    i_product_name
+    i_manufact
+    i_manufact_id
+
+  aggregate:
+    item_count is all(
+      count(*) { 
+        where:
+          (
+            (
+              i_category = 'Women'
+              and (i_color ? = 'powder' | = 'khaki')
+              and (i_units ? = 'Ounce' | = 'Oz')
+              and (i_size = 'medium' | = 'extra large')
+            )
+            or (
+              i_category = 'Women'
+              and (i_color ? = 'brown' | = 'honeydew')
+              and (i_units ? = 'Bunch' | = 'Ton')
+              and (i_size = 'N/A' | = 'small')
+            )
+            or (
+              i_category = 'Men'
+              and (i_color ? = 'floral' | = 'deep')
+              and (i_units ? = 'N/A' | = 'Dozen')
+              and (i_size = 'petite')
+            )
+            or (
+              i_category = 'Men'
+              and (i_color ? = 'light' | = 'cornflower')
+              and (i_units ? = 'Box' | = 'Pound')
+              and (i_size = 'medium' | = 'extra large')
+            )
+          )
+          or (
+            (
+              i_category = 'Women'
+              and (i_color ? = 'midnight' | = 'snow')
+              and (i_units ? = 'Pallet' | = 'Gross')
+              and (i_size = 'medium' | = 'extra large')
+            )
+            or (
+              i_category = 'Women'
+              and (i_color ? = 'cyan' | = 'papaya')
+              and (i_units ? = 'Cup' | = 'Dram')
+              and (i_size = 'N/A' | = 'small')
+            )
+            or (
+              i_category = 'Men'
+              and (i_color ? = 'orange' | = 'frosted')
+              and (i_units ? = 'Each' | = 'Tbl')
+              and (i_size = 'petite')
+            )
+            or (
+              i_category = 'Men'
+              and (i_color ? = 'forest' | = 'ghost')
+              and (i_units ? = 'Lb' | = 'Bundle')
+              and (i_size = 'medium' | = 'extra large')
+            )
+          )
+      }
+      , i_manufact
+    )
+} -> {
+  group_by: i_product_name
+  where:
+    i_manufact_id >= 738
+    and i_manufact_id <= 778
+    and item_count > 0
+}
