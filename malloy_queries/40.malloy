@@ -1,0 +1,32 @@
+import "tpcds.malloy"
+
+-- I think there's a bug in here.
+-- catalog_returns join is not being written to SQL,
+-- unless I hadd the hacky `where` condition at the bottom:
+-- where cr_refunded_cash != null or cr_refunded_cash = null
+
+query: catalog_sales -> {
+  group_by: 
+    warehouse.w_state
+    item.i_item_id
+
+  aggregate:
+    sales_before is sum(cs_sales_price - coalesce(catalog_returns.cr_refunded_cash, 0)) { where: date_dim.d_date < '2000-03-11' }
+    sales_after is sum(cs_sales_price - coalesce(catalog_returns.cr_refunded_cash, 0)) { where: date_dim.d_date >= '2000-03-11' }
+
+  where:
+    item.i_current_price >= 0.99
+    and item.i_current_price <= 1.49
+    and date_dim.d_date >= '2000-02-10'
+    and date_dim.d_date <= '2000-04-10'
+    and (
+      catalog_returns.cr_refunded_cash = null
+      or catalog_returns.cr_refunded_cash != null
+    )
+
+  order_by:
+    w_state
+    i_item_id
+
+  limit: 100
+}
