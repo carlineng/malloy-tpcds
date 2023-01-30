@@ -15,13 +15,15 @@ query: store_sales + {
       store_avg is all(avg(ss_net_profit) { where: ss_store_sk = 4 and ss_addr_sk = null }, ss_store_sk)
 
     where: ss_store_sk = 4
+  } -> {
+    project: *
+    where: rank_col > 0.9 * store_avg
   }
 } -> {
   nest: best_performing is ranked_items -> {
     project:
       i_product_name
       rank_col
-    where: rank_col > 0.9 * store_avg
     order_by: rank_col asc
     limit: 10
   } -> { 
@@ -29,10 +31,9 @@ query: store_sales + {
   }
 
   nest: worst_performing is ranked_items -> { 
-        project:
+    project:
       i_product_name
       rank_col
-    where: rank_col > 0.9 * store_avg
     order_by: rank_col desc
     limit: 10
   } -> {
