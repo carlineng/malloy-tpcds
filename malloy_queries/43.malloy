@@ -1,0 +1,24 @@
+import "tpcds.malloy"
+
+query: store_sales -> {
+  group_by:
+    store.s_store_name
+    store.s_store_id
+
+  aggregate:
+    sun_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Sunday' }
+    mon_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Monday' }
+    tue_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Tuesday' }
+    wed_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Wednesday' }
+    thu_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Thursday' }
+    fri_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Friday' }
+    sat_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Saturday' }
+
+  where:
+    store.s_gmt_offset = -5
+    and date_dim.d_year = 2000
+
+  order_by: 
+    s_store_name
+    s_store_id
+}
