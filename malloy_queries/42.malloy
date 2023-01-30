@@ -1,0 +1,16 @@
+import "tpcds.malloy"
+
+query: store_sales -> {
+  group_by:
+    date_dim.d_year
+    item.i_category_id
+    item.i_category
+
+  aggregate:
+    total_ext_sales
+
+  where:
+    date_dim.d_moy = 11
+    and date_dim.d_year = 2000
+    and item.i_manager_id = 1
+}
