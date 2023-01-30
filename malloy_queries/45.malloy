@@ -1,0 +1,24 @@
+import "tpcds.malloy"
+
+query: web_sales -> {
+  group_by:
+    customer.customer_address.ca_zip
+    customer.customer_address.ca_city
+
+  aggregate:
+    sales_price is sum(ws_sales_price)
+
+  where:
+    date_dim.d_qoy = 2
+    and date_dim.d_year = 2001
+    and (
+      (substring(customer.customer_address.ca_zip, 1, 5)? '85669' | '86197' | '88274' | '83405' | '86475' | '85392' | '85460' | '80348' | '81792')
+      or (item.i_item_sk? 2 | 3 | 5 | 7 | 11 | 13 | 17 | 19 | 23 | 29)
+    )
+  
+  order_by: 
+    ca_zip
+    ca_city
+  
+  limit: 100
+}
