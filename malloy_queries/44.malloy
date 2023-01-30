@@ -1,0 +1,51 @@
+import "tpcds.malloy"
+
+-- Don't have access to window functions in Malloy yet.
+-- Instead, use nesting w/ order_by and limit to mimic the functionality.
+
+-- TODO: is there a way to DRY this up?
+-- Tried to "extend" the top part of the `ascending` and `descending` queries, but couldn't get the syntax to work.
+query: store_sales + {
+  query: ascending_items is {
+    group_by:
+      ss_item_sk
+      ss_store_sk
+      item.i_product_name
+
+    aggregate: 
+      rank_col is avg(ss_net_profit)
+      store_avg is all(avg(ss_net_profit) { where: ss_store_sk = 4 and ss_addr_sk = null }, ss_store_sk)
+
+    where: ss_store_sk = 4
+  } -> {
+    project:
+      i_product_name
+      rank_col
+    where: rank_col > 0.9 * store_avg
+    order_by: rank_col asc
+    limit: 10
+  }
+
+  query: descending_items is {
+    group_by:
+      ss_item_sk
+      ss_store_sk
+      item.i_product_name
+
+    aggregate: 
+      rank_col is avg(ss_net_profit)
+      store_avg is all(avg(ss_net_profit) { where: ss_store_sk = 4 and ss_addr_sk = null }, ss_store_sk)
+
+    where: ss_store_sk = 4
+  } -> {
+    project:
+      i_product_name
+      rank_col
+    where: rank_col > 0.9 * store_avg
+    order_by: rank_col desc
+    limit: 10
+  }
+} -> {
+  nest: best_performing is ascending_items -> { project: i_product_name }
+  nest: worst_performing is descending_items -> { project: i_product_name } 
+}
