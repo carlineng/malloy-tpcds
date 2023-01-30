@@ -1,17 +1,27 @@
+-- Get distinct product names
+-- Where manufacturer ID is between 738 and 778
+-- and the manufacturer has items that meet a bunch of criteria
+
 SELECT distinct(i_product_name)
 FROM item i1
 WHERE i_manufact_id BETWEEN 738 AND 738+40
   AND
+
+     -- count of items > 0
+     -- correlated subquery
     (SELECT count(*) AS item_cnt
      FROM item
-     WHERE (i_manufact = i1.i_manufact
-            AND ((i_category = 'Women'
+     WHERE i_manufact = i1.i_manufact
+
+     AND ((
+          (i_category = 'Women'
                   AND (i_color = 'powder'
                        OR i_color = 'khaki')
                   AND (i_units = 'Ounce'
                        OR i_units = 'Oz')
                   AND (i_size = 'medium'
-                       OR i_size = 'extra large'))
+                       OR i_size = 'extra olarge'))
+
                  OR (i_category = 'Women'
                      AND (i_color = 'brown'
                           OR i_color = 'honeydew')
@@ -32,9 +42,10 @@ WHERE i_manufact_id BETWEEN 738 AND 738+40
                      AND (i_units = 'Box'
                           OR i_units = 'Pound')
                      AND (i_size = 'medium'
-                          OR i_size = 'extra large'))))
-       OR (i_manufact = i1.i_manufact
-           AND ((i_category = 'Women'
+                          OR i_size = 'extra large'))
+                          )
+
+          OR (((i_category = 'Women'
                  AND (i_color = 'midnight'
                       OR i_color = 'snow')
                  AND (i_units = 'Pallet'
@@ -61,7 +72,7 @@ WHERE i_manufact_id BETWEEN 738 AND 738+40
                     AND (i_units = 'Lb'
                          OR i_units = 'Bundle')
                     AND (i_size = 'medium'
-                         OR i_size = 'extra large'))))) > 0
+                         OR i_size = 'extra large'))))) > 0)
 ORDER BY i_product_name
 LIMIT 100;
 
