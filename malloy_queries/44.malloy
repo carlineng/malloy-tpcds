@@ -3,8 +3,6 @@ import "tpcds.malloy"
 -- Don't have access to window functions in Malloy yet.
 -- Instead, use nesting w/ order_by and limit to mimic the functionality.
 
--- TODO: is there a way to DRY this up?
--- Tried to "extend" the top part of the `ascending` and `descending` queries, but couldn't get the syntax to work.
 query: store_sales + {
   query: ranked_items is {
     group_by:
