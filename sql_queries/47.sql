@@ -1,4 +1,7 @@
 WITH v1 AS
+
+-- Get total sales by category, brand, store, company, year/month
+-- rank year/month for each category/brand/store/company
   (SELECT i_category,
           i_brand,
           s_store_name,
@@ -11,12 +14,12 @@ WITH v1 AS
                                                       s_store_name,
                                                       s_company_name,
                                                       d_year) avg_monthly_sales,
-                                        rank() OVER (PARTITION BY i_category,
-                                                                  i_brand,
-                                                                  s_store_name,
-                                                                  s_company_name
-                                                     ORDER BY d_year,
-                                                              d_moy) rn
+          rank() OVER (PARTITION BY i_category,
+                                        i_brand,
+                                        s_store_name,
+                                        s_company_name
+                         ORDER BY d_year,
+                                   d_moy) rn
    FROM item,
         store_sales,
         date_dim,
@@ -35,8 +38,13 @@ WITH v1 AS
             s_company_name,
             d_year,
             d_moy),
+
+
      v2 AS
-  (SELECT v1.i_category,
+  (
+
+-- Get sum_sales for previous and next month
+     SELECT v1.i_category,
           v1.i_brand,
           v1.s_store_name,
           v1.s_company_name,
@@ -59,6 +67,7 @@ WITH v1 AS
      AND v1.s_company_name = v1_lead.s_company_name
      AND v1.rn = v1_lag.rn + 1
      AND v1.rn = v1_lead.rn - 1)
+
 SELECT *
 FROM v2
 WHERE d_year = 1999

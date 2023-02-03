@@ -1,4 +1,3 @@
-
 SELECT c_last_name,
        c_first_name,
        ca_city,
@@ -42,3 +41,5 @@ WHERE ss_customer_sk = c_customer_sk
 ORDER BY profit
 LIMIT 100;
 
+-- Malloy doesn't currently support NULLS FIRST/LAST
+-- Changed the ORDER BY clause to something else for verification purposes

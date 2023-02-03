@@ -18,10 +18,10 @@ query: all_sales -> {
 
   having:
     store_total_sales_2001 > 0
-    and store_total_sales_2002 > 0
-    and web_total_sales_2001 > 0
-    and web_total_sales_2002 > 0
-    and web_total_sales_2002 / web_total_sales_2001 > store_total_sales_2002 / store_total_sales_2001
+    & store_total_sales_2002 > 0
+    & web_total_sales_2001 > 0
+    & web_total_sales_2002 > 0
+    & web_total_sales_2002 / web_total_sales_2001 > store_total_sales_2002 / store_total_sales_2001
 
   order_by:
     c_customer_id 

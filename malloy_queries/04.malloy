@@ -21,13 +21,13 @@ query: all_sales -> {
 
   having:
     catalog_yoy > store_yoy
-    and catalog_yoy > web_yoy
-    and store_total_sales_2001 > 0
-    and store_total_sales_2002 > 0
-    and web_total_sales_2001 > 0
-    and web_total_sales_2002 > 0
-    and catalog_total_sales_2001 > 0
-    and catalog_total_sales_2002 > 0
+    & catalog_yoy > web_yoy
+    & store_total_sales_2001 > 0
+    & store_total_sales_2002 > 0
+    & web_total_sales_2001 > 0
+    & web_total_sales_2002 > 0
+    & catalog_total_sales_2001 > 0
+    & catalog_total_sales_2002 > 0
 
   order_by:
     c_customer_id 
