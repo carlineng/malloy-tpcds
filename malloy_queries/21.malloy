@@ -21,8 +21,8 @@ query: inventory -> {
 
   having:
     inv_before > 0
-    and inv_after / inv_before >= 2.0 / 3.0
-    and inv_after / inv_before <= 3.0 / 2.0
+    & inv_after / inv_before >= 2.0 / 3.0
+    & inv_after / inv_before <= 3.0 / 2.0
 
   order_by:
     w_warehouse_name
