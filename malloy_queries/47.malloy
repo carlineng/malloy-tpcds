@@ -1,0 +1,8 @@
+import "tpcds.malloy"
+
+// Placeholder
+// Waiting on a fix to Turducken DuckDB paths, or for ranking/window functions to be implemented
+query: store_sales -> {
+  project: *
+  limit: 100
+}
