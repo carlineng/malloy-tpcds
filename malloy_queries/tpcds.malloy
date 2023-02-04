@@ -82,7 +82,10 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
       channel_category
       channel_id
       customer_sk is sr_customer_sk
+      order_number is sr_ticket_number
+      item_sk is sr_item_sk
       returned_date_sk is sr_returned_date_sk
+      return_quantity is sr_return_quantity
       return_amt is sr_return_amt
       net_loss is sr_net_loss
 
@@ -117,6 +120,7 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
       sold_date_sk is ss_sold_date_sk
       sold_time_sk is ss_sold_time_sk
       item_sk is ss_item_sk
+      order_number is ss_ticket_number
       customer_sk is ss_customer_sk 
       addr_sk is ss_addr_sk
       cdemo_sk is ss_cdemo_sk
@@ -157,7 +161,10 @@ source: catalog_returns is table('duckdb:../data/catalog_returns.parquet') {
       channel_category
       channel_id
       customer_sk is cr_refunded_customer_sk
+      order_number is cr_order_number
+      item_sk is cr_item_sk
       returned_date_sk is cr_returned_date_sk
+      return_quantity is cr_return_quantity
       return_amt is cr_return_amount
       net_loss is cr_net_loss
 
@@ -192,6 +199,7 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
       sold_date_sk is cs_sold_date_sk
       sold_time_sk is cs_sold_time_sk
       item_sk is cs_item_sk
+      order_number is cs_order_number
       customer_sk is cs_bill_customer_sk 
       addr_sk is cs_bill_addr_sk
       cdemo_sk is cs_bill_cdemo_sk
@@ -233,6 +241,7 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
       sold_date_sk is ws_sold_date_sk
       sold_time_sk is ws_sold_time_sk
       item_sk is ws_item_sk
+      order_number is ws_order_number
       customer_sk is ws_bill_customer_sk 
       addr_sk is ws_bill_addr_sk
       cdemo_sk is ws_bill_cdemo_sk
@@ -274,7 +283,10 @@ source: web_returns is table('duckdb:../data/web_returns.parquet') {
       channel_category
       channel_id
       customer_sk is wr_refunded_customer_sk
+      order_number is wr_order_number
+      item_sk is wr_item_sk
       returned_date_sk is wr_returned_date_sk
+      return_quantity is wr_return_quantity
       return_amt is wr_return_amt
       net_loss is wr_net_loss
 
@@ -304,6 +316,27 @@ sql: all_returns_sql is {
   connection: "duckdb"
 }
 
+source: all_returns is from_sql(all_returns_sql) {
+  join_one: date_dim with returned_date_sk
+  join_one: customer with customer_sk
+
+  measure: total_returns is sum(return_amt)
+  measure: total_loss is sum(net_loss)
+
+  query: daily_profit_loss is {
+    group_by:
+      channel_category
+      channel_id
+      date_dim.d_date
+
+    aggregate:
+      sales is 0
+      total_profit is 0
+      return_amt is total_returns
+      net_loss is total_loss
+  }
+}
+
 source: all_sales is from_sql(all_sales_sql) {
   join_one: date_dim with sold_date_sk
   join_one: customer_demographics with cdemo_sk
@@ -311,6 +344,9 @@ source: all_sales is from_sql(all_sales_sql) {
   join_one: item with item_sk
   join_one: promotion with promo_sk
   join_one: customer_address with addr_sk
+  join_one: all_returns
+    on order_number = all_returns.order_number
+    and item_sk = all_returns.item_sk
 
   measure: total_sales is sum((ext_list_price - ext_wholesale_cost - ext_discount_amt + ext_sales_price) / 2)
   measure: total_ext_sales_price is sum(ext_sales_price)
@@ -362,23 +398,3 @@ source: all_sales is from_sql(all_sales_sql) {
   }
 }
 
-source: all_returns is from_sql(all_returns_sql) {
-  join_one: date_dim with returned_date_sk
-  join_one: customer with customer_sk
-
-  measure: total_returns is sum(return_amt)
-  measure: total_loss is sum(net_loss)
-
-  query: daily_profit_loss is {
-    group_by:
-      channel_category
-      channel_id
-      date_dim.d_date
-
-    aggregate:
-      sales is 0
-      total_profit is 0
-      return_amt is total_returns
-      net_loss is total_loss
-  }
-}

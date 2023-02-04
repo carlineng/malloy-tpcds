@@ -1,0 +1,33 @@
+import "tpcds.malloy"
+
+query: all_sales + {
+  query: return_ratio_query is {
+    group_by:
+      item
+
+    aggregate:
+      return_ratio is sum(coalesce(all_returns.return_quantity, 0)) / sum(coalesce(quantity, 0))
+      currency_ratio is sum(coalesce(all_returns.return_amt, 0)) / sum(coalesce(net_paid, 0))
+  }
+} -> {
+  group_by:
+    channel_category
+
+  nest: top_ten_by_returns is return_ratio_query + {
+      order_by: return_ratio
+      limit: 10
+    }
+  
+  nest: top_ten_by_amount is return_ratio_query + {
+    order_by: currency_ratio
+    limit: 10
+  }
+
+  where:
+    date_dim.d_year = 2001
+    and date_dim.d_moy = 12
+    and all_returns.return_amt > 10000
+    and net_profit > 1
+    and net_paid > 0
+    and quantity > 0
+}

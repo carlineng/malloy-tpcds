@@ -1,3 +1,10 @@
+-- For each of web/catalog/store sales channels
+-- for each item:
+
+-- calculate percentage of returned items
+-- and percentage of total amount returned
+-- get top 10 of either rank or amount
+
 
 SELECT channel,
        item,
@@ -5,12 +12,14 @@ SELECT channel,
        return_rank,
        currency_rank
 FROM
-  (SELECT 'web' AS channel,
+  (
+    SELECT 'web' AS channel,
           web.item,
           web.return_ratio,
           web.return_rank,
           web.currency_rank
    FROM
+
      (SELECT item,
              return_ratio,
              currency_ratio,
@@ -35,7 +44,10 @@ FROM
          GROUP BY ws.ws_item_sk) in_web) web
    WHERE (web.return_rank <= 10
           OR web.currency_rank <= 10)
-   UNION SELECT 'catalog' AS channel,
+
+   UNION 
+   
+   SELECT 'catalog' AS channel,
                 catalog.item,
                 catalog.return_ratio,
                 catalog.return_rank,
@@ -65,7 +77,10 @@ FROM
          GROUP BY cs.cs_item_sk) in_cat) CATALOG
    WHERE (catalog.return_rank <= 10
           OR catalog.currency_rank <=10)
-   UNION SELECT 'store' AS channel,
+
+   UNION 
+
+   SELECT 'store' AS channel,
                 store.item,
                 store.return_ratio,
                 store.return_rank,
@@ -94,7 +109,9 @@ FROM
            AND d_moy = 12
          GROUP BY sts.ss_item_sk) in_store) store
    WHERE (store.return_rank <= 10
-          OR store.currency_rank <= 10) ) sq1
+          OR store.currency_rank <= 10) 
+
+          ) sq1
 ORDER BY 1 NULLS FIRST,
          4 NULLS FIRST,
          5 NULLS FIRST,
