@@ -1,0 +1,34 @@
+import "tpcds.malloy"
+
+query: store_sales -> {
+  group_by:
+    store.s_store_name
+    store.s_company_id
+    store.s_street_number
+    store.s_street_name
+    store.s_street_type
+    store.s_suite_number
+    store.s_city
+    store.s_county
+    store.s_state
+    store.s_zip
+
+  aggregate:
+    count_30_days is sum(1) { where: store_returns.sr_returned_date_sk - ss_sold_date_sk <= 30 }
+    count_31_60_days is sum(1) { where: (store_returns.sr_returned_date_sk - ss_sold_date_sk) ? > 30 & <= 60 }
+    count_61_90_days is sum(1) { where: (store_returns.sr_returned_date_sk - ss_sold_date_sk) ? > 60 & <= 90 }
+    count_91_120_days is sum(1) { where: (store_returns.sr_returned_date_sk - ss_sold_date_sk) ? > 90 & <= 120 }
+    count_120_days is sum(1) { where: (store_returns.sr_returned_date_sk - ss_sold_date_sk) > 120 }
+
+  where:
+    store_returns.date_dim.d_year = 2001
+    and store_returns.date_dim.d_moy = 8
+    and store.s_store_name != null
+
+  order_by:
+    s_store_name
+    s_company_id
+    s_street_number
+
+  limit: 100
+}

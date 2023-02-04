@@ -1,3 +1,6 @@
+-- Get counts of returns bucketed by time from sold to returned
+-- for each store
+
 SELECT s_store_name,
        s_company_id,
        s_street_number,
