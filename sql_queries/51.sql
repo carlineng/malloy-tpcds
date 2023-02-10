@@ -1,4 +1,8 @@
+-- Don't think I can do this one in Malloy without a Turducken
+-- need window functions to calculate cumulative (year-to-date) sales
+
 WITH web_v1 AS
+-- Get cumulative web sales by date for each item during a given year
   (SELECT ws_item_sk item_sk,
           d_date,
           sum(sum(ws_sales_price)) OVER (PARTITION BY ws_item_sk
@@ -10,6 +14,8 @@ WITH web_v1 AS
      AND ws_item_sk IS NOT NULL
    GROUP BY ws_item_sk,
             d_date),
+
+-- Get cumulative store sales by date for each item during a given year
      store_v1 AS
   (SELECT ss_item_sk item_sk,
           d_date,
@@ -22,6 +28,7 @@ WITH web_v1 AS
      AND ss_item_sk IS NOT NULL
    GROUP BY ss_item_sk,
             d_date)
+
 SELECT *
 FROM
   (SELECT item_sk,
@@ -30,8 +37,8 @@ FROM
           store_sales,
           max(web_sales) OVER (PARTITION BY item_sk
                                ORDER BY d_date ROWS BETWEEN unbounded preceding AND CURRENT ROW) web_cumulative,
-                              max(store_sales) OVER (PARTITION BY item_sk
-                                                     ORDER BY d_date ROWS BETWEEN unbounded preceding AND CURRENT ROW) store_cumulative
+          max(store_sales) OVER (PARTITION BY item_sk
+                                 ORDER BY d_date ROWS BETWEEN unbounded preceding AND CURRENT ROW) store_cumulative
    FROM
      (SELECT CASE
                  WHEN web.item_sk IS NOT NULL THEN web.item_sk

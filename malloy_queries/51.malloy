@@ -1,0 +1,24 @@
+import "tpcds.malloy"
+
+// TODO: fix when Turducken path issue is resolved
+sql: daily_sales_sql is {
+  select: """
+    SELECT
+      *
+    FROM (%{
+      all_sales -> {
+        group_by:
+          item_sk
+          date_dim.d_date
+        
+        aggregate:
+          total_sales_price is sum(sales_price)
+
+        where:
+          date_dim.d_month_seq >= 1200
+          and date_dim.d_month_seq <= 1211
+          and (channel_category ? 'web channel' | 'store channel')
+      }
+    }%)
+  """
+}
