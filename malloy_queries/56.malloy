@@ -1,0 +1,30 @@
+import "tpcds.malloy"
+
+query: all_sales + {
+  join_one: colored_items is from(item -> {
+    group_by:
+      i_item_id
+
+    where:
+      i_color ? 'slate' | 'blanched' | 'burnished'
+  })
+    on item.i_item_id = colored_items.i_item_id
+} -> {
+  group_by: 
+    item.i_item_id
+
+  aggregate:
+    total_sales is sum(ext_sales_price)
+
+  where:
+    colored_items.i_item_id != null
+    and date_dim.d_year = 2001
+    and date_dim.d_moy = 2
+    and customer_address.ca_gmt_offset = -5
+
+  order_by: 
+    total_sales
+    i_item_id
+
+  limit: 100
+} 

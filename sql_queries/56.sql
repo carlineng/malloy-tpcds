@@ -1,3 +1,6 @@
+-- This is annoying because i_item_id is NOT a primary key
+-- An item_id can have multiple colors
+
 WITH ss AS
   (SELECT i_item_id,
           sum(ss_ext_sales_price) total_sales
@@ -72,3 +75,4 @@ ORDER BY total_sales  NULLS FIRST,
          i_item_id NULLS FIRST
 LIMIT 100;
 
+-- 402 distinct items
