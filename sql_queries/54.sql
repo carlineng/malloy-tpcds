@@ -25,7 +25,7 @@ WITH my_customers AS
      AND i_class = 'maternity'
      AND c_customer_sk = cs_or_ws_sales.customer_sk
      AND d_moy = 12
-     AND d_year = 1998 ),
+     AND d_year = 1998 )
 
 -- Get store revenue for the above customers
 -- For all stores in the same state/county as the state/county where they
@@ -47,7 +47,7 @@ WITH my_customers AS
      AND c_customer_sk = ss_customer_sk
      AND d_month_seq BETWEEN 1188 AND 1190
     ) 
-    
+
 -- Had to fix fanout bug in here by adding SUM(DISTINCT ...)
     , my_revenue AS (
       SELECT
@@ -56,7 +56,7 @@ WITH my_customers AS
       FROM my_revenue_0
       GROUP BY c_customer_sk
     )
-    
+
     , segments AS
   (SELECT cast(round(revenue/50) AS int) AS SEGMENT
    FROM my_revenue)
