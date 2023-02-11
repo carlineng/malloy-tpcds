@@ -1,4 +1,10 @@
+-- Pretty sure this query has an error in it.
+-- Join condition contains a fan-out
+-- The join on ca_county = s_county and ca_state = s_state
+-- Some orders are counted more than once
+
 WITH my_customers AS
+-- Find customers who purchased items in 'Women' and 'maternity' on catalog or web
   (SELECT DISTINCT c_customer_sk,
                    c_current_addr_sk
    FROM
@@ -20,9 +26,15 @@ WITH my_customers AS
      AND c_customer_sk = cs_or_ws_sales.customer_sk
      AND d_moy = 12
      AND d_year = 1998 ),
-     my_revenue AS
+
+-- Get store revenue for the above customers
+-- For all stores in the same state/county as the state/county where they
+-- resided when they made the above purchases
+    , my_revenue_0 AS
   (SELECT c_customer_sk,
-          sum(ss_ext_sales_price) AS revenue
+          ss_ext_sales_price,
+          ca_county,
+          ca_state
    FROM my_customers,
         store_sales,
         customer_address,
@@ -33,17 +45,19 @@ WITH my_customers AS
      AND ca_state = s_state
      AND ss_sold_date_sk = d_date_sk
      AND c_customer_sk = ss_customer_sk
-     AND d_month_seq BETWEEN
-       (SELECT DISTINCT d_month_seq+1
-        FROM date_dim
-        WHERE d_year = 1998
-          AND d_moy = 12) AND
-       (SELECT DISTINCT d_month_seq+3
-        FROM date_dim
-        WHERE d_year = 1998
-          AND d_moy = 12)
-   GROUP BY c_customer_sk),
-     segments AS
+     AND d_month_seq BETWEEN 1188 AND 1190
+    ) 
+    
+-- Had to fix fanout bug in here by adding SUM(DISTINCT ...)
+    , my_revenue AS (
+      SELECT
+        c_customer_sk,
+        sum(distinct ss_ext_sales_price) as revenue
+      FROM my_revenue_0
+      GROUP BY c_customer_sk
+    )
+    
+    , segments AS
   (SELECT cast(round(revenue/50) AS int) AS SEGMENT
    FROM my_revenue)
 SELECT SEGMENT,

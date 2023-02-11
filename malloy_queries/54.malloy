@@ -1,0 +1,51 @@
+import "tpcds.malloy"
+
+-- Interesting example of how to do a self-join type query.
+-- Define a subset of "interesting" customers, then join back to the original source.
+
+-- The original SQL query is a bit of nonsense -- had a fanout in the join
+-- I tried fixing it, but am missing a single row in the store_sales dataset:
+-- select * from store_sales where ss_customer_sk = 26788 and ss_ext_sales_price = 3622.32
+
+query: all_sales + {
+  join_one: my_customers is from(all_sales -> {
+    group_by:
+      customer_sk
+      customer.c_current_addr_sk
+      customer.customer_address.ca_state
+      customer.customer_address.ca_county
+    
+    where:
+      (channel_category ? 'web channel' | 'catalog channel')
+      and item.i_category = 'Women'
+      and item.i_class = 'maternity'
+      and date_dim.d_moy = 12
+      and date_dim.d_year = 1998
+  })
+    on customer_sk = my_customers.customer_sk
+
+  join_many: home_stores is store
+    on my_customers.ca_state = store.s_state
+    and my_customers.ca_county = store.s_county
+} -> {
+  group_by:
+    customer_sk
+
+  aggregate:
+    revenue is sum(ext_sales_price)
+
+  where:
+    channel_category = 'store channel'
+    and my_customers.customer_sk != null
+    and home_stores.s_store_sk != null
+    and date_dim.d_month_seq >= 1188
+    and date_dim.d_month_seq <= 1190
+} -> {
+  declare: segment is round(revenue / 50)
+  group_by: 
+    segment
+    segment_base is segment * 50
+
+  aggregate:
+    num_customers is count()
+}
