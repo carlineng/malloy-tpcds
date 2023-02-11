@@ -1,0 +1,18 @@
+import "tpcds.malloy"
+
+query: store_sales -> {
+  group_by:
+    item.i_brand_id
+    item.i_brand
+
+  aggregate:
+    ext_price is sum(ss_ext_sales_price)
+
+  where:
+    item.i_manager_id = 28
+    and date_dim.d_moy = 11
+    and date_dim.d_year = 1999
+
+  order_by: ext_price desc
+  limit: 100
+}
