@@ -1,0 +1,40 @@
+import "tpcds.malloy"
+
+query: all_sales -> {
+  group_by:
+    item.i_item_id
+
+  aggregate:
+    total_rev is sum(ext_sales_price)
+    store_rev is sum(ext_sales_price) { where: channel_category = 'store channel' }
+    web_rev is sum(ext_sales_price) { where: channel_category = 'web channel' }
+    catalog_rev is sum(ext_sales_price) { where: channel_category = 'catalog channel' }
+
+  where:
+    date_dim.d_date >= '1999-12-28'
+    and date_dim.d_date <= '2000-01-03'
+    and item.i_item_id != null
+} -> {
+  project:
+    item_id is i_item_id
+    store_rev
+    ss_dev is store_rev / (total_rev / 3) * 100
+    catalog_rev
+    catalog_dev is catalog_rev / (total_rev / 3) * 100
+    web_rev
+    web_dev is web_rev / (total_rev / 3) * 100 
+    average is total_rev / 3
+
+  where:
+    store_rev >= 0.9 * catalog_rev and store_rev <= 1.1 * catalog_rev
+    and store_rev >= 0.9 * web_rev and store_rev <= 1.1 * web_rev
+    and catalog_rev >= 0.9 * store_rev and catalog_rev <= 1.1 * store_rev
+    and catalog_rev >= 0.9 * web_rev and catalog_rev <= 1.1 * web_rev
+    and web_rev >= 0.9 * store_rev and web_rev <= 1.1 * store_rev
+    and web_rev >= 0.9 * catalog_rev and web_rev <= 1.1 * catalog_rev
+    and store_rev > 0
+    and web_rev > 0
+    and catalog_rev > 0
+
+  order_by: item_id
+}
