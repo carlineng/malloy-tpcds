@@ -43,9 +43,7 @@ WITH wss AS
    and d_month_seq <= 1212+23
    GROUP BY d_week_seq,
             ss_store_sk
-
             )
-
 SELECT s_store_name1,
        s_store_id1,
        d_week_seq1,
