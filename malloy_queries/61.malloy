@@ -1,0 +1,24 @@
+import "tpcds.malloy"
+
+query: store_sales -> {
+  declare: 
+    promotions is sum(ss_ext_sales_price) { 
+      where: promotion.p_channel_dmail = 'Y' 
+      or promotion.p_channel_email = 'Y'
+      or promotion. p_channel_tv = 'Y'
+    }
+    total is sum(ss_ext_sales_price)
+
+  aggregate:
+    promotions
+    total
+    ratio is (promotions / total) * 100
+
+  where:
+    item.i_category = 'Jewelry'
+    and date_dim.d_year = 1998
+    and date_dim.d_moy = 11
+    and customer.customer_address.ca_gmt_offset = -5
+    and store.s_gmt_offset = -5
+
+}
