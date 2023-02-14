@@ -1,0 +1,28 @@
+import "tpcds.malloy"
+
+// This is one category where I think Malloy could be improved --
+// "semi-join" syntax in SQL is pretty convenient. In Malloy, I need
+// to extend the source with an in-line join, which isn't as nice.
+
+query: all_sales + {
+  join_one: music_items is from(item -> {
+    group_by: i_item_id
+    where: i_category = 'Music'
+  })
+    on item.i_item_id = music_items.i_item_id
+} -> {
+  group_by:
+    item.i_item_id
+
+  aggregate:
+    total_sales is sum(ext_sales_price)
+
+  where:
+    date_dim.d_year = 1998
+    and date_dim.d_moy = 9
+    and customer_address.ca_gmt_offset = -5
+    and music_items.i_item_id != null
+
+  order_by: i_item_id, total_sales
+  limit: 100
+}
