@@ -1,3 +1,10 @@
+-- This query has a lot of duplicate rows...
+-- `wss` CTE has one row per (week, store)
+-- `y` CTE has 7 rows per (week, store)
+    -- This CTE joins `date_dim` to `wss`
+    -- `date_dim` has 7 rows for each (week) value, while `wss` has 1 row per week
+-- `z` has the same problem as `y`, and these two are again joined on a week equality, making it worse
+
 WITH wss AS
   (SELECT d_week_seq,
           ss_store_sk,
@@ -32,8 +39,13 @@ WITH wss AS
    FROM store_sales,
         date_dim
    WHERE d_date_sk = ss_sold_date_sk
+   and d_month_seq >= 1212
+   and d_month_seq <= 1212+23
    GROUP BY d_week_seq,
-            ss_store_sk)
+            ss_store_sk
+
+            )
+
 SELECT s_store_name1,
        s_store_id1,
        d_week_seq1,

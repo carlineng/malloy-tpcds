@@ -1,0 +1,55 @@
+import "tpcds.malloy"
+
+-- Pretty similar to query 2
+-- The SQL version has the same fanout join problem
+
+source: weekly_store_sales is from(
+  store_sales -> {
+    group_by:
+      date_dim.d_week_seq
+      ss_store_sk
+
+    aggregate:
+      sun_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Sunday' }
+      mon_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Monday' }
+      tue_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Tuesday' }
+      wed_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Wednesday' }
+      thu_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Thursday' }
+      fri_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Friday' }
+      sat_sales is sum(ss_sales_price) { where: date_dim.d_day_name = 'Saturday' }
+
+    where:
+      date_dim.d_month_seq >= 1212
+      and date_dim.d_month_seq <= 1212+23
+  }
+) {
+  join_many: date_dim on d_week_seq = date_dim.d_week_seq
+  join_one: store with ss_store_sk
+}
+
+query: yoy_weekly_store_sales is weekly_store_sales + {
+  join_one: ly_weekly_store_sales is weekly_store_sales
+    on d_week_seq = ly_weekly_store_sales.d_week_seq - 52
+    and ss_store_sk = ly_weekly_store_sales.ss_store_sk
+} -> {
+  group_by:
+    store.s_store_name
+    store.s_store_id
+    d_week_seq
+    sun_sales_ratio is sun_sales / ly_weekly_store_sales.sun_sales
+    mon_sales_ratio is mon_sales / ly_weekly_store_sales.mon_sales
+    tue_sales_ratio is tue_sales / ly_weekly_store_sales.tue_sales
+    wed_sales_ratio is wed_sales / ly_weekly_store_sales.wed_sales
+    thu_sales_ratio is thu_sales / ly_weekly_store_sales.thu_sales
+    fri_sales_ratio is fri_sales / ly_weekly_store_sales.fri_sales
+    sat_sales_ratio is sat_sales / ly_weekly_store_sales.sat_sales
+
+  where: d_week_seq >= 5271
+  
+  order_by:
+    s_store_name
+    s_store_id
+    d_week_seq
+
+  limit: 100
+}
