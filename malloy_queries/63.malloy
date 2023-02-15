@@ -1,0 +1,41 @@
+import "tpcds.malloy"
+
+query: store_sales -> {
+  group_by: 
+    item.i_manager_id
+    date_dim.d_month_seq
+  
+  aggregate:
+    sum_sales is sum(ss_sales_price)
+    avg_monthly_sales is all(sum(ss_sales_price) / count(distinct date_dim.d_moy), i_manager_id)
+
+  where:
+    date_dim.d_month_seq >= 1200
+    and date_dim.d_month_seq <= 1211
+    and (
+      (
+        (item.i_category ? 'Books' | 'Children' | 'Electronics')
+        and (item.i_class ? 'personal' | 'portable' | 'reference' | 'self-help')
+        and (item.i_brand ? 'scholaramalgamalg #14' | 'scholaramalgamalg #7' | 'exportiunivamalg #9' | 'scholaramalgamalg #9')
+      )
+    or (
+        (item.i_category ? 'Women' | 'Music' | 'Men')
+        and (item.i_class ? 'accessories' | 'classical' | 'fragrances' | 'pants')
+        and (item.i_brand ? 'amalgimporto #1' | 'edu packscholar #1' | 'exportiimporto #1' | 'importoamalg #1')
+      )
+    )
+    and store.s_store_sk != null
+} -> {
+  project: *
+
+  where:
+    avg_monthly_sales > 0
+    and abs(sum_sales - avg_monthly_sales) / avg_monthly_sales > 0.1
+
+  order_by:
+    i_manager_id
+    avg_monthly_sales
+    sum_sales
+
+  limit: 100
+}
