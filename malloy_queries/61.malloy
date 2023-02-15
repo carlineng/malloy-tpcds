@@ -20,5 +20,4 @@ query: store_sales -> {
     and date_dim.d_moy = 11
     and customer.customer_address.ca_gmt_offset = -5
     and store.s_gmt_offset = -5
-
 }
