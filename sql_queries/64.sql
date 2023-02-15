@@ -1,4 +1,10 @@
+-- This query takes quite a long time to run due to a join explosion between
+-- store_sales and store_returns. The join does not include `customer_sk` as a join key,
+-- when it probably should.
+
 WITH cs_ui AS
+
+-- List price as refunds for each item in catalog_sales
   (SELECT cs_item_sk,
           sum(cs_ext_list_price) AS sale,
           sum(cr_refunded_cash+cr_reversed_charge+cr_store_credit) AS refund
@@ -8,6 +14,8 @@ WITH cs_ui AS
      AND cs_order_number = cr_order_number
    GROUP BY cs_item_sk
    HAVING sum(cs_ext_list_price)>2*sum(cr_refunded_cash+cr_reversed_charge+cr_store_credit)),
+
+-- sum of store sales prices for the above
      cross_sales AS
   (SELECT i_product_name product_name,
           i_item_sk item_sk,
@@ -53,8 +61,14 @@ WITH cs_ui AS
      AND ss_hdemo_sk = hd1.hd_demo_sk
      AND ss_addr_sk = ad1.ca_address_sk
      AND ss_item_sk = i_item_sk
+
+    -- The join from store_sales to store_returns here causes a join explosion
+    -- and makes the query run for a long time.
      AND ss_item_sk = sr_item_sk
      AND ss_ticket_number = sr_ticket_number
+     -- Adding `customer_sk` to the join condition makes it behave better
+     and ss_customer_sk = sr_customer_sk
+
      AND ss_item_sk = cs_ui.cs_item_sk
      AND c_current_cdemo_sk = cd2.cd_demo_sk
      AND c_current_hdemo_sk = hd2.hd_demo_sk
@@ -88,6 +102,7 @@ WITH cs_ui AS
             d1.d_year,
             d2.d_year,
             d3.d_year)
+
 SELECT cs1.product_name,
        cs1.store_name,
        cs1.store_zip,

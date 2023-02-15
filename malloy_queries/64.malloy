@@ -1,0 +1,109 @@
+import "tpcds.malloy"
+
+source: cross_sales is from(
+  store_sales + {
+    join_one: cs_ui is from(
+      catalog_sales -> {
+        group_by:
+          cs_item_sk
+
+        aggregate:
+          sale is sum(cs_ext_list_price)
+          refund is sum(catalog_returns.cr_refunded_cash + catalog_returns.cr_reversed_charge + catalog_returns.cr_store_credit)
+
+        having:
+          sum(cs_ext_list_price) > 2 * sum(catalog_returns.cr_refunded_cash + catalog_returns.cr_reversed_charge + catalog_returns.cr_store_credit)
+      }
+    ) {
+      primary_key: cs_item_sk
+    } 
+      on ss_item_sk = cs_ui.cs_item_sk
+
+    // This join condition is different from what's defined in the `store_sales` source
+    // since it excludes the `customer_sk` field.
+    join_many: sr is store_returns
+      on ss_item_sk = store_returns.sr_item_sk
+      and ss_ticket_number = store_returns.sr_ticket_number
+  } -> {
+    group_by:
+      product_name is item.i_product_name
+      item_sk is item.i_item_sk
+      store_name is store.s_store_name
+      store_zip is store.s_zip
+      b_street_number is customer_address.ca_street_number
+      b_street_name is customer_address.ca_street_name
+      b_city is customer_address.ca_city
+      b_zip is customer_address.ca_zip
+      c_street_number is customer.customer_address.ca_street_number
+      c_street_name is customer.customer_address.ca_street_name
+      c_city is customer.customer_address.ca_city
+      c_zip is customer.customer_address.ca_zip
+      syear is date_dim.d_year
+      fsyear is customer.first_sale_date.d_year
+      s2year is customer.first_shipto_date.d_year
+
+    aggregate:
+      cnt is count()
+      s1 is sum(ss_wholesale_cost)
+      s2 is sum(ss_list_price)
+      s3 is sum(ss_coupon_amt)
+
+    where:
+      (item.i_color ? 'purple' | 'burlywood' | 'indian' | 'spring' | 'floral' | 'medium')
+      and item.i_current_price >= 64 and item.i_current_price <= 74
+      and item.i_current_price >= 65 and item.i_current_price <= 79
+      and customer_demographics.cd_marital_status != customer.customer_demographics.cd_marital_status
+      // This `where` clause should use `sr`, and not `store_returns`
+      // Unfortunately, DuckDB crashes with `IO Error: Failed to create directory ".tmp"!`
+      // when using it. For now, stick with `store_returns`
+      // and sr.sr_ticket_number != null
+      and store_returns.sr_ticket_number != null
+      and cs_ui.cs_item_sk != null
+      and promotion.p_promo_sk != null
+      and household_demographics.income_band.ib_income_band_sk != null
+      and customer.household_demographics.income_band.ib_income_band_sk != null
+  }
+)
+
+query: cross_sales + {
+  join_many: cs2 is cross_sales
+    on item_sk = cs2.item_sk
+    and store_name = cs2.store_name
+    and store_zip = cs2.store_zip
+    and cs2.cnt <= cnt
+    and syear = 1999
+    and cs2.syear = 2000
+} -> {
+  project:
+    product_name
+    store_name
+    store_zip
+    b_street_number
+    b_street_name
+    b_city
+    b_zip
+    c_street_number
+    c_street_name
+    c_city
+    c_zip
+    cs1syear is syear
+    cs1cnt is cnt
+    s11 is s1
+    s21 is s2
+    s31 is s3
+    s12 is cs2.s1
+    s22 is cs2.s2
+    s32 is cs2.s3
+    cs2syear is cs2.syear
+    cs2cnt is cs2.cnt
+
+  where:
+    cs2.item_sk != null
+
+  order_by: 
+    product_name
+    store_name
+    cs2cnt
+    s11
+    s12
+}

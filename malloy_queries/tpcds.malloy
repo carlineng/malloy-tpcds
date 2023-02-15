@@ -15,18 +15,26 @@ source: customer_demographics is table('duckdb:../data/customer_demographics.par
   primary_key: cd_demo_sk
 }
 
-source: customer is table('duckdb:../data/customer.parquet') {
-  primary_key: c_customer_sk
-  join_one: customer_address with c_current_addr_sk
-  join_one: customer_demographics with c_current_cdemo_sk 
-}
-
 source: date_dim is table('duckdb:../data/date_dim.parquet') {
   primary_key: d_date_sk
 }
 
+source: income_band is table('duckdb:../data/income_band.parquet') {
+  primary_key: ib_income_band_sk
+}
+
 source: household_demographics is table('duckdb:../data/household_demographics.parquet') {
   primary_key: hd_demo_sk
+  join_one: income_band with hd_income_band_sk
+}
+
+source: customer is table('duckdb:../data/customer.parquet') {
+  primary_key: c_customer_sk
+  join_one: customer_address with c_current_addr_sk
+  join_one: customer_demographics with c_current_cdemo_sk 
+  join_one: first_sale_date is date_dim with c_first_sales_date_sk
+  join_one: first_shipto_date is date_dim with c_first_shipto_date_sk
+  join_one: household_demographics with c_current_hdemo_sk
 }
 
 source: item is table('duckdb:../data/item.parquet') {
