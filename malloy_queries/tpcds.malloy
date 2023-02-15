@@ -132,6 +132,12 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
       store_sk is channel_category ?
         pick ss_store_sk when 'store channel'
         else null
+      warehouse_sk is channel_category ?
+        pick -1 when 'catalog channel' | 'web channel'
+        else null 
+      ship_mode_sk is channel_category ?
+        pick -1 when 'catalog channel' | 'web channel'
+        else null
       sold_date_sk is ss_sold_date_sk
       sold_time_sk is ss_sold_time_sk
       item_sk is ss_item_sk
@@ -214,6 +220,12 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
       store_sk is channel_category ?
         pick '' when 'store channel'
         else null
+      warehouse_sk is channel_category ?
+        pick cs_warehouse_sk when 'catalog channel' | 'web channel'
+        else -1
+      ship_mode_sk is channel_category ?
+        pick cs_ship_mode_sk when 'catalog channel' | 'web channel'
+        else null
       sold_date_sk is cs_sold_date_sk
       sold_time_sk is cs_sold_time_sk
       item_sk is cs_item_sk
@@ -261,6 +273,12 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
       channel_id
       store_sk is channel_category ?
         pick '' when 'store channel'
+        else null
+      warehouse_sk is channel_category ?
+        pick ws_warehouse_sk when 'catalog channel' | 'web channel'
+        else -1
+      ship_mode_sk is channel_category ?
+        pick ws_ship_mode_sk when 'catalog channel' | 'web channel'
         else null
       sold_date_sk is ws_sold_date_sk
       sold_time_sk is ws_sold_time_sk
@@ -368,12 +386,19 @@ source: all_sales is from_sql(all_sales_sql) {
   join_one: item with item_sk
   join_one: promotion with promo_sk
   join_one: customer_address with addr_sk
+  join_one: time_dim with sold_time_sk
   join_one: all_returns
     on order_number = all_returns.order_number
     and item_sk = all_returns.item_sk
   join_one: store
     on channel_category = 'store channel'
     and store_sk = store.s_store_sk
+  join_one: warehouse
+    on (channel_category ? 'web channel' | 'catalog channel')
+    and warehouse_sk = warehouse.w_warehouse_sk
+  join_one: ship_mode
+    on (channel_category ? 'web channel' | 'catalog channel')
+    and ship_mode_sk = ship_mode.sm_ship_mode_sk
 
   measure: total_sales is sum((ext_list_price - ext_wholesale_cost - ext_discount_amt + ext_sales_price) / 2)
   measure: total_ext_sales_price is sum(ext_sales_price)
