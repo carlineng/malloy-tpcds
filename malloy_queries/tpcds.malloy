@@ -41,6 +41,10 @@ source: reason is table('duckdb:../data/reason.parquet') {
   primary_key: r_reason_sk
 }
 
+source: ship_mode is table('duckdb:../data/ship_mode.parquet') {
+  primary_key: sm_ship_mode_sk
+}
+
 source: store is table('duckdb:../data/store.parquet') {
   primary_key: s_store_sk
 }
@@ -230,9 +234,12 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
 
 source: web_sales is table('duckdb:../data/web_sales.parquet') {
   join_one: date_dim with ws_sold_date_sk
+  join_one: ship_date is date_dim with ws_ship_date_sk
   join_one: customer with ws_bill_customer_sk
   join_one: web_site with ws_web_site_sk
   join_one: item with ws_item_sk
+  join_one: warehouse with ws_warehouse_sk
+  join_one: ship_mode with ws_ship_mode_sk
 
   dimension: channel_category is 'web channel'
   dimension: channel_id is concat('web_site', web_site.web_site_id)

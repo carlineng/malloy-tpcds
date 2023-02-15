@@ -1,3 +1,5 @@
+-- Needed to change to "NULLS LAST" since Malloy doesn't yet support "NULLS FIRST"
+
 SELECT w_substr,
        sm_type,
        web_name,
@@ -39,8 +41,8 @@ WHERE d_month_seq BETWEEN 1200 AND 1200 + 11
 GROUP BY w_substr,
          sm_type,
          web_name
-ORDER BY 1 NULLS FIRST,
-         2 NULLS FIRST,
-         3 NULLS FIRST
+ORDER BY 1 NULLS LAST,
+         2 NULLS LAST,
+         3 NULLS LAST 
 LIMIT 100;
 
