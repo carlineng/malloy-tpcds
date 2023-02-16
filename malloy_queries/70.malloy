@@ -1,0 +1,37 @@
+import "tpcds.malloy"
+
+query: store_sales + {
+  join_one: top_states is from(store_sales -> {
+    group_by:
+      state is store.s_state
+
+    aggregate:
+      net_profit is sum(ss_net_profit)
+
+    where:
+      date_dim.d_month_seq >= 1200
+      and date_dim.d_month_seq <= 1211
+
+    order_by: net_profit desc
+    limit: 5
+    }
+  )
+    on store.s_state = top_states.state
+} -> {
+  aggregate: total_sum is sum(ss_net_profit)
+  nest: by_state is {
+    group_by: store.s_state
+    aggregate: total_sum is sum(ss_net_profit)
+    nest: by_county is {
+      group_by: store.s_county
+      aggregate: total_sum is sum(ss_net_profit)
+    }
+  }
+
+  where:
+    top_states.state != null
+    and store.s_store_sk != null
+    and date_dim.d_month_seq >= 1200
+    and date_dim.d_month_seq <= 1211
+  
+}
