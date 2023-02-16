@@ -1,0 +1,61 @@
+import "tpcds.malloy"
+
+// Query takes quite awhile to run in DuckDB (38s on my M1 Macbook Air)
+// Results with all the nestings won't render unless I comment out some of the nests.
+// Each level of nesting theoretically increases the resultset size by a factor of N where N is the `limit` clause
+
+// Also, the original SQL query uses a RANK() partition function
+// that computes a rank comparing rows from different levels of hierarchy.
+// I don't think this is possible to do with nested queries, but I think
+// it's a non-sensical calculation anyway, so I'm not bothered that it's not
+// possible in Malloy.
+
+query: store_sales -> {
+  aggregate: sum_sales is sum(ss_sales_price * ss_quantity)
+    nest: by_category is {
+      group_by: item.i_category
+      aggregate: sum_sales is sum(ss_sales_price * ss_quantity)
+      order_by: sum_sales desc
+      limit: 10
+      nest: by_class is {
+        group_by: item.i_class
+        aggregate: sum_sales is sum(ss_sales_price * ss_quantity)
+        order_by: sum_sales desc
+        limit: 10
+        nest: by_brand is {
+          group_by: item.i_brand
+          aggregate: sum_sales is sum(ss_sales_price * ss_quantity)
+          order_by: sum_sales desc
+          limit: 10
+          // nest: by_product_name is {
+          //   group_by: item.i_product_name
+          //   aggregate: sum_sales is sum(ss_sales_price * ss_quantity)
+          //   limit: 10
+          //   // nest: by_year is {
+          //   //   group_by: date_dim.d_year
+          //   //   aggregate: sum_sales is sum(ss_sales_price * ss_quantity)
+          //   //   // nest: by_quarter is {
+          //   //   //   group_by: date_dim.d_qoy
+          //   //   //   aggregate: sum_sales is sum(ss_sales_price * ss_quantity)
+          //   //   //   // nest: by_moy is {
+          //   //   //   //   group_by: date_dim.d_moy
+          //   //   //   //   aggregate: sum_sales is sum(ss_sales_price * ss_quantity)
+          //   //   //   //   // nest: by_store is {
+          //   //   //   //   //   group_by: store.s_store_id
+          //   //   //   //   //   aggregate: sum_sales is sum(ss_sales_price * ss_quantity)
+          //   //   //   //   //   limit: 10
+          //   //   //   //   // }
+          //   //   //   // }
+          //   //   // }
+          //   // }
+          // }
+        }
+      }
+    }
+
+  where:
+    date_dim.d_month_seq >= 1200
+    and date_dim.d_month_seq <= 1211
+    and item.i_item_sk != null
+    and store.s_store_sk != null
+}
