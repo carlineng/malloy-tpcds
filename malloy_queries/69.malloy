@@ -1,0 +1,33 @@
+import "tpcds.malloy"
+
+query: all_sales -> {
+  group_by:
+    customer.customer_demographics.cd_gender
+    customer.customer_demographics.cd_marital_status
+    customer.customer_demographics.cd_education_status
+    customer.customer_demographics.cd_purchase_estimate
+    customer.customer_demographics.cd_credit_rating
+  
+  aggregate:
+    cnt1 is count(distinct customer.c_customer_sk)
+
+  where:
+    (customer.customer_address.ca_state ? 'KY' | 'GA' | 'NM')
+    and date_dim.d_year = 2001
+    and date_dim.d_moy >= 4
+    and date_dim.d_moy <= 6
+  
+  having:
+    count_store_sales > 0
+    & count_web_sales = 0
+    & count_catalog_sales = 0
+
+  order_by:
+    cd_gender
+    cd_marital_status
+    cd_education_status
+    cd_purchase_estimate
+    cd_credit_rating
+
+  limit: 100 
+}
