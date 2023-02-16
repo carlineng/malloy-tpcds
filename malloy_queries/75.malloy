@@ -1,0 +1,51 @@
+import "tpcds.malloy"
+
+// This doesn't quite match the SQL version, due to the way the `all_sales` source is constructed.
+// `all_sales` is a union of `catalog`/`web`/`store` sales tables, but each of the individual queries
+// contains a clause like "store_id != null" to verify that the channel ID exists.
+// The SQL version doesn't contain this. Removing the != null clauses in each of the sources makes the results match.
+
+query: all_sales -> {
+  group_by:
+    item.i_brand_id
+    item.i_class_id
+    item.i_category_id
+    item.i_manufact_id
+
+  aggregate:
+    sales_cnt_prev_yr is sum(quantity - coalesce(all_returns.return_quantity, 0)) { where: date_dim.d_year = 2001 }
+    sales_cnt_curr_yr is sum(quantity - coalesce(all_returns.return_quantity, 0)) { where: date_dim.d_year = 2002 }
+    sales_amt_prev_yr is sum(ext_sales_price - coalesce(all_returns.return_amt, 0)) { where: date_dim.d_year = 2001 }
+    sales_amt_curr_yr is sum(ext_sales_price - coalesce(all_returns.return_amt, 0)) { where: date_dim.d_year = 2002 }
+    total_returns is sum(all_returns.return_amt)
+    cnt_prev_yr is sum(1) { where: date_dim.d_year = 2001 }
+    cnt_curr_yr is sum(1) { where: date_dim.d_year = 2002 }
+
+  where:
+    item.i_category = 'Books'
+    and date_dim.d_year >= 2001
+    and date_dim.d_year <= 2002
+} -> {
+  project: 
+    prev_year is 2001
+    curr_year is 2002
+    i_brand_id
+    i_class_id
+    i_category_id
+    i_manufact_id
+    sales_cnt_prev_yr
+    sales_cnt_curr_yr
+    sales_cnt_diff is sales_cnt_curr_yr - sales_cnt_prev_yr
+    sales_amt_diff is sales_amt_curr_yr - sales_amt_prev_yr
+
+  where:
+    sales_cnt_curr_yr / sales_cnt_prev_yr < 0.9
+    and cnt_prev_yr > 0
+    and cnt_curr_yr > 0
+
+  order_by:
+    sales_cnt_diff
+    sales_amt_diff
+
+  limit: 100
+}
