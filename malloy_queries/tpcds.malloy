@@ -100,8 +100,6 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
       return_quantity is sr_return_quantity
       return_amt is sr_return_amt
       net_loss is sr_net_loss
-
-    where: store.s_store_id != null
   }
 }
 
@@ -143,7 +141,13 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
       item_sk is ss_item_sk
       order_number is ss_ticket_number
       customer_sk is ss_customer_sk 
+      ship_customer_sk is channel_category ?
+        pick -1 when 'catalog channel' | 'web channel'
+        else null 
       addr_sk is ss_addr_sk
+      ship_addr_sk is channel_category ?
+        pick -1 when 'catalog channel' | 'web channel'
+        else null 
       cdemo_sk is ss_cdemo_sk
       promo_sk is ss_promo_sk
       quantity is ss_quantity
@@ -159,8 +163,6 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
       net_paid is ss_net_paid
       net_paid_inc_tax is ss_net_paid_inc_tax
       net_profit is ss_net_profit
-
-    where: store.s_store_id != null
   }
 
 }
@@ -188,8 +190,6 @@ source: catalog_returns is table('duckdb:../data/catalog_returns.parquet') {
       return_quantity is cr_return_quantity
       return_amt is cr_return_amount
       net_loss is cr_net_loss
-
-    where: catalog_page.cp_catalog_page_id != null
   }
 }
 
@@ -234,7 +234,9 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
       item_sk is cs_item_sk
       order_number is cs_order_number
       customer_sk is cs_bill_customer_sk 
+      ship_customer_sk is cs_ship_customer_sk
       addr_sk is cs_bill_addr_sk
+      ship_addr_sk is cs_ship_addr_sk
       cdemo_sk is cs_bill_cdemo_sk
       promo_sk is cs_promo_sk
       quantity is cs_quantity
@@ -250,8 +252,6 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
       net_paid is cs_net_paid
       net_paid_inc_tax is cs_net_paid_inc_tax
       net_profit is cs_net_profit
-
-    where: catalog_page.cp_catalog_page_id != null
   }
 }
 
@@ -288,7 +288,9 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
       item_sk is ws_item_sk
       order_number is ws_order_number
       customer_sk is ws_bill_customer_sk 
+      ship_customer_sk is ws_ship_customer_sk
       addr_sk is ws_bill_addr_sk
+      ship_addr_sk is ws_ship_addr_sk
       cdemo_sk is ws_bill_cdemo_sk
       promo_sk is ws_promo_sk
       quantity is ws_quantity
@@ -304,8 +306,6 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
       net_paid is ws_net_paid
       net_paid_inc_tax is ws_net_paid_inc_tax
       net_profit is ws_net_profit
-
-    where: web_site.web_site_id != null
   }
 }
 
@@ -334,8 +334,6 @@ source: web_returns is table('duckdb:../data/web_returns.parquet') {
       return_quantity is wr_return_quantity
       return_amt is wr_return_amt
       net_loss is wr_net_loss
-
-    where: web_sales.web_site.web_site_id != null
   }
 }
 

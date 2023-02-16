@@ -1,5 +1,7 @@
 import "tpcds.malloy"
 
+// TODO: these results have drifted, need to fix
+
 query: all_sales -> {
   declare:
     catalog_total_sales_2001 is total_sales { where: date_dim.d_year = 2001 and channel_category = 'catalog channel'}
