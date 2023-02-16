@@ -1,0 +1,49 @@
+import "tpcds.malloy"
+
+query: all_sales -> {
+  group_by:
+    date_dim.d_year
+    item_sk
+    customer_sk
+
+  aggregate:
+    store_qty is sum(quantity) { where: channel_category = 'store channel' }
+    store_wc is sum(wholesale_cost) { where: channel_category = 'store channel' }
+    store_sp is sum(sales_price) { where: channel_category = 'store channel' }
+    other_qty is sum(quantity) { where: channel_category != 'store channel' }
+    other_wc is sum(wholesale_cost) { where: channel_category != 'store channel' }
+    other_sp is sum(sales_price) { where: channel_category != 'store channel' }
+
+    web_qty is sum(quantity) { where: channel_category = 'web channel' }
+    catalog_qty is sum(quantity) { where: channel_category = 'catalog channel' }
+
+  where:
+    all_returns.order_number = null
+    and date_dim.d_year = 2000
+    and customer_sk != null
+} -> {
+  project:
+    d_year
+    item_sk
+    customer_sk
+
+    ratio is store_qty / other_qty
+    store_qty
+    store_wc
+    store_sp
+    other_qty
+    other_wc
+    other_sp
+
+  where:
+    store_qty > 0
+    and (web_qty > 0 or catalog_qty > 0)
+
+  order_by: 
+    d_year
+    item_sk
+    customer_sk
+    store_qty desc
+
+  limit: 100
+}

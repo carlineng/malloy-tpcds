@@ -43,6 +43,7 @@ WITH ws AS
    GROUP BY d_year,
             ss_item_sk,
             ss_customer_sk )
+
 SELECT ss_sold_year,
        ss_item_sk,
        ss_customer_sk,
