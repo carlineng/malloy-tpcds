@@ -1,0 +1,23 @@
+import "tpcds.malloy"
+
+query: all_sales -> {
+  group_by:
+    item.i_brand_id
+    item.i_brand
+    time_dim.t_hour
+    time_dim.t_minute
+
+  aggregate:
+    ext_price is sum(ext_sales_price)
+
+  where:
+    date_dim.d_moy = 11
+    and date_dim.d_year = 1999
+    and item.i_manager_id = 1
+    and (time_dim.t_meal_time ? 'dinner' | 'breakfast')
+
+  order_by:
+    ext_price desc
+    i_brand_id
+    t_hour
+}
