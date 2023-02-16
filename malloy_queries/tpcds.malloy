@@ -136,6 +136,12 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
       ship_mode_sk is channel_category ?
         pick -1 when 'catalog channel' | 'web channel'
         else null
+      catalog_page_sk is channel_category ?
+        pick -1 when 'catalog channel'
+        else null
+      web_site_sk is channel_category ?
+        pick -1 when 'web channel'
+        else null
       sold_date_sk is ss_sold_date_sk
       sold_time_sk is ss_sold_time_sk
       item_sk is ss_item_sk
@@ -229,6 +235,12 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
       ship_mode_sk is channel_category ?
         pick cs_ship_mode_sk when 'catalog channel' | 'web channel'
         else null
+      catalog_page_sk is channel_category ?
+        pick cs_catalog_page_sk when 'catalog channel'
+        else null
+      web_site_sk is channel_category ?
+        pick -1 when 'web channel'
+        else null
       sold_date_sk is cs_sold_date_sk
       sold_time_sk is cs_sold_time_sk
       item_sk is cs_item_sk
@@ -283,6 +295,12 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
       ship_mode_sk is channel_category ?
         pick ws_ship_mode_sk when 'catalog channel' | 'web channel'
         else null
+      catalog_page_sk is channel_category ?
+        pick -1 when 'catalog channel'
+        else null
+      web_site_sk is channel_category ?
+        pick ws_web_site_sk when 'web channel'
+        else null
       sold_date_sk is ws_sold_date_sk
       sold_time_sk is ws_sold_time_sk
       item_sk is ws_item_sk
@@ -309,6 +327,8 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
   }
 }
 
+// TODO: move web_returns above web_sales, join returns into sales
+// Find query that uses this
 source: web_returns is table('duckdb:../data/web_returns.parquet') {
   join_one: date_dim with wr_returned_date_sk
   join_one: customer with wr_refunded_customer_sk
@@ -337,13 +357,14 @@ source: web_returns is table('duckdb:../data/web_returns.parquet') {
   }
 }
 
+// TODO: why do I need to add `catalog_page_sk` to the projection list?
 sql: all_sales_sql is {
   select: """
-  SELECT * FROM (%{ web_sales -> projection }%)
+  SELECT *, catalog_page_sk FROM (%{ web_sales -> projection }%)
   UNION ALL
-  SELECT * FROM (%{ catalog_sales -> projection }%)
+  SELECT *, catalog_page_sk FROM (%{ catalog_sales -> projection }%)
   UNION ALL
-  SELECT * FROM (%{ store_sales -> projection }%)
+  SELECT *, catalog_page_sk FROM (%{ store_sales -> projection }%)
   """
   connection: "duckdb"
 }
@@ -400,6 +421,12 @@ source: all_sales is from_sql(all_sales_sql) {
   join_one: ship_mode
     on (channel_category ? 'web channel' | 'catalog channel')
     and ship_mode_sk = ship_mode.sm_ship_mode_sk
+  join_one: catalog_page
+    on (channel_category = 'catalog channel')
+    and catalog_page_sk = catalog_page.cp_catalog_page_sk
+  join_one: web_site
+    on (channel_category = 'web channel')
+    and web_site_sk = web_site.web_site_sk
 
   measure: total_sales is sum((ext_list_price - ext_wholesale_cost - ext_discount_amt + ext_sales_price) / 2)
   measure: total_ext_sales_price is sum(ext_sales_price)

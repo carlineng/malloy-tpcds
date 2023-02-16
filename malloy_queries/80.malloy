@@ -1,0 +1,47 @@
+import "tpcds.malloy"
+
+// TODO: 
+// Individual channel ID totals look good
+// Rollup totals aren't matching
+
+query: all_sales -> {
+  aggregate:
+    sales is sum(ext_sales_price)
+    returns is sum(all_returns.return_amt)
+    profit is sum(net_profit - coalesce(all_returns.net_loss, 0))
+
+  nest: by_category is {
+    group_by:
+      channel_category
+
+    aggregate:
+      sales is sum(ext_sales_price)
+      returns is sum(all_returns.return_amt)
+      profit is sum(net_profit - coalesce(all_returns.net_loss, 0))
+
+    order_by: channel_category
+
+    nest: by_id is {
+      group_by:
+        channel_id
+
+      aggregate:
+        sales is sum(ext_sales_price)
+        returns is sum(all_returns.return_amt)
+        profit is sum(net_profit - coalesce(all_returns.net_loss, 0))
+
+      order_by: channel_id
+    }
+  }
+
+  where:
+    date_dim.d_date >= '2000-08-23'
+    and date_dim.d_date <= '2000-09-22'
+    and item.i_current_price > 50
+    and promotion.p_channel_tv = 'N'
+    and (
+      (channel_category = 'catalog channel' and catalog_page.cp_catalog_page_sk != null)
+      or (channel_category = 'store channel' and store.s_store_sk != null)
+      or (channel_category = 'web channel' and web_site.web_site_sk != null)
+    )
+}
