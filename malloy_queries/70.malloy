@@ -33,5 +33,6 @@ query: store_sales + {
     and store.s_store_sk != null
     and date_dim.d_month_seq >= 1200
     and date_dim.d_month_seq <= 1211
-  
+
+ limit: 100 
 }
