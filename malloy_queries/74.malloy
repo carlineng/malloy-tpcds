@@ -1,0 +1,34 @@
+import "tpcds.malloy"
+
+query: all_sales -> {
+  group_by:
+    customer.c_customer_id
+    customer.c_first_name
+    customer.c_last_name
+
+  aggregate:
+    web_year_total_1 is sum(net_paid) { where: channel_category = 'web channel' and date_dim.d_year = 2001 }
+    web_year_total_2 is sum(net_paid) { where: channel_category = 'web channel' and date_dim.d_year = 2002 }
+    store_year_total_1 is sum(net_paid) { where: channel_category = 'store channel' and date_dim.d_year = 2001 }
+    store_year_total_2 is sum(net_paid) { where: channel_category = 'store channel' and date_dim.d_year = 2002 }
+
+  where:
+    (channel_category ? 'web channel' | 'store channel')
+    and date_dim.d_year >= 2001
+    and date_dim.d_year <= 2002
+} -> {
+  project:
+    c_customer_id
+    c_first_name
+    c_last_name
+
+  where:
+    web_year_total_1 > 0
+    and web_year_total_2 > 0
+    and store_year_total_1 > 0
+    and store_year_total_2 > 0
+    and web_year_total_2 / web_year_total_1 > store_year_total_2 / store_year_total_1
+
+  order_by: c_customer_id
+  limit: 100
+}
