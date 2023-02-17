@@ -1,0 +1,36 @@
+import "tpcds.malloy"
+
+query: all_returns -> {
+  group_by:
+    item.i_item_id
+
+  aggregate:
+    store_item_qty is sum(return_quantity) { where: channel_category = 'store channel' }
+    catalog_item_qty is sum(return_quantity) { where: channel_category = 'catalog channel' }
+    web_item_qty is sum(return_quantity) { where: channel_category = 'web channel' }
+    total_qty is sum(return_quantity)
+
+  where:
+    (date_dim.d_week_seq ? 5244 | 5257 | 5264)
+} -> {
+  project: 
+    i_item_id
+    store_item_qty
+    store_dev is store_item_qty / total_qty / 3 * 100
+    catalog_item_qty
+    catalog_dev is catalog_item_qty / total_qty / 3 * 100
+    web_item_qty
+    web_dev is web_item_qty / total_qty / 3 * 100
+    overall_avg is total_qty / 3
+
+  where:
+    store_item_qty > 0
+    and catalog_item_qty > 0
+    and web_item_qty > 0
+
+  order_by:
+    i_item_id
+    store_item_qty
+
+  limit: 100
+}
