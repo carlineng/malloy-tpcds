@@ -1,0 +1,19 @@
+import "tpcds.malloy"
+
+query: customer + {
+  join_many: store_returns
+    on customer_demographics.cd_demo_sk = store_returns.sr_cdemo_sk
+} -> {
+  group_by:
+    c_customer_id
+    customername is concat(concat(coalesce(c_last_name, '') , ', '), coalesce(c_first_name, ''))
+
+  where:
+    customer_address.ca_city = 'Edgewood'
+    and household_demographics.income_band.ib_lower_bound >= 38128
+    and household_demographics.income_band.ib_upper_bound <= 38128 + 50000
+    and store_returns.sr_cdemo_sk != null
+
+  order_by: c_customer_id
+  limit: 100
+}
