@@ -1,0 +1,64 @@
+import "tpcds.malloy"
+
+// Clicking "Run" from VSCode doesn't work, the DuckDB query never completes
+// However, when I copy/paste the compiled SQL and run it directly in the DuckDB terminal, it finishes
+// and gives the correct answer.
+// TODO: file an issue for this
+
+query: web_sales -> {
+  group_by:
+    rsn is substring(web_returns.reason.r_reason_desc, 1, 20)
+    avg1 is avg(ws_quantity)
+    avg2 is avg(web_returns.wr_refunded_cash)
+    avg3 is avg(web_returns.wr_fee)
+
+  where:
+    date_dim.d_year = 2000
+    and (
+      (
+        web_returns.refunded_cdemo.cd_marital_status = 'M'
+        and web_returns.refunded_cdemo.cd_marital_status = web_returns.returning_cdemo.cd_marital_status
+        and web_returns.refunded_cdemo.cd_education_status = 'Advanced Degree'
+        and web_returns.refunded_cdemo.cd_marital_status = web_returns.returning_cdemo.cd_marital_status
+        and ws_sales_price >= 100 and ws_sales_price <= 150
+      )
+    or (
+        web_returns.refunded_cdemo.cd_marital_status = 'S'
+        and web_returns.refunded_cdemo.cd_marital_status = web_returns.returning_cdemo.cd_marital_status
+        and web_returns.refunded_cdemo.cd_education_status = 'College'
+        and web_returns.refunded_cdemo.cd_marital_status = web_returns.returning_cdemo.cd_marital_status
+        and ws_sales_price >= 50 and ws_sales_price <= 100
+    )
+    or (
+        web_returns.refunded_cdemo.cd_marital_status = 'W'
+        and web_returns.refunded_cdemo.cd_marital_status = web_returns.returning_cdemo.cd_marital_status
+        and web_returns.refunded_cdemo.cd_education_status = '2 yr Degree'
+        and web_returns.refunded_cdemo.cd_marital_status = web_returns.returning_cdemo.cd_marital_status
+        and ws_sales_price >= 150 and ws_sales_price <= 200
+    )
+  )
+  and (
+    (
+      web_returns.refunded_addr.ca_country = 'United States'
+      and (web_returns.refunded_addr.ca_state ? 'IN' | 'OH' | 'NJ')
+      and ws_net_profit >= 100 and ws_net_profit <= 200
+    )
+    or (
+      web_returns.refunded_addr.ca_country = 'United States'
+      and (web_returns.refunded_addr.ca_state ? 'WI' | 'CT' | 'KY')
+      and ws_net_profit >= 150 and ws_net_profit <= 300
+    )
+    or (
+      web_returns.refunded_addr.ca_country = 'United States'
+      and (web_returns.refunded_addr.ca_state ? 'LA' | 'IA' | 'AR')
+      and ws_net_profit >= 50 and ws_net_profit <= 250
+    )
+  )
+  and web_page.wp_web_page_sk != null
+  and web_returns.wr_item_sk != null
+
+  order_by:
+    rsn
+
+  limit: 100
+}

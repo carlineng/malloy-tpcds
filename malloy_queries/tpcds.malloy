@@ -69,6 +69,10 @@ source: web_site is table('duckdb:../data/web_site.parquet') {
   primary_key: web_site_sk
 }
 
+source: web_page is table('duckdb:../data/web_page.parquet') {
+  primary_key: wp_web_page_sk
+}
+
 // Facts
 
 source: inventory is table('duckdb:../data/inventory.parquet') {
@@ -269,14 +273,53 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
   }
 }
 
+// TODO: take a look at Query 5 -- most likely broke it by updating `channel_id`
+source: web_returns is table('duckdb:../data/web_returns.parquet') {
+  join_one: date_dim with wr_returned_date_sk
+  join_one: customer with wr_refunded_customer_sk
+  join_one: returning_customer is customer with wr_returning_customer_sk
+  join_one: returning_addr is customer_address with wr_returning_addr_sk
+  join_one: refunded_addr is customer_address with wr_refunded_addr_sk
+  join_one: reason with wr_reason_sk
+  join_one: web_page with wr_web_page_sk
+  join_one: refunded_cdemo is customer_demographics
+    on wr_refunded_cdemo_sk = refunded_cdemo.cd_demo_sk
+  join_one: returning_cdemo is customer_demographics
+    on wr_returning_cdemo_sk = returning_cdemo.cd_demo_sk
+
+  measure: total_returns is sum(wr_return_amt)
+  measure: total_loss is sum(wr_net_loss)
+  measure: avg_returns is avg(wr_return_amt)
+
+  dimension: channel_category is 'web channel'
+  dimension: channel_id is concat('web_site', web_page.wp_web_page_id)
+
+  query: projection is {
+    project:
+      channel_category
+      channel_id
+      customer_sk is wr_refunded_customer_sk
+      order_number is wr_order_number
+      item_sk is wr_item_sk
+      returned_date_sk is wr_returned_date_sk
+      return_quantity is wr_return_quantity
+      return_amt is wr_return_amt
+      net_loss is wr_net_loss
+  }
+}
+
 source: web_sales is table('duckdb:../data/web_sales.parquet') {
   join_one: date_dim with ws_sold_date_sk
   join_one: ship_date is date_dim with ws_ship_date_sk
   join_one: customer with ws_bill_customer_sk
   join_one: web_site with ws_web_site_sk
+  join_one: web_page with ws_web_page_sk
   join_one: item with ws_item_sk
   join_one: warehouse with ws_warehouse_sk
   join_one: ship_mode with ws_ship_mode_sk
+  join_one: web_returns 
+    on ws_item_sk = web_returns.wr_item_sk 
+    and ws_order_number = web_returns.wr_order_number
 
   dimension: channel_category is 'web channel'
   dimension: channel_id is concat('web_site', web_site.web_site_id)
@@ -326,36 +369,6 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
       net_paid is ws_net_paid
       net_paid_inc_tax is ws_net_paid_inc_tax
       net_profit is ws_net_profit
-  }
-}
-
-// TODO: move web_returns above web_sales, join returns into sales
-// Find query that uses this
-source: web_returns is table('duckdb:../data/web_returns.parquet') {
-  join_one: date_dim with wr_returned_date_sk
-  join_one: customer with wr_refunded_customer_sk
-  join_one: returning_customer is customer with wr_returning_customer_sk
-  join_one: web_sales on wr_item_sk = web_sales.ws_item_sk and wr_order_number = web_sales.ws_order_number
-  join_one: returning_addr is customer_address with wr_returning_addr_sk
-
-  measure: total_returns is sum(wr_return_amt)
-  measure: total_loss is sum(wr_net_loss)
-  measure: avg_returns is avg(wr_return_amt)
-
-  dimension: channel_category is 'web channel'
-  dimension: channel_id is concat('web_site', web_sales.web_site.web_site_id)
-
-  query: projection is {
-    project:
-      channel_category
-      channel_id
-      customer_sk is wr_refunded_customer_sk
-      order_number is wr_order_number
-      item_sk is wr_item_sk
-      returned_date_sk is wr_returned_date_sk
-      return_quantity is wr_return_quantity
-      return_amt is wr_return_amt
-      net_loss is wr_net_loss
   }
 }
 
