@@ -385,6 +385,7 @@ sql: all_returns_sql is {
 source: all_returns is from_sql(all_returns_sql) {
   join_one: date_dim with returned_date_sk
   join_one: customer with customer_sk
+  join_one: item with item_sk
 
   measure: total_returns is sum(return_amt)
   measure: total_loss is sum(net_loss)
