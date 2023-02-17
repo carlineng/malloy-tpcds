@@ -1,0 +1,37 @@
+import "tpcds.malloy"
+
+// Looks a lot like query 1
+
+query: catalog_returns -> {
+  group_by:
+    returning_customer.c_customer_id
+    returning_customer.c_salutation
+    returning_customer.c_first_name
+    returning_customer.c_last_name
+    cr_returning_customer_sk
+    return_addr.ca_state
+
+  aggregate:
+    ctr_total_return is sum(cr_return_amt_inc_tax)
+    avg_state_return is all(sum(cr_return_amt_inc_tax) / count(distinct cr_returning_customer_sk), ca_state)
+
+  where:
+    date_dim.d_year = 2000
+    and return_addr.ca_state != null
+    and returning_customer.customer_address.ca_state = 'GA'
+} -> {
+  project:
+    c_customer_id
+    c_salutation
+    c_first_name
+    c_last_name
+    ctr_total_return
+
+  where: ctr_total_return > avg_state_return * 1.2
+
+  order_by:
+    c_customer_id
+    c_salutation
+
+  limit: 100
+}
