@@ -1,0 +1,21 @@
+import "tpcds.malloy"
+
+query: web_sales -> {
+  aggregate: total_sum is sum(ws_net_paid)
+
+  nest: by_category is {
+    group_by: item.i_category
+    aggregate: total_sum is sum(ws_net_paid)
+
+    nest: by_class is {
+      group_by: item.i_class
+      aggregate: total_sum is sum(ws_net_paid)
+      order_by: total_sum desc
+      limit: 100
+    }
+  }
+
+  where:
+    date_dim.d_month_seq >= 1200
+    and date_dim.d_month_seq <= 1211
+}
