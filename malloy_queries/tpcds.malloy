@@ -325,6 +325,7 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
     on ws_item_sk = web_returns.wr_item_sk 
     and ws_order_number = web_returns.wr_order_number
   join_one: ship_demo is household_demographics with ws_ship_hdemo_sk
+  join_one: ship_addr is customer_address with ws_ship_addr_sk
 
   dimension: channel_category is 'web channel'
   dimension: channel_id is concat('web_site', web_site.web_site_id)
