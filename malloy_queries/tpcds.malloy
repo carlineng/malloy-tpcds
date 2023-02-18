@@ -109,6 +109,7 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
 
 source: store_sales is table('duckdb:../data/store_sales.parquet') {
   join_one: date_dim with ss_sold_date_sk
+  join_one: time_dim with ss_sold_time_sk
   join_one: store with ss_store_sk
   join_one: customer with ss_customer_sk
   join_one: item with ss_item_sk
