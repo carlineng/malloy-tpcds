@@ -184,6 +184,7 @@ source: catalog_returns is table('duckdb:../data/catalog_returns.parquet') {
   join_one: customer with cr_refunded_customer_sk
   join_one: returning_customer is customer with cr_returning_customer_sk
   join_one: return_addr is customer_address with cr_returning_addr_sk
+  join_one: call_center with cr_call_center_sk
 
   dimension: channel_category is 'catalog channel'
   dimension: channel_id is concat('catalog_page', catalog_page.cp_catalog_page_id)

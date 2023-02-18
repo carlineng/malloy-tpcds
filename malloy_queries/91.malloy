@@ -1,0 +1,27 @@
+import "tpcds.malloy"
+
+query: catalog_returns -> {
+  group_by:
+    call_center is call_center.cc_call_center_id
+    call_center_name is call_center.cc_name
+    manager is call_center.cc_manager
+
+  aggregate:
+    returns_loss is sum(cr_net_loss)
+
+  where:
+    date_dim.d_year = 1998
+    and date_dim.d_moy = 11
+    and (
+      (
+        returning_customer.customer_demographics.cd_marital_status = 'M'
+        and returning_customer.customer_demographics.cd_education_status = 'Unknown'
+      )
+      or (
+        returning_customer.customer_demographics.cd_marital_status = 'W'
+        and returning_customer.customer_demographics.cd_education_status = 'Advanced Degree'
+      )
+    )
+    and returning_customer.household_demographics.hd_buy_potential ~ 'Unknown%'
+    and returning_customer.customer_address.ca_gmt_offset = -7
+}
