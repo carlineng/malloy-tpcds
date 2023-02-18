@@ -1,0 +1,24 @@
+import "tpcds.malloy"
+
+query: store_sales + {
+  join_one: sr is store_returns
+    on ss_item_sk = sr.sr_item_sk
+    and ss_ticket_number = sr.sr_ticket_number
+} -> {
+  project: 
+    ss_item_sk
+    ss_ticket_number
+    ss_customer_sk
+    act_sales is
+      pick (ss_quantity - sr.sr_return_quantity) * ss_sales_price when sr.sr_return_quantity != null
+      else ss_quantity * ss_sales_price
+
+  where:
+    sr.reason.r_reason_desc = 'reason 28'
+} -> {
+  group_by: ss_customer_sk
+  aggregate: 
+    sumsales is sum(act_sales)
+  order_by: sumsales desc
+  limit: 100
+}

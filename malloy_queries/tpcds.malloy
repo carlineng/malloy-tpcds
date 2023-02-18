@@ -85,6 +85,7 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
   join_one: date_dim with sr_returned_date_sk
   join_one: store with sr_store_sk
   join_one: customer with sr_customer_sk
+  join_one: reason with sr_reason_sk
 
   dimension: channel_category is 'store channel'
   dimension: channel_id is concat('store', store.s_store_id)

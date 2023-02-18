@@ -1,3 +1,6 @@
+-- The `r_reason_desc` WHERE clause makes the `LEFT OUTER JOIN` effectively an `INNER JOIN`
+-- The `CASE` statement wouldn't be necessary if `store_returns` didn't have `NULL` values for `sr_return_quantity`
+
 SELECT ss_customer_sk,
        sum(act_sales) sumsales
 FROM
@@ -14,7 +17,7 @@ FROM
    WHERE sr_reason_sk = r_reason_sk
      AND r_reason_desc = 'reason 28') t
 GROUP BY ss_customer_sk
-ORDER BY sumsales NULLS FIRST,
+ORDER BY sumsales DESC NULLS LAST,
          ss_customer_sk NULLS FIRST
 LIMIT 100;
 
