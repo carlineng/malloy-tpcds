@@ -1,0 +1,14 @@
+import "tpcds.malloy"
+
+query: web_sales -> {
+  aggregate: 
+    amc is count() { where: time_dim.t_hour >= 8 and time_dim.t_hour <= 9 }
+    pmc is count() { where: time_dim.t_hour >= 19 and time_dim.t_hour <= 20 }
+  where:
+    ship_demo.hd_dep_count = 6
+    and web_page.wp_char_count >= 5000
+    and web_page.wp_char_count <= 5200
+} -> {
+  project:
+    am_pm_ratio is amc / pmc
+}
