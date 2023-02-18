@@ -1,3 +1,10 @@
+-- This correlated subquery is really weird
+-- It contains an implicit `GROUP BY` on item ID
+-- due to the `WHERE` clause
+-- It's finding the avg(ws_ext_discount_amt) per i_item_sk
+-- NOT the overall avg(ws_ext_discount_amt), which I had initially assumed
+-- because the sub-select doesn't contain any GROUP BY clauses
+
 SELECT sum(ws_ext_discount_amt) AS "Excess Discount Amount"
 FROM web_sales,
      item,
