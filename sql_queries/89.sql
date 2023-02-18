@@ -1,6 +1,15 @@
 
 SELECT * from
-  (SELECT i_category, i_class, i_brand, s_store_name, s_company_name, d_moy, sum(ss_sales_price) sum_sales, avg(sum(ss_sales_price)) OVER (PARTITION BY i_category, i_brand, s_store_name, s_company_name) avg_monthly_sales
+(
+   SELECT 
+    i_category
+    , i_class
+    , i_brand
+    , s_store_name
+    , s_company_name
+    , d_moy
+    , sum(ss_sales_price) sum_sales
+    , avg(sum(ss_sales_price)) OVER (PARTITION BY i_category, i_brand, s_store_name, s_company_name) avg_monthly_sales
    FROM item, store_sales, date_dim, store
    WHERE ss_item_sk = i_item_sk
      AND ss_sold_date_sk = d_date_sk
@@ -10,7 +19,8 @@ SELECT * from
            AND i_class IN ('computers','stereo','football') )
           OR (i_category IN ('Men','Jewelry','Women')
               AND i_class IN ('shirts','birdal','dresses')))
-   GROUP BY i_category, i_class, i_brand, s_store_name, s_company_name, d_moy) tmp1
+   GROUP BY i_category, i_class, i_brand, s_store_name, s_company_name, d_moy
+) tmp1
 WHERE CASE
           WHEN (avg_monthly_sales <> 0) THEN (abs(sum_sales - avg_monthly_sales) / avg_monthly_sales)
           ELSE NULL

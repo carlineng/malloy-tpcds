@@ -1,0 +1,38 @@
+import "tpcds.malloy"
+
+query: store_sales -> {
+  group_by:
+    item.i_category
+    item.i_class
+    item.i_brand
+    store.s_store_name
+    store.s_company_name
+    date_dim.d_moy
+
+  aggregate:
+    sum_sales is sum(ss_sales_price)
+    avg_monthly_sales is all(sum(ss_sales_price) / count(distinct date_dim.d_moy), i_category, i_brand, s_store_name, s_company_name)
+
+  where:
+    date_dim.d_year = 1999
+    and (
+      (
+        (item.i_category ? 'Books' | 'Electronics' | 'Sports')
+        and (item.i_class ? 'computers' | 'stereo' | 'football')
+      )
+      or (
+        (item.i_category ? 'Men' | 'Jewelry' | 'Women')
+        and (item.i_class ? 'shirts' | 'birdal' | 'dresses')
+      )
+    )
+} -> {
+  declare: sales_diff is sum_sales - avg_monthly_sales
+  project: *
+  where:
+    avg_monthly_sales != 0
+    and abs(sales_diff) / avg_monthly_sales > 0.1
+  order_by:
+    sales_diff
+    s_store_name
+  limit: 100
+}
