@@ -1,0 +1,23 @@
+import "tpcds.malloy"
+
+query: web_sales + {
+  join_many: ws_wh is web_sales
+    on ws_order_number = ws_wh.ws_order_number
+    and ws_warehouse_sk != ws_wh.ws_warehouse_sk
+
+  join_many: wr is web_returns
+    on ws_wh.ws_order_number = wr.wr_order_number
+} -> {
+  aggregate:
+    order_count is count(distinct ws_order_number)
+    total_shipping_cost is sum(ws_ext_ship_cost)
+    total_net_profit is sum(ws_net_profit)
+
+  where:
+    ship_date.d_date >= '1999-02-01'
+    and ship_date.d_date <= '1999-04-02'
+    and ship_addr.ca_state = 'IL'
+    and web_site.web_company_name = 'pri'
+    and ws_wh.ws_item_sk != null
+    and wr.wr_item_sk != null
+}
