@@ -1,0 +1,10 @@
+import "tpcds.malloy"
+
+query: store_sales -> {
+  aggregate: cnt is count()
+  where:
+    time_dim.t_hour = 20
+    and time_dim.t_minute >= 30
+    and household_demographics.hd_dep_count = 7
+    and store.s_store_name = 'ese'
+}
