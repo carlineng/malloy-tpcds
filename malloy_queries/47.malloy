@@ -1,8 +1,62 @@
 import "tpcds.malloy"
 
-// Placeholder
-// Waiting on a fix to Turducken DuckDB paths, or for ranking/window functions to be implemented
-query: store_sales -> {
-  project: *
+// Ranking window function in the SQL isn't actually used anywhere.
+// Can emulate it by using a self-join in `d_month_seq`
+
+source: v1 is from(
+  store_sales -> {
+    group_by: 
+      item.i_category
+      item.i_brand
+      store.s_store_name
+      store.s_company_name
+      date_dim.d_year
+      date_dim.d_moy
+      date_dim.d_month_seq
+
+    aggregate:
+      sum_sales is sum(ss_sales_price)
+      avg_monthly_sales is all(sum(ss_sales_price) / count(distinct date_dim.d_month_seq), i_category, i_brand, s_store_name, s_company_name, d_year)
+  }
+) {}
+
+query: v1 + {
+  join_one: v1lag is v1
+      on i_category = v1lag.i_category
+      and i_brand = v1lag.i_brand
+      and s_store_name = v1lag.s_store_name
+      and s_company_name = v1lag.s_company_name
+      and d_month_seq = v1lag.d_month_seq + 1
+
+  join_one: v1lead is v1
+      on i_category = v1lead.i_category
+      and i_brand = v1lead.i_brand
+      and s_store_name = v1lead.s_store_name
+      and s_company_name = v1lead.s_company_name
+      and d_month_seq = v1lead.d_month_seq - 1
+} -> {
+  project: 
+    i_category
+    i_brand
+    s_store_name
+    s_company_name
+    d_year
+    d_moy
+    avg_monthly_sales
+    sum_sales
+    psum is v1lag.sum_sales
+    nsum is v1lead.sum_sales
+    sales_diff is sum_sales - avg_monthly_sales
+
+  where:
+    d_year = 1999
+    and avg_monthly_sales > 0
+    and abs(sum_sales - avg_monthly_sales) / avg_monthly_sales > 0.1
+
+  order_by:
+    sales_diff
+    i_category
+    i_brand
+  
   limit: 100
 }
