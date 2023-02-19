@@ -1,0 +1,59 @@
+import "tpcds.malloy"
+
+source: v1 is from(
+  catalog_sales -> {
+    group_by:
+      item.i_category
+      item.i_brand
+      call_center.cc_name
+      date_dim.d_year
+      date_dim.d_moy
+      date_dim.d_month_seq
+
+    aggregate:
+      sum_sales is sum(cs_sales_price)
+      avg_monthly_sales is all(sum(cs_sales_price) / count(distinct date_dim.d_month_seq), i_category, i_brand, cc_name, d_year)
+
+    where:
+      call_center.cc_call_center_sk != null
+      and item.i_item_sk != null
+  }
+) {}
+
+query: v1 + {
+  join_one: v1lag is v1
+    on i_category = v1lag.i_category
+    and i_brand = v1lag.i_brand
+    and cc_name = v1lag.cc_name
+    and d_month_seq = v1lag.d_month_seq + 1
+
+  join_one: v1lead is v1
+    on i_category = v1lead.i_category
+    and i_brand = v1lead.i_brand
+    and cc_name = v1lead.cc_name
+    and d_month_seq = v1lead.d_month_seq - 1
+} -> {
+  project: 
+    i_category
+    i_brand
+    cc_name
+    d_year
+    d_moy
+    avg_monthly_sales
+    sum_sales
+    psum is v1lag.sum_sales
+    nsum is v1lead.sum_sales
+    sales_diff is sum_sales - avg_monthly_sales
+
+  where:
+    d_year = 1999
+    and avg_monthly_sales > 0
+    and abs(sum_sales - avg_monthly_sales) / avg_monthly_sales > 0.1
+
+  order_by:
+    sales_diff
+    i_category
+    i_brand
+  
+  limit: 100
+}

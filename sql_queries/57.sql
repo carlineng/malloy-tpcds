@@ -1,3 +1,4 @@
+-- Looks similar to query 47
 WITH v1 AS
   (SELECT i_category,
           i_brand,
