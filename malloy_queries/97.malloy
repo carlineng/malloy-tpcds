@@ -1,0 +1,22 @@
+import "tpcds.malloy"
+
+query: all_sales -> {
+  group_by:
+    customer_sk
+    item_sk
+
+  aggregate:
+    count_store_sales
+    count_catalog_sales
+
+  where:
+    (channel_category ? 'store channel' | 'catalog channel')
+    and date_dim.d_month_seq >= 1200
+    and date_dim.d_month_seq <= 1211
+    and customer_sk != null
+} -> {
+  aggregate:
+    store_only is count() { where: count_store_sales > 0 and count_catalog_sales = 0 }
+    catalog_only is count() { where: count_store_sales = 0 and count_catalog_sales > 0 }
+    store_and_catalog is count() { where: count_store_sales > 0 and count_catalog_sales > 0 }
+}
