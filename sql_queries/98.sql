@@ -19,8 +19,8 @@ GROUP BY i_item_id ,
          i_category ,
          i_class ,
          i_current_price
-ORDER BY i_category  NULLS FIRST,
-         i_class  NULLS FIRST,
+ORDER BY i_category  NULLS LAST,
+         i_class  NULLS LAST,
          i_item_id  NULLS FIRST,
          i_item_desc  NULLS FIRST,
          revenueratio NULLS FIRST;
