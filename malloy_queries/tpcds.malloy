@@ -224,6 +224,7 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
   join_one: warehouse with cs_warehouse_sk
   join_one: promotion with cs_promo_sk
   join_one: inventory on cs_item_sk = inventory.inv_item_sk
+  join_one: ship_mode with cs_ship_mode_sk
 
   dimension: channel_category is 'catalog channel'
   dimension: channel_id is concat('catalog_page', catalog_page.cp_catalog_page_id)
