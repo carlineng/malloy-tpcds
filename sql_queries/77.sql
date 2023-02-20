@@ -1,3 +1,7 @@
+-- Original query had a mistake in the join between `cs` and `cr` CTEs
+-- There was no JOIN condition between the tables, when they should be joined
+-- on `cr.cr_call_center_sk = cs.cs_call_center_sk`
+
 WITH ss AS
   (SELECT s_store_sk,
           sum(ss_ext_sales_price) AS sales,
@@ -60,6 +64,7 @@ WITH ss AS
      AND d_date BETWEEN cast('2000-08-23' AS date) AND cast('2000-09-22' AS date)
      AND wr_web_page_sk = wp_web_page_sk
    GROUP BY wp_web_page_sk)
+
 SELECT channel ,
        id ,
        sum(sales) AS sales ,
@@ -73,20 +78,27 @@ FROM
           (profit - coalesce(profit_loss,0)) AS profit
    FROM ss
    LEFT JOIN sr ON ss.s_store_sk = sr.s_store_sk
-   UNION ALL SELECT 'catalog channel' AS channel ,
+
+   UNION ALL 
+
+   SELECT 'catalog channel' AS channel ,
                     cs_call_center_sk AS id ,
                     sales ,
                     returns_ ,
                     (profit - profit_loss) AS profit
-   FROM cs ,
-        cr
-   UNION ALL SELECT 'web channel' AS channel ,
+   FROM cs 
+   LEFT JOIN cr ON cs.cs_call_center_sk= cr.cr_call_center_sk
+
+   UNION ALL 
+  
+   SELECT 'web channel' AS channel ,
                     ws.wp_web_page_sk AS id ,
                     sales ,
                     coalesce(returns_, 0) returns_ ,
                     (profit - coalesce(profit_loss,0)) AS profit
    FROM ws
    LEFT JOIN wr ON ws.wp_web_page_sk = wr.wp_web_page_sk ) x
+
 GROUP BY ROLLUP (channel,
                  id)
 ORDER BY channel NULLS FIRST,

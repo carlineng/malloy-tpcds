@@ -1,0 +1,152 @@
+import "tpcds.malloy"
+
+// TODO: need Turducken to get the UNION ALL + GROUP BY ROLLUP
+// to work correctly.
+// For now, the individual queries seem to be working,
+
+
+source: sr is from(
+  store_returns -> {
+    group_by:
+      channel is store.s_store_sk
+
+    aggregate:
+      returns is sum(sr_return_amt)
+      profit_loss is sum(sr_net_loss)
+
+    where:
+      date_dim.d_date >= '2000-08-23' 
+      and date_dim.d_date <= '2000-09-22'
+  }
+)
+
+source: ss is from(
+  store_sales -> {
+    group_by:
+      channel is store.s_store_sk
+
+    aggregate:
+      sales is sum(ss_ext_sales_price)
+      profit is sum(ss_net_profit)
+    where:
+      date_dim.d_date >= '2000-08-23' 
+      and date_dim.d_date <= '2000-09-22'
+  }
+) {
+  join_one: sr on channel = sr.channel
+}
+
+source: cr is from (
+  catalog_returns -> {
+    group_by:
+      channel is cr_call_center_sk
+
+    aggregate:
+      returns is sum(cr_return_amount)
+      profit_loss is sum(cr_net_loss)
+
+    where:
+      date_dim.d_date >= '2000-08-23' 
+      and date_dim.d_date <= '2000-09-22'
+  }
+)
+
+source: cs is from (
+  catalog_sales -> {
+    group_by:
+      channel is cs_call_center_sk
+
+    aggregate:
+      sales is sum(cs_ext_sales_price)
+      profit is sum(cs_net_profit)
+
+    where:
+      date_dim.d_date >= '2000-08-23' 
+      and date_dim.d_date <= '2000-09-22'
+  }
+) {
+  join_one: cr on channel = cr.channel
+}
+
+source: wr is from(
+  web_returns -> {
+    group_by:
+      channel is web_page.wp_web_page_sk
+
+    aggregate:
+      returns is sum(wr_return_amt)
+      profit_loss is sum(wr_net_loss)
+
+    where:
+      date_dim.d_date >= '2000-08-23' 
+      and date_dim.d_date <= '2000-09-22'
+  }
+)
+
+source: ws is from (
+  web_sales -> {
+    group_by:
+     channel is web_page.wp_web_page_sk
+
+    aggregate:
+      sales is sum(ws_ext_sales_price)
+      profit is sum(ws_net_profit)
+
+    where:
+      date_dim.d_date >= '2000-08-23' 
+      and date_dim.d_date <= '2000-09-22'
+  }
+) {
+  join_one: wr on channel = wr.channel
+}
+
+query: ss -> {
+  aggregate:
+    sales is sum(sales)
+    return is sum(sr.returns)
+    profit is sum(profit - sr.profit_loss)
+
+  nest: by_channel is {
+    project:
+      channel
+      sales
+      sr.returns
+      profit is profit - sr.profit_loss
+    order_by: channel
+  }
+
+  where:
+    channel != null
+}
+
+query: cs -> {
+  aggregate:
+    sales is sum(sales)
+    return is sum(coalesce(cr.returns, 0))
+    profit is sum(profit - coalesce(cr.profit_loss, 0))
+
+  nest: by_channel is {
+    project:
+      channel
+      sales
+      cr.returns
+      profit is profit - cr.profit_loss
+    order_by: channel
+  }
+}
+
+query: ws -> {
+  aggregate:
+    sales is sum(sales)
+    return is sum(wr.returns)
+    profit is sum(profit - wr.profit_loss)
+
+  nest: by_channel is {
+    project:
+      channel
+      sales
+      wr.returns
+      profit is profit - wr.profit_loss
+    order_by: channel
+  }
+}
