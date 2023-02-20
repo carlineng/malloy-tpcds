@@ -55,9 +55,10 @@ source: cross_sales is from(
       and customer_demographics.cd_marital_status != customer.customer_demographics.cd_marital_status
       // This `where` clause should use `sr`, and not `store_returns`
       // Unfortunately, DuckDB crashes with `IO Error: Failed to create directory ".tmp"!`
-      // when using it. For now, stick with `store_returns`
-      // and sr.sr_ticket_number != null
-      and store_returns.sr_ticket_number != null
+      // when using it.
+      and sr.sr_ticket_number != null
+      // The query works if we substitute the following join instead:
+      // and store_returns.sr_ticket_number != null
       and cs_ui.cs_item_sk != null
       and promotion.p_promo_sk != null
       and household_demographics.income_band.ib_income_band_sk != null
