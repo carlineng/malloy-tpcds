@@ -3,6 +3,12 @@ import "tpcds.malloy"
 // Ugh, the `projection` query in the sales sources has a 
 // "not null" clause in it that is messing things up in the `avg_sales` query
 // TODO: fix that later...
+// DuckDB syntax error in compiled SQL
+// Parser Error: syntax error at or near ")"
+// LINE 425: ...brand_id" as "i_brand_id",
+//      item_0."i_class_id" as "i_class_id",
+//      item_0."i_category_id" as "i_category_id"
+
 
 source: item_properties is from(
   all_sales -> {
@@ -17,8 +23,8 @@ source: item_properties is from(
     
     having:
       count_store_sales > 0
-      and count_web_sales > 0
-      and count_catalog_sales > 0
+      & count_web_sales > 0
+      & count_catalog_sales > 0
 
     order_by:
       i_brand_id
