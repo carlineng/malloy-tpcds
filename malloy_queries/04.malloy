@@ -21,7 +21,8 @@ query: all_sales -> {
     customer.c_last_name
     customer.c_preferred_cust_flag
 
-  having: catalog_yoy > store_yoy
+  having: 
+    catalog_yoy > store_yoy
     , catalog_yoy > web_yoy
     , store_total_sales_2001 > 0
     , store_total_sales_2002 > 0
