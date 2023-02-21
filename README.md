@@ -11,7 +11,20 @@ Data is from Altinity's TPC-DS repository:
 
 To get started:
 - Get data from the Altinity repo linked above
-- Unzip the archive in the `data/` subfolder
+- Unzip the archive in the `data/` subfolder. You'll need to concatenate the split data archive using a command like:
+
+```
+cat *.zip.00* > data.zip
+unzip data.zip
+```
+
+Also note that DuckDB didn't like the input for `customer_001.dat` table due to non-utf8 characters.
+To strip non-utf8 characters, run:
+
+```
+iconv -f utf-8 -t utf-8 -c customer_001.dat > customer_001.dat.utf8
+```
+
 - Open DuckDB shell, load the TPC-DS schema into duckdb:
 
 ```
