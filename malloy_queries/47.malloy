@@ -1,8 +1,5 @@
 import "tpcds.malloy"
 
-// Ranking window function in the SQL isn't actually used anywhere.
-// Can emulate it by using a self-join in `d_month_seq`
-
 source: v1 is from(
   store_sales -> {
     group_by: 

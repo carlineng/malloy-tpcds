@@ -1,8 +1,5 @@
 import "tpcds.malloy"
 
--- Pretty similar to query 2
--- The SQL version has the same fanout join problem
-
 source: weekly_store_sales is from(
   store_sales -> {
     group_by:

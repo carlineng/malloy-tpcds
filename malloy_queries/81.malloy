@@ -1,7 +1,5 @@
 import "tpcds.malloy"
 
-// Looks a lot like query 1
-
 query: catalog_returns -> {
   group_by:
     returning_customer.c_customer_id

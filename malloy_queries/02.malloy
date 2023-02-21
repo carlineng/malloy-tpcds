@@ -1,52 +1,5 @@
 import "tpcds.malloy"
 
-/*
-
-Query 2 
-
-Calculate year-over-year catalog and web gross sales for years
-2001 and 2002 for each day of the week (Sunday - Saturday)
-
-This is kind of a stupid query. It joins date_dim back to the
-weekly aggregated table, which causes a fan-out and each row
-is repeated 7 times (once for each day of the week)
-
-In the Malloy version, I'm doing a GROUP BY on all the columns
-to remove to duplicate rows.
-
-This query showcases a few interesting features of Malloy, namely:
-- The ability to define a source from a SQL block. Currently,
-  Malloy does not support UNION constructs, but provides an escape
-  hatch that lets us use arbitrary SQL to do what we want.
-- The filtered aggregates functionality is really nice. A lot more
-  concise than embedding `CASE` statements inside of aggregates.
-- Great example of Malloy's composability, and how it is both
-  more concise and more readable than SQL. The SQL query is 79
-  lines long. All the Malloy code to generate the result is 55 lines.
-- The Malloy version consists of a SQL query, 3 Source definitions,
-  and 1 Query, all of which build upon each other.
-- I didn't actually update the core TPCDS Malloy model. The model
-  concepts used in this query didn't seem relevant beyond the query.
-  Maybe I'm wrong, and later can refactor `web_catalog_sales` into
-  the primary model.
-- Note the sub-SELECT in the final FROM clause, and how each of the
-  sub-queries (aliased `y` and `z`) are basically identical. In
-  Malloy, I can achieve this effect without repeating code by
-  extending the `weekly_sales` source and creating `yoy_weekly_sales`
-  that includes the self-join clause.
-- This query helped me understand more clearly the distinction between
-  a Source and a Query in Malloy. A Query in Malloy cannot contain
-  explicit joins. The joins are defined in Sources, and performed
-  implicitly in Queries by accessing the joined fields as-needed.
-  This is different from SQL, where there's no concept of a "Source".
-  All CTEs can be thought of as simply flat tables that support any
-  operation.
-- If there's a SQL query that contains "pipelined" CTEs, but 
-  intermediate CTEs access "new" joined tables that aren't present
-  in previous CTEs, is there an easy way to replicate that in Malloy
-  pipelines? Or do we need to define separate Sources for this?
-*/
-
 sql: web_catalog_sales_qry is {
   select: """
   SELECT

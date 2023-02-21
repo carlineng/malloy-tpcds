@@ -1,10 +1,5 @@
 import "tpcds.malloy"
 
-// TODO: need Turducken to get the UNION ALL + GROUP BY ROLLUP
-// to work correctly.
-// For now, the individual queries seem to be working,
-
-
 source: sr is from(
   store_returns -> {
     group_by:

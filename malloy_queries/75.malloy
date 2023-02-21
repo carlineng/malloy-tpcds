@@ -1,10 +1,5 @@
 import "tpcds.malloy"
 
-// This doesn't quite match the SQL version, due to the way the `all_sales` source is constructed.
-// `all_sales` is a union of `catalog`/`web`/`store` sales tables, but each of the individual queries
-// contains a clause like "store_id != null" to verify that the channel ID exists.
-// The SQL version doesn't contain this. Removing the != null clauses in each of the sources makes the results match.
-
 query: all_sales -> {
   group_by:
     item.i_brand_id

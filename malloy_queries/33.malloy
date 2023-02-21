@@ -1,8 +1,5 @@
 import "tpcds.malloy"
 
--- This one is a fun demonstration --
--- query an ad-hoc extension to a source, using an ad-hoc query
-
 query: all_sales + {
   join_one: manufacturers is from(
     item -> {

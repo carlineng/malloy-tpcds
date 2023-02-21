@@ -1,9 +1,5 @@
 import "tpcds.malloy"
 
-// TODO: 
-// Individual channel ID totals look good
-// Rollup totals aren't matching
-
 query: all_sales -> {
   aggregate:
     sales is sum(ext_sales_price)

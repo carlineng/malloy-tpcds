@@ -1,19 +1,5 @@
 import "tpcds.malloy"
 
-/*
-
-Query 3
-
-Compute brands that have the most gross store sales
-in November from items with Manufacturer ID 128.
-
-This query is pretty simple in both SQL and Malloy.
-The Malloy query and Source definition of store_sales
-should be immediately understandable to anyone who knows
-SQL.
-
- */
-
 query: store_sales -> {
   group_by: 
     d_year is date_dim.d_year

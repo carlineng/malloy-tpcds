@@ -1,15 +1,5 @@
 import "tpcds.malloy"
 
-// Query takes quite awhile to run in DuckDB (38s on my M1 Macbook Air)
-// Results with all the nestings won't render unless I comment out some of the nests.
-// Each level of nesting theoretically increases the resultset size by a factor of N where N is the `limit` clause
-
-// Also, the original SQL query uses a RANK() partition function
-// that computes a rank comparing rows from different levels of hierarchy.
-// I don't think this is possible to do with nested queries, but I think
-// it's a non-sensical calculation anyway, so I'm not bothered that it's not
-// possible in Malloy.
-
 query: store_sales -> {
   aggregate: sum_sales is sum(ss_sales_price * ss_quantity)
     nest: by_category is {

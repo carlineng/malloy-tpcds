@@ -1,12 +1,5 @@
 import "tpcds.malloy"
 
--- Interesting example of how to do a self-join type query.
--- Define a subset of "interesting" customers, then join back to the original source.
-
--- The original SQL query is a bit of nonsense -- had a fanout in the join
--- I tried fixing it, but am missing a single row in the store_sales dataset:
--- select * from store_sales where ss_customer_sk = 26788 and ss_ext_sales_price = 3622.32
-
 query: all_sales + {
   join_one: my_customers is from(all_sales -> {
     group_by:

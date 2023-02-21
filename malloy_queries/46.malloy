@@ -14,12 +14,7 @@ query: store_sales -> {
     profit is sum(ss_net_profit)
 
   where:
-    -- Alternations need to be enclosed in quotes.
-    -- If not enclosed in quotes, and followed by `and`, generates error.
     (date_dim.d_dow ? 0 | 6)
-    -- Tried doing a range, but getting a compilation error
-    -- "mysterious error in range computation"
-    -- and date_dim.d_year ~ 1999 to 2002
     and date_dim.d_year >= 1999
     and date_dim.d_year <= 2001
     and (store.s_city ? 'Fairview' | 'Midway')

@@ -1,10 +1,5 @@
 import "tpcds.malloy"
 
--- I think there's a bug in here.
--- catalog_returns join is not being written to SQL,
--- unless I hadd the hacky `where` condition at the bottom:
--- where cr_refunded_cash != null or cr_refunded_cash = null
-
 query: catalog_sales -> {
   group_by: 
     warehouse.w_state

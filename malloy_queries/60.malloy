@@ -1,9 +1,5 @@
 import "tpcds.malloy"
 
-// This is one category where I think Malloy could be improved --
-// "semi-join" syntax in SQL is pretty convenient. In Malloy, I need
-// to extend the source with an in-line join, which isn't as nice.
-
 query: all_sales + {
   join_one: music_items is from(item -> {
     group_by: i_item_id
