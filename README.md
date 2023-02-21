@@ -23,6 +23,7 @@ To strip non-utf8 characters, run:
 
 ```
 iconv -f utf-8 -t utf-8 -c customer_001.dat > customer_001.dat.utf8
+mv customer_001.dat.utf8 customer_001.dat
 ```
 
 - Open DuckDB shell, load the TPC-DS schema into duckdb:
