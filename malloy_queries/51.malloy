@@ -1,24 +1,77 @@
 import "tpcds.malloy"
 
-// TODO: fix when Turducken path issue is resolved
-sql: daily_sales_sql is {
-  select: """
-    SELECT
-      *
-    FROM (%{
-      all_sales -> {
-        group_by:
-          item_sk
-          date_dim.d_date
-        
-        aggregate:
-          total_sales_price is sum(sales_price)
+// Would prefer to do this one using window functions and SQL Turducken
+// TODO: once Turducken bug is fixed, re-implement this query
 
-        where:
-          date_dim.d_month_seq >= 1200
-          and date_dim.d_month_seq <= 1211
-          and (channel_category ? 'web channel' | 'store channel')
-      }
-    }%)
-  """
+source: v1 is from (
+  all_sales -> {
+    group_by:
+      item_sk
+      date_dim.d_date
+
+    aggregate:
+      web_sales_price is sum(sales_price) { where: channel_category = 'web channel' }
+      store_sales_price is sum(sales_price) { where: channel_category = 'store channel' }
+
+    where:
+      date_dim.d_month_seq >= 1200
+      and date_dim.d_month_seq <= 1211
+      and item_sk != null
+      and item_sk = 14
+  }
+) {
+  join_one: cumu_date is from(
+    date_dim -> {
+      project:
+        d_date_sk
+        d_date
+
+      where:
+        d_month_seq >= 1200
+        and d_month_seq <= 1211
+    }
+  ) on d_date <= cumu_date.d_date
+
+  join_one: dates_with_sales is from(
+    all_sales -> {
+      group_by:
+        item_sk
+        date_dim.d_date
+
+      declare:
+        sales_count is count() { where: channel_category ? 'store channel' | 'web channel' }
+
+      aggregate:
+        sales_count
+
+      where:
+        date_dim.d_month_seq >= 1200
+        and date_dim.d_month_seq <= 1211
+
+      having:
+        sales_count > 0
+    } 
+  )
+    on item_sk = dates_with_sales.item_sk
+    and cumu_date.d_date = dates_with_sales.d_date
+}
+
+query: v1 -> {
+  group_by:
+    item_sk
+    cumu_date.d_date
+  
+  aggregate:
+    web_cumulative is sum(web_sales_price)
+    store_cumulative is sum(store_sales_price)
+
+  where:
+    dates_with_sales.d_date != null
+
+  having:
+    sum(web_sales_price) > sum(store_sales_price)
+
+  order_by: 
+    item_sk
+    d_date
 }
