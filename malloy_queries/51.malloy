@@ -1,6 +1,8 @@
 import "tpcds.malloy"
 
 // Would prefer to do this one using window functions and SQL Turducken
+// The existing logic works with a filter on `item_sk`, but runs for a long
+// time with that filter removed.
 // TODO: once Turducken bug is fixed, re-implement this query
 
 source: v1 is from (
@@ -74,4 +76,6 @@ query: v1 -> {
   order_by: 
     item_sk
     d_date
+
+  limit: 100
 }
