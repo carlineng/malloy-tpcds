@@ -1,13 +1,5 @@
 import "tpcds.malloy"
 
-// Would prefer to do this one using window functions and SQL Turducken
-//
-// The logic as implemented here does a cartesian join on the date_dim table, which duplicates
-// the daily sales data to allow for the cumulative computation. This approach
-// works with a filter on `item_sk`, but runs for a long time with that filter removed.
-//
-// TODO: once Turducken bug is fixed, re-implement this query
-
 source: v1 is from (
   all_sales -> {
     group_by:
