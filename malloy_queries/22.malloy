@@ -13,11 +13,14 @@ query: inventory -> {
       nest: by_class is {
         group_by: item.i_class
         aggregate: qoh
-        nest: by_category is {
-          group_by: item.i_category
-          aggregate: qoh
-          order_by: i_category
-        }
+        // Uncommenting this nest causes the query to crash on the web IDE.
+        // It works fine locally, though.
+
+        // nest: by_category is {
+        //   group_by: item.i_category
+        //   aggregate: qoh
+        //   order_by: i_category
+        // }
         order_by: i_class
       }
       order_by: i_brand
