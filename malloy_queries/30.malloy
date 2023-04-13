@@ -1,9 +1,11 @@
 import "tpcds.malloy"
 
+// Count distinct is insufficient because null wr_returning_customer_sk is included in average
+
 query: web_returns -> {
   group_by:
     wr_returning_customer_sk
-    returning_addr.ca_state
+    returning_state is returning_addr.ca_state
     returning_customer.c_customer_id
     returning_customer.c_salutation
     returning_customer.c_first_name
@@ -20,12 +22,33 @@ query: web_returns -> {
 
   aggregate: 
     customer_total_returns is total_returns
-    avg_web_return is all(total_returns / count(distinct wr_returning_customer_sk), ca_state)
+    total_web_return is all(sum(wr_return_amt), wr_returning_customer_sk, returning_state)
+
   where:
     date_dim.d_year = 2002
     and wr_return_amt != null
-    and returning_customer.c_customer_id != null
     and returning_addr.ca_state != null
+} -> {
+  group_by:
+    c_customer_id
+    c_salutation
+    c_first_name
+    c_last_name
+    c_preferred_cust_flag
+    c_birth_day
+    c_birth_month
+    c_birth_year
+    c_birth_country
+    c_login
+    c_email_address
+    c_last_review_date
+    customer_total_returns
+    returning_state
+    returning_customer_state
+
+  aggregate:
+  ave_return is all(avg(total_web_return), returning_state)
+
 } -> {
   project:
     c_customer_id
@@ -41,11 +64,10 @@ query: web_returns -> {
     c_email_address
     c_last_review_date
     customer_total_returns
-    avg_web_return
-
   where: 
-    customer_total_returns > avg_web_return * 1.2
+    customer_total_returns > ave_return * 1.2
     and returning_customer_state = 'GA'
+    and c_customer_id != null
 
   order_by:
     c_customer_id
