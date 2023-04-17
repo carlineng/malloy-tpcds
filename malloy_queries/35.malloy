@@ -38,9 +38,9 @@ query: all_sales -> {
 
   having:
     count_store_sales > 0
-    & (
+    and (
       count_catalog_sales > 0
-      | count_web_sales > 0
+      or count_web_sales > 0
     )
 } -> { 
   group_by: 
