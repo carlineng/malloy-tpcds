@@ -19,6 +19,9 @@ query: catalog_sales -> {
   where:
     ship_date.d_month_seq >= 1200
     and ship_date.d_month_seq <= 1211
+    and cs_warehouse_sk != null
+    and cs_call_center_sk != null
+    and cs_ship_mode_sk != null
 
   order_by: 
     w_substr
