@@ -1,5 +1,10 @@
 import "tpcds.malloy"
 
+// This one is *slightly* different from the SQL version.
+// The Malloy model creates the `all_sales` source using
+// a join on `cs_bill_customer_sk` when joining `catalog_sales`
+// to `customers`. The SQL version uses `cs_ship_customer_sk`.
+
 query: all_sales -> {
   group_by:
     customer.customer_demographics.cd_gender
@@ -29,9 +34,9 @@ query: all_sales -> {
   
   having:
     count_store_sales > 0
-    & (
+    and (
       count_web_sales > 0
-      | count_catalog_sales > 0
+      or count_catalog_sales > 0
     )
   
   order_by: 
