@@ -19,6 +19,8 @@ to calculate the average, but this computed a different average from the
 original SQL query. The avg() function uses sum(amt)/count(amt), but the query
 as originally written computes sum(amt)/count(distinct customer)
 
+count(distinct customer) doesn't count null customers, so a second pass is used instead.
+
  */ 
 
 query: store_returns -> {
@@ -28,16 +30,26 @@ query: store_returns -> {
     customer.c_customer_id
   aggregate: 
     customer_total_returns is total_returns
-    avg_store_return is all(total_returns / count(distinct sr_customer_sk), sr_store_sk)
+    count_customers is all(max(1),sr_customer_sk,sr_store_sk)
   where:
     date_dim.d_year = 2000
     and store.s_state = 'TN'
     and sr_return_amt != null
 } -> {
+  group_by:
+    sr_customer_sk
+    sr_store_sk
+    c_customer_id
+  aggregate: 
+    avg_store_return is all(sum(customer_total_returns) / sum(count_customers), sr_store_sk)
+    customer_total_returns
+} ->
+{
   project:
     c_customer_id
   where: 
     customer_total_returns > avg_store_return * 1.2
+    and sr_customer_sk != null
   order_by:
     c_customer_id
   limit: 100
