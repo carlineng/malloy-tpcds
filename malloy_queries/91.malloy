@@ -5,6 +5,8 @@ query: catalog_returns -> {
     call_center is call_center.cc_call_center_id
     call_center_name is call_center.cc_name
     manager is call_center.cc_manager
+    marital_status is returning_customer.customer_demographics.cd_marital_status
+    education_status is returning_customer.customer_demographics.cd_education_status
 
   aggregate:
     returns_loss is sum(cr_net_loss)

@@ -13,9 +13,10 @@ query: all_sales -> {
     other_qty is sum(quantity) { where: channel_category != 'store channel' }
     other_wc is sum(wholesale_cost) { where: channel_category != 'store channel' }
     other_sp is sum(sales_price) { where: channel_category != 'store channel' }
-
+    
     web_qty is sum(quantity) { where: channel_category = 'web channel' }
     catalog_qty is sum(quantity) { where: channel_category = 'catalog channel' }
+    store_count is count(*) { where: channel_category = 'store channel' }
 
   where:
     all_returns.order_number = null
@@ -36,7 +37,7 @@ query: all_sales -> {
     other_sp
 
   where:
-    store_qty > 0
+    store_count > 0
     and (web_qty > 0 or catalog_qty > 0)
 
   order_by: 

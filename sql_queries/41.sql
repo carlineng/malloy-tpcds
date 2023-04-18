@@ -20,7 +20,7 @@ WHERE i_manufact_id BETWEEN 738 AND 738+40
                   AND (i_units = 'Ounce'
                        OR i_units = 'Oz')
                   AND (i_size = 'medium'
-                       OR i_size = 'extra olarge'))
+                       OR i_size = 'extra large'))
 
                  OR (i_category = 'Women'
                      AND (i_color = 'brown'

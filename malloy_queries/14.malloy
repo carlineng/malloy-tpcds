@@ -23,8 +23,8 @@ source: item_properties is from(
     
     having:
       count_store_sales > 0
-      & count_web_sales > 0
-      & count_catalog_sales > 0
+      and count_web_sales > 0
+      and count_catalog_sales > 0
 
     order_by:
       i_brand_id

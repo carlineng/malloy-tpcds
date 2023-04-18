@@ -25,6 +25,8 @@ query: store_sales -> {
         and (item.i_class ? 'shirts' | 'birdal' | 'dresses')
       )
     )
+    and ss_store_sk != null
+    and ss_sales_price != null
 } -> {
   declare: sales_diff is sum_sales - avg_monthly_sales
   project: *

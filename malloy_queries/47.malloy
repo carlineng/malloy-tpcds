@@ -5,6 +5,12 @@ import "tpcds.malloy"
 
 source: v1 is from(
   store_sales -> {
+    where:
+      ss_sales_price != null
+      and ss_store_sk != null
+      and item.i_category != null
+      and item.i_brand != null
+      
     group_by: 
       item.i_category
       item.i_brand
@@ -52,6 +58,8 @@ query: v1 + {
     d_year = 1999
     and avg_monthly_sales > 0
     and abs(sum_sales - avg_monthly_sales) / avg_monthly_sales > 0.1
+    and v1lag.d_month_seq != null
+    and v1lead.d_month_seq != null
 
   order_by:
     sales_diff

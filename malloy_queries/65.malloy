@@ -17,6 +17,8 @@ query: store_sales -> {
   where:
     date_dim.d_month_seq >= 1176
     and date_dim.d_month_seq <= 1187
+    and ss_sales_price != null
+    and ss_store_sk != null
 } -> {
   project: s_store_name, i_item_desc, revenue, i_current_price, i_wholesale_cost, i_brand
   where: revenue <= 0.1 * ave
