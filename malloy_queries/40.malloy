@@ -2,7 +2,7 @@ import "tpcds.malloy"
 
 -- I think there's a bug in here.
 -- catalog_returns join is not being written to SQL,
--- unless I hadd the hacky `where` condition at the bottom:
+-- unless I add the hacky `where` condition at the bottom:
 -- where cr_refunded_cash != null or cr_refunded_cash = null
 
 query: catalog_sales -> {
@@ -23,6 +23,7 @@ query: catalog_sales -> {
       catalog_returns.cr_refunded_cash = null
       or catalog_returns.cr_refunded_cash != null
     )
+    and cs_warehouse_sk != null
 
   order_by:
     w_state
