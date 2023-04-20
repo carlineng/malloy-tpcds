@@ -24,11 +24,11 @@ query: all_sales -> {
 
   where:
     web_year_total_1 > 0
-    and web_year_total_2 > 0
+    and web_year_total_2 != 0
     and store_year_total_1 > 0
-    and store_year_total_2 > 0
+    and store_year_total_2 != 0
     and web_year_total_2 / web_year_total_1 > store_year_total_2 / store_year_total_1
-
+    and c_customer_id != null
   order_by: c_customer_id
   limit: 100
 }
