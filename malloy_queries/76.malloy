@@ -17,6 +17,7 @@ query: all_sales -> {
       or ( channel_category = 'web channel' and ship_customer_sk = null)
       or ( channel_category = 'catalog channel' and ship_addr_sk = null)
     )
+    and date_dim.d_year != null
 
   order_by:
     channel_category
