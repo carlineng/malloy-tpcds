@@ -18,7 +18,7 @@ query: store_sales -> {
         avg_total_sales is avg(total_sales)
 }
 
--- Imagined "include" syntax -- Can we do this in one pass?
+-- Imagined "include" syntax -- would allow calculating two-stage aggregation in a single query stage
 query: store_sales -> {
     group_by:
         store.s_city
