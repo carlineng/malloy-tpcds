@@ -1,0 +1,31 @@
+import "tpcds.malloy"
+
+-- I want to calculate average total sales per customer by city
+query: store_sales -> {
+    -- First calculate total sales for each city/customer
+    group_by:
+        store.s_city
+        customer.c_customer_sk
+
+    aggregate:
+        total_sales is sum(ss_sales_price)
+} -> {
+    -- Then calculate average of total per city
+    aggregate:
+        s_city
+    
+    aggregate:
+        avg_total_sales is avg(total_sales)
+}
+
+-- Imagined "include" syntax -- Can we do this in one pass?
+query: store_sales -> {
+    group_by:
+        store.s_city
+
+    aggregate:
+        avg_total_sales is avg(include(customer.c_customer_sk, sum(ss_sales_price)))
+}
+
+-- The idea is that the `group_by` clause could change to an arbitrary set of dimensions,
+-- and I only want to change it in a single place. In the first example, I have to update `s_city` in both query stages,
