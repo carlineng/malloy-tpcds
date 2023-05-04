@@ -1,6 +1,11 @@
 import "tpcds.malloy"
 
 query: all_sales -> {
+  join_one: item_category is from(item -> {
+    group_by: i_category
+    aggregate: avg_price is avg(i_current_price)
+  }) on item.i_category = item_category.i_category
+
   group_by: 
     item.i_category
     item.i_current_price
@@ -8,7 +13,7 @@ query: all_sales -> {
     customer.customer_address.ca_state
 
   aggregate:
-    avg_price is all(item.i_current_price.avg(), i_category)
+    avg_price is item_category.avg_price
     cnt is count(*)
 
   where:
