@@ -8,6 +8,9 @@ query: all_returns -> {
     store_item_qty is sum(return_quantity) { where: channel_category = 'store channel' }
     catalog_item_qty is sum(return_quantity) { where: channel_category = 'catalog channel' }
     web_item_qty is sum(return_quantity) { where: channel_category = 'web channel' }
+    store_item_count is count(*) { where: channel_category = 'store channel' }
+    catalog_item_count is count(*) { where: channel_category = 'catalog channel' }
+    web_item_count is count(*) { where: channel_category = 'web channel' }
     total_qty is sum(return_quantity)
 
   where:
@@ -24,9 +27,9 @@ query: all_returns -> {
     overall_avg is total_qty / 3
 
   where:
-    store_item_qty > 0
-    and catalog_item_qty > 0
-    and web_item_qty > 0
+    store_item_count > 0
+    and catalog_item_count > 0
+    and web_item_count > 0
 
   order_by:
     i_item_id

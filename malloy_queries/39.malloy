@@ -39,6 +39,4 @@ query: inventory -> {
   order_by:
     w_warehouse_sk
     i_item_sk
-
-  limit: 250
 }

@@ -16,6 +16,9 @@ query: web_sales -> {
   where:
     ship_date.d_month_seq >= 1200
     and ship_date.d_month_seq <= 1211
+    and ws_warehouse_sk != null
+    and ws_ship_mode_sk != null
+    and ws_web_site_sk != null
 
   order_by:
     w_substr
