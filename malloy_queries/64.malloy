@@ -22,8 +22,8 @@ source: cross_sales is from(
     // This join condition is different from what's defined in the `store_sales` source
     // since it excludes the `customer_sk` field.
     join_many: sr is store_returns
-      on ss_item_sk = store_returns.sr_item_sk
-      and ss_ticket_number = store_returns.sr_ticket_number
+      on ss_item_sk = sr.sr_item_sk
+      and ss_ticket_number = sr.sr_ticket_number
   } -> {
     group_by:
       product_name is item.i_product_name
@@ -57,11 +57,13 @@ source: cross_sales is from(
       // Unfortunately, DuckDB crashes with `IO Error: Failed to create directory ".tmp"!`
       // when using it. For now, stick with `store_returns`
       // and sr.sr_ticket_number != null
-      and store_returns.sr_ticket_number != null
+      and sr.sr_ticket_number != null
       and cs_ui.cs_item_sk != null
       and promotion.p_promo_sk != null
       and household_demographics.income_band.ib_income_band_sk != null
       and customer.household_demographics.income_band.ib_income_band_sk != null
+      and customer.first_sale_date.d_year != null
+      and customer.first_shipto_date.d_year != null
   }
 )
 
