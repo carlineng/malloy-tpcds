@@ -21,8 +21,8 @@ query: catalog_sales -> {
       or item.i_category = 'Books'
       or item.i_category = 'Home'
     )
-    and date_dim.d_date >= '1999-02-22'
-    and date_dim.d_date <= '1999-03-24'
+    and date_dim.d_date >= @1999-02-22
+    and date_dim.d_date <= @1999-03-24
 
   order_by: 
     i_category

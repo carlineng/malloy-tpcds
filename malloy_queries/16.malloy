@@ -9,8 +9,8 @@ query: cs1 is catalog_sales + {
     total_net_profit is sum(cs_net_profit)
 
   where:
-    ship_date.d_date >= '2002-02-01'
-    and ship_date.d_date <= '2002-04-02'
+    ship_date.d_date >= @2002-02-01
+    and ship_date.d_date <= @2002-04-02
     and ship_address.ca_state = 'GA'
     and call_center.cc_county = 'Williamson County'
     and cs_warehouse_sk != cs2.cs_warehouse_sk

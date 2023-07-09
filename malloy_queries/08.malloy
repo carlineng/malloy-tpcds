@@ -2,12 +2,9 @@ import "tpcds.malloy"
 
 source: preferred_customer_zip is from(
   customer -> {
-    declare:
-      ca_zip is substring(customer_address.ca_zip, 1, 5)
-
     group_by:
       ca_zip
-      ca_zip_prefix is substring(ca_zip, 1, 2)
+      ca_zip_prefix is substr(ca_zip, 1, 2)
 
     aggregate:
       zip_count is count(*)
@@ -425,7 +422,7 @@ source: preferred_customer_zip is from(
 }
 
 query: store_sales + {
-  join_one: preferred_customer_zip on substring(store.s_zip, 1, 2) = preferred_customer_zip.ca_zip_prefix
+  join_one: preferred_customer_zip on substr(store.s_zip, 1, 2) = preferred_customer_zip.ca_zip_prefix
 } -> {
   group_by:
     store.s_store_name

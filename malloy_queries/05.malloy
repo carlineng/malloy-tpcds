@@ -48,5 +48,5 @@ query: daily_profit_loss -> {
   }
 
   where:
-    d_date >= '2000-08-23' and d_date <= '2000-09-06'
+    d_date >= @2000-08-23 and d_date <= @2000-09-06
 }

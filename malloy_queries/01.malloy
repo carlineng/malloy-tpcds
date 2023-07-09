@@ -40,9 +40,9 @@ query: store_returns -> {
     sr_customer_sk
     sr_store_sk
     c_customer_id
+    customer_total_returns
   aggregate: 
     avg_store_return is all(sum(customer_total_returns) / sum(count_customers), sr_store_sk)
-    customer_total_returns
 } ->
 {
   project:
