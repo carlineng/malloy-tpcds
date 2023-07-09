@@ -14,7 +14,7 @@ query: store_sales -> {
     item.i_manager_id = 8
     and date_dim.d_moy = 11
     and date_dim.d_year = 1998
-    and substring(customer.customer_address.ca_zip, 1, 5) != substring(store.s_zip, 1, 5)
+    and substr(customer.customer_address.ca_zip, 1, 5) != substr(store.s_zip, 1, 5)
 
   order_by: 
     total_ext_sales desc 

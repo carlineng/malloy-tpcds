@@ -11,10 +11,10 @@ query: all_sales -> {
     item.i_current_price
     item.i_item_id
     customer.customer_address.ca_state
+    avg_price is item_category.avg_price
 
   aggregate:
-    avg_price is item_category.avg_price
-    cnt is count(*)
+    sale_cnt is count(*)
 
   where:
     date_dim.d_year = 2001
@@ -23,9 +23,9 @@ query: all_sales -> {
     and customer.c_customer_sk != null
 } -> {
   group_by: ca_state
-  aggregate: cnt is cnt.sum()
+  aggregate: cnt is sale_cnt.sum()
   where: i_current_price > avg_price * 1.2 
-  having: cnt.sum() > 10
+  having: sale_cnt.sum() > 10
   order_by: 
     cnt
     ca_state

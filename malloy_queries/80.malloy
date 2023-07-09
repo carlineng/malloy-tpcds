@@ -35,8 +35,8 @@ query: all_sales -> {
   }
 
   where:
-    date_dim.d_date >= '2000-08-23'
-    and date_dim.d_date <= '2000-09-22'
+    date_dim.d_date >= @2000-08-23
+    and date_dim.d_date <= @2000-09-22
     and item.i_current_price > 50
     and promotion.p_channel_tv = 'N'
     and (

@@ -15,8 +15,8 @@ source: sr is from(
       profit_loss is sum(sr_net_loss)
 
     where:
-      date_dim.d_date >= '2000-08-23' 
-      and date_dim.d_date <= '2000-09-22'
+      date_dim.d_date >= @2000-08-23
+      and date_dim.d_date <= @2000-09-22
   }
 )
 
@@ -29,8 +29,8 @@ source: ss is from(
       sales is sum(ss_ext_sales_price)
       profit is sum(ss_net_profit)
     where:
-      date_dim.d_date >= '2000-08-23' 
-      and date_dim.d_date <= '2000-09-22'
+      date_dim.d_date >= @2000-08-23
+      and date_dim.d_date <= @2000-09-22
   }
 ) {
   join_one: sr on channel = sr.channel
@@ -46,8 +46,8 @@ source: cr is from (
       profit_loss is sum(cr_net_loss)
 
     where:
-      date_dim.d_date >= '2000-08-23' 
-      and date_dim.d_date <= '2000-09-22'
+      date_dim.d_date >= @2000-08-23 
+      and date_dim.d_date <= @2000-09-22
   }
 )
 
@@ -61,8 +61,8 @@ source: cs is from (
       profit is sum(cs_net_profit)
 
     where:
-      date_dim.d_date >= '2000-08-23' 
-      and date_dim.d_date <= '2000-09-22'
+      date_dim.d_date >= @2000-08-23
+      and date_dim.d_date <= @2000-09-22
   }
 ) {
   join_one: cr on channel = cr.channel
@@ -78,8 +78,8 @@ source: wr is from(
       profit_loss is sum(wr_net_loss)
 
     where:
-      date_dim.d_date >= '2000-08-23' 
-      and date_dim.d_date <= '2000-09-22'
+      date_dim.d_date >= @2000-08-23
+      and date_dim.d_date <= @2000-09-22
   }
 )
 
@@ -93,8 +93,8 @@ source: ws is from (
       profit is sum(ws_net_profit)
 
     where:
-      date_dim.d_date >= '2000-08-23' 
-      and date_dim.d_date <= '2000-09-22'
+      date_dim.d_date >= @2000-08-23
+      and date_dim.d_date <= @2000-09-22
   }
 ) {
   join_one: wr on channel = wr.channel

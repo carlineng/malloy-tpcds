@@ -35,6 +35,9 @@ source: customer is table('duckdb:../data/customer.parquet') {
   join_one: first_sale_date is date_dim with c_first_sales_date_sk
   join_one: first_shipto_date is date_dim with c_first_shipto_date_sk
   join_one: household_demographics with c_current_hdemo_sk
+
+  dimension:
+    ca_zip is substr(customer_address.ca_zip, 1, 5)
 }
 
 source: item is table('duckdb:../data/item.parquet') {
@@ -417,8 +420,8 @@ source: all_returns is from_sql(all_returns_sql) {
       date_dim.d_date
 
     aggregate:
-      sales is 0
-      total_profit is 0
+      sales is sum(0)
+      total_profit is sum(0)
       return_amt is total_returns
       net_loss is total_loss
   }
@@ -473,8 +476,8 @@ source: all_sales is from_sql(all_sales_sql) {
     aggregate:
       sales is total_ext_sales_price
       total_profit
-      return_amt is 0
-      net_loss is 0
+      return_amt is sum(0)
+      net_loss is sum(0)
   }
 
   query: stats_by_item is {

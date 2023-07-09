@@ -7,7 +7,9 @@ import "tpcds.malloy"
 
 query: web_sales -> {
   group_by:
-    rsn is substring(web_returns.reason.r_reason_desc, 1, 20)
+    rsn is substr(web_returns.reason.r_reason_desc, 1, 20)
+
+  aggregate:
     avg1 is avg(ws_quantity)
     avg2 is avg(web_returns.wr_refunded_cash)
     avg3 is avg(web_returns.wr_fee)
