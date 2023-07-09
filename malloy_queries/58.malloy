@@ -11,8 +11,8 @@ query: all_sales -> {
     catalog_rev is sum(ext_sales_price) { where: channel_category = 'catalog channel' }
 
   where:
-    date_dim.d_date >= '1999-12-28'
-    and date_dim.d_date <= '2000-01-03'
+    date_dim.d_date >= @1999-12-28
+    and date_dim.d_date <= @2000-01-03
     and item.i_item_id != null
 } -> {
   project:

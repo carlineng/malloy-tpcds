@@ -1,15 +1,17 @@
 import "tpcds.malloy"
 
 query: web_sales -> {
-  aggregate:
+  group_by:
     ws_ext_discount_amt
     item.i_manufact_id
     item.i_item_sk
+
+  aggregate:
     avg_discount is all(avg(ws_ext_discount_amt), i_item_sk)
 
   where:
-    date_dim.d_date >= '2000-01-27'
-    and date_dim.d_date <= '2000-04-26'
+    date_dim.d_date >= @2000-01-27
+    and date_dim.d_date <= @2000-04-26
     and item.i_manufact_id = 350
 }  -> {
   aggregate:

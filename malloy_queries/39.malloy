@@ -8,16 +8,17 @@ query: inventory -> {
     date_dim.d_moy
   
   aggregate:
-    stdev is stddev_samp(inv_quantity_on_hand) + sum(0)
+    stdev is stddev_samp!(inv_quantity_on_hand) + sum(0)
     mean is avg(inv_quantity_on_hand)
 
   where:
     date_dim.d_year = 2001
 } -> {
-  declare: cov is stdev / mean
-  project: *
+  project:
+    *
+    cov is stdev / mean
   where:
-    cov > 1
+    (stdev / mean) > 1
     and (
       d_moy = 1
       or d_moy = 2

@@ -9,8 +9,8 @@ query: inventory + {
     item.i_current_price
 
   where:
-    date_dim.d_date >= '2000-05-25'
-    and date_dim.d_date <= '2000-07-24'
+    date_dim.d_date >= @2000-05-25
+    and date_dim.d_date <= @2000-07-24
     and item.i_current_price >= 62
     and item.i_current_price <= 62+30
     and (item.i_manufact_id ? 129 | 270 | 821 | 423)

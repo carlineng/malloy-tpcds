@@ -12,6 +12,7 @@ query: store_sales -> {
   aggregate:
     sum_sales is sum(ss_sales_price)
     avg_monthly_sales is all(sum(ss_sales_price) / count(distinct date_dim.d_moy), i_category, i_brand, s_store_name, s_company_name)
+    sales_diff is sum(ss_sales_price) - all(sum(ss_sales_price) / count(distinct date_dim.d_moy), i_category, i_brand, s_store_name, s_company_name)
 
   where:
     date_dim.d_year = 1999
@@ -28,7 +29,6 @@ query: store_sales -> {
     and ss_store_sk != null
     and ss_sales_price != null
 } -> {
-  declare: sales_diff is sum_sales - avg_monthly_sales
   project: *
   where:
     avg_monthly_sales != 0
