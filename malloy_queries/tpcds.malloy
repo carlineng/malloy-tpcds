@@ -240,7 +240,7 @@ source: catalog_sales is bigquery.table('data-to-insights.tpcds_2t_flat_part_clu
       channel_category
       channel_id
       store_sk is channel_category ?
-        pick '' when 'store channel'
+        pick -1 when 'store channel'
         else null
       warehouse_sk is channel_category ?
         pick cs_warehouse_sk when 'catalog channel' | 'web channel'
@@ -342,7 +342,7 @@ source: web_sales is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.w
       channel_category
       channel_id
       store_sk is channel_category ?
-        pick '' when 'store channel'
+        pick -1 when 'store channel'
         else null
       warehouse_sk is channel_category ?
         pick ws_warehouse_sk when 'catalog channel' | 'web channel'
@@ -382,125 +382,124 @@ source: web_sales is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.w
   }
 }
 
-// // TODO: why do I need to add `catalog_page_sk` to the projection list?
-// sql: all_sales_sql is {
-//   select: """
-//   SELECT *, catalog_page_sk FROM (%{ web_sales -> projection }%)
-//   UNION ALL
-//   SELECT *, catalog_page_sk FROM (%{ catalog_sales -> projection }%)
-//   UNION ALL
-//   SELECT *, catalog_page_sk FROM (%{ store_sales -> projection }%)
-//   """
-//   connection: "duckdb"
-// }
+sql: all_sales_sql is {
+  select: """
+  SELECT *, catalog_page_sk FROM (%{ web_sales -> projection }%)
+  UNION ALL
+  SELECT *, catalog_page_sk FROM (%{ catalog_sales -> projection }%)
+  UNION ALL
+  SELECT *, catalog_page_sk FROM (%{ store_sales -> projection }%)
+  """
+  connection: "bigquery"
+}
 
-// sql: all_returns_sql is {
-//   select: """
-//   SELECT * FROM (%{ web_returns -> projection }%)
-//   UNION ALL
-//   SELECT * FROM (%{ catalog_returns -> projection }%)
-//   UNION ALL
-//   SELECT * FROM (%{ store_returns -> projection }%)
-//   """
-//   connection: "duckdb"
-// }
+sql: all_returns_sql is {
+  select: """
+  SELECT * FROM (%{ web_returns -> projection }%)
+  UNION ALL
+  SELECT * FROM (%{ catalog_returns -> projection }%)
+  UNION ALL
+  SELECT * FROM (%{ store_returns -> projection }%)
+  """
+  connection: "bigquery"
+}
 
-// source: all_returns is from_sql(all_returns_sql) {
-//   join_one: date_dim with returned_date_sk
-//   join_one: customer with customer_sk
-//   join_one: item with item_sk
+source: all_returns is from_sql(all_returns_sql) {
+  join_one: date_dim with returned_date_sk
+  join_one: customer with customer_sk
+  join_one: item with item_sk
 
-//   measure: total_returns is sum(return_amt)
-//   measure: total_loss is sum(net_loss)
+  measure: total_returns is sum(return_amt)
+  measure: total_loss is sum(net_loss)
 
-//   query: daily_profit_loss is {
-//     group_by:
-//       channel_category
-//       channel_id
-//       date_dim.d_date
+  query: daily_profit_loss is {
+    group_by:
+      channel_category
+      channel_id
+      date_dim.d_date
 
-//     aggregate:
-//       sales is sum(0)
-//       total_profit is sum(0)
-//       return_amt is total_returns
-//       net_loss is total_loss
-//   }
-// }
+    aggregate:
+      sales is sum(0)
+      total_profit is sum(0)
+      return_amt is total_returns
+      net_loss is total_loss
+  }
+}
 
-// source: all_sales is from_sql(all_sales_sql) {
-//   join_one: date_dim with sold_date_sk
-//   join_one: customer_demographics with cdemo_sk
-//   join_one: customer with customer_sk
-//   join_one: item with item_sk
-//   join_one: promotion with promo_sk
-//   join_one: customer_address with addr_sk
-//   join_one: time_dim with sold_time_sk
-//   join_one: all_returns
-//     on order_number = all_returns.order_number
-//     and item_sk = all_returns.item_sk
-//   join_one: store
-//     on channel_category = 'store channel'
-//     and store_sk = store.s_store_sk
-//   join_one: warehouse
-//     on (channel_category ? 'web channel' | 'catalog channel')
-//     and warehouse_sk = warehouse.w_warehouse_sk
-//   join_one: ship_mode
-//     on (channel_category ? 'web channel' | 'catalog channel')
-//     and ship_mode_sk = ship_mode.sm_ship_mode_sk
-//   join_one: catalog_page
-//     on (channel_category = 'catalog channel')
-//     and catalog_page_sk = catalog_page.cp_catalog_page_sk
-//   join_one: web_site
-//     on (channel_category = 'web channel')
-//     and web_site_sk = web_site.web_site_sk
+source: all_sales is from_sql(all_sales_sql) {
+  join_one: date_dim with sold_date_sk
+  join_one: customer_demographics with cdemo_sk
+  join_one: customer with customer_sk
+  join_one: item with item_sk
+  join_one: promotion with promo_sk
+  join_one: customer_address with addr_sk
+  join_one: time_dim with sold_time_sk
+  join_one: all_returns
+    on order_number = all_returns.order_number
+    and item_sk = all_returns.item_sk
+  join_one: store
+    on channel_category = 'store channel'
+    and store_sk = store.s_store_sk
+  join_one: warehouse
+    on (channel_category ? 'web channel' | 'catalog channel')
+    and warehouse_sk = warehouse.w_warehouse_sk
+  join_one: ship_mode
+    on (channel_category ? 'web channel' | 'catalog channel')
+    and ship_mode_sk = ship_mode.sm_ship_mode_sk
+  join_one: catalog_page
+    on (channel_category = 'catalog channel')
+    and catalog_page_sk = catalog_page.cp_catalog_page_sk
+  join_one: web_site
+    on (channel_category = 'web channel')
+    and web_site_sk = web_site.web_site_sk
 
-//   measure: total_sales is sum((ext_list_price - ext_wholesale_cost - ext_discount_amt + ext_sales_price) / 2)
-//   measure: total_ext_sales_price is sum(ext_sales_price)
-//   measure: total_profit is sum(net_profit)
-//   measure: total_list_minus_discount is sum(ext_list_price - ext_discount_amt)
-//   measure: avg_quantity is avg(quantity)
-//   measure: avg_list_price is avg(list_price)
-//   measure: avg_coupon_amt is avg(coupon_amt)
-//   measure: avg_sales_price is avg(sales_price)
+  measure: total_sales is sum((ext_list_price - ext_wholesale_cost - ext_discount_amt + ext_sales_price) / 2)
+  measure: total_ext_sales_price is sum(ext_sales_price)
+  measure: total_profit is sum(net_profit)
+  measure: total_list_minus_discount is sum(ext_list_price - ext_discount_amt)
+  measure: avg_quantity is avg(quantity)
+  measure: avg_list_price is avg(list_price)
+  measure: avg_coupon_amt is avg(coupon_amt)
+  measure: avg_sales_price is avg(sales_price)
 
-//   measure: count_store_sales is count(*) { where: channel_category = 'store channel' }
-//   measure: count_web_sales is count(*) { where: channel_category = 'web channel' }
-//   measure: count_catalog_sales is count(*) { where: channel_category = 'catalog channel' }
+  measure: count_store_sales is count(*) { where: channel_category = 'store channel' }
+  measure: count_web_sales is count(*) { where: channel_category = 'web channel' }
+  measure: count_catalog_sales is count(*) { where: channel_category = 'catalog channel' }
 
-//   query: daily_profit_loss is {
-//     group_by:
-//       channel_category
-//       channel_id
-//       date_dim.d_date
+  query: daily_profit_loss is {
+    group_by:
+      channel_category
+      channel_id
+      date_dim.d_date
 
-//     aggregate:
-//       sales is total_ext_sales_price
-//       total_profit
-//       return_amt is sum(0)
-//       net_loss is sum(0)
-//   }
+    aggregate:
+      sales is total_ext_sales_price
+      total_profit
+      return_amt is sum(0)
+      net_loss is sum(0)
+  }
 
-//   query: stats_by_item is {
-//     group_by:
-//       item.i_item_id
+  query: stats_by_item is {
+    group_by:
+      item.i_item_id
     
-//     aggregate:
-//       avg_quantity
-//       avg_list_price
-//       avg_coupon_amt
-//       avg_sales_price
+    aggregate:
+      avg_quantity
+      avg_list_price
+      avg_coupon_amt
+      avg_sales_price
 
-//     where:
-//       customer_demographics.cd_gender = 'M'
-//       and customer_demographics.cd_marital_status = 'S'
-//       and customer_demographics.cd_education_status = 'College'
-//       and (promotion.p_channel_email = 'N' or promotion.p_channel_event = 'N')
-//       and date_dim.d_year = 2000
+    where:
+      customer_demographics.cd_gender = 'M'
+      and customer_demographics.cd_marital_status = 'S'
+      and customer_demographics.cd_education_status = 'College'
+      and (promotion.p_channel_email = 'N' or promotion.p_channel_event = 'N')
+      and date_dim.d_year = 2000
 
-//     order_by:
-//       i_item_id
+    order_by:
+      i_item_id
 
-//     limit: 100
-//   }
-// }
+    limit: 100
+  }
+}
 
