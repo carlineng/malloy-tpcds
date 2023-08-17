@@ -1,34 +1,34 @@
 // Dimensions
-source: call_center is table('duckdb:../data/call_center.parquet') {
+source: call_center is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.call_center'){
   primary_key: cc_call_center_sk
 }
 
-source: catalog_page is table('duckdb:../data/catalog_page.parquet') {
+source: catalog_page is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.catalog_page') {
   primary_key: cp_catalog_page_sk
 }
 
-source: customer_address is table('duckdb:../data/customer_address.parquet') {
+source: customer_address is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.customer_address') {
   primary_key: ca_address_sk
 }
 
-source: customer_demographics is table('duckdb:../data/customer_demographics.parquet') {
+source: customer_demographics is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.customer_demographics') {
   primary_key: cd_demo_sk
 }
 
-source: date_dim is table('duckdb:../data/date_dim.parquet') {
+source: date_dim is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.date_dim') {
   primary_key: d_date_sk
 }
 
-source: income_band is table('duckdb:../data/income_band.parquet') {
+source: income_band is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.income_band') {
   primary_key: ib_income_band_sk
 }
 
-source: household_demographics is table('duckdb:../data/household_demographics.parquet') {
+source: household_demographics is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.household_demographics') {
   primary_key: hd_demo_sk
   join_one: income_band with hd_income_band_sk
 }
 
-source: customer is table('duckdb:../data/customer.parquet') {
+source: customer is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.customer') {
   primary_key: c_customer_sk
   join_one: customer_address with c_current_addr_sk
   join_one: customer_demographics with c_current_cdemo_sk 
@@ -40,51 +40,51 @@ source: customer is table('duckdb:../data/customer.parquet') {
     ca_zip is substr(customer_address.ca_zip, 1, 5)
 }
 
-source: item is table('duckdb:../data/item.parquet') {
+source: item is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.item') {
   primary_key: i_item_sk
 }
 
-source: promotion is table('duckdb:../data/promotion.parquet') {
+source: promotion is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.promotion') {
   primary_key: p_promo_sk
 }
 
-source: reason is table('duckdb:../data/reason.parquet') {
+source: reason is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.reason') {
   primary_key: r_reason_sk
 }
 
-source: ship_mode is table('duckdb:../data/ship_mode.parquet') {
+source: ship_mode is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.ship_mode') {
   primary_key: sm_ship_mode_sk
 }
 
-source: store is table('duckdb:../data/store.parquet') {
+source: store is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.store') {
   primary_key: s_store_sk
 }
 
-source: time_dim is table('duckdb:../data/time_dim.parquet') {
+source: time_dim is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.time_dim') {
   primary_key: t_time_sk
 }
 
-source: warehouse is table('duckdb:../data/warehouse.parquet') {
+source: warehouse is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.warehouse') {
   primary_key: w_warehouse_sk
 }
 
-source: web_site is table('duckdb:../data/web_site.parquet') {
+source: web_site is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.web_site') {
   primary_key: web_site_sk
 }
 
-source: web_page is table('duckdb:../data/web_page.parquet') {
+source: web_page is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.web_page') {
   primary_key: wp_web_page_sk
 }
 
 // Facts
 
-source: inventory is table('duckdb:../data/inventory.parquet') {
+source: inventory is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.inventory') {
   join_one: date_dim with inv_date_sk
   join_one: item with inv_item_sk
   join_one: warehouse with inv_warehouse_sk
 }
 
-source: store_returns is table('duckdb:../data/store_returns.parquet') {
+source: store_returns is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.store_returns') {
   join_one: date_dim with sr_returned_date_sk
   join_one: store with sr_store_sk
   join_one: customer with sr_customer_sk
@@ -111,7 +111,7 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
   }
 }
 
-source: store_sales is table('duckdb:../data/store_sales.parquet') {
+source: store_sales is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.store_sales') {
   join_one: date_dim with ss_sold_date_sk
   join_one: time_dim with ss_sold_time_sk
   join_one: store with ss_store_sk
@@ -182,7 +182,7 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
 
 }
 
-source: catalog_returns is table('duckdb:../data/catalog_returns.parquet') {
+source: catalog_returns is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.catalog_returns') {
   join_one: date_dim with cr_returned_date_sk
   join_one: catalog_page with cr_catalog_page_sk
   join_one: customer with cr_refunded_customer_sk
@@ -211,7 +211,7 @@ source: catalog_returns is table('duckdb:../data/catalog_returns.parquet') {
   }
 }
 
-source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
+source: catalog_sales is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.catalog_sales') {
   join_one: date_dim with cs_sold_date_sk
   join_one: catalog_page with cs_catalog_page_sk
   join_one: customer with cs_bill_customer_sk
@@ -281,7 +281,7 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
 }
 
 // TODO: take a look at Query 5 -- most likely broke it by updating `channel_id`
-source: web_returns is table('duckdb:../data/web_returns.parquet') {
+source: web_returns is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.web_returns') {
   join_one: date_dim with wr_returned_date_sk
   join_one: customer with wr_refunded_customer_sk
   join_one: returning_customer is customer with wr_returning_customer_sk
@@ -315,7 +315,7 @@ source: web_returns is table('duckdb:../data/web_returns.parquet') {
   }
 }
 
-source: web_sales is table('duckdb:../data/web_sales.parquet') {
+source: web_sales is bigquery.table('data-to-insights.tpcds_2t_flat_part_clust.web_sales') {
   join_one: date_dim with ws_sold_date_sk
   join_one: time_dim with ws_sold_time_sk
   join_one: ship_date is date_dim with ws_ship_date_sk
@@ -382,125 +382,125 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
   }
 }
 
-// TODO: why do I need to add `catalog_page_sk` to the projection list?
-sql: all_sales_sql is {
-  select: """
-  SELECT *, catalog_page_sk FROM (%{ web_sales -> projection }%)
-  UNION ALL
-  SELECT *, catalog_page_sk FROM (%{ catalog_sales -> projection }%)
-  UNION ALL
-  SELECT *, catalog_page_sk FROM (%{ store_sales -> projection }%)
-  """
-  connection: "duckdb"
-}
+// // TODO: why do I need to add `catalog_page_sk` to the projection list?
+// sql: all_sales_sql is {
+//   select: """
+//   SELECT *, catalog_page_sk FROM (%{ web_sales -> projection }%)
+//   UNION ALL
+//   SELECT *, catalog_page_sk FROM (%{ catalog_sales -> projection }%)
+//   UNION ALL
+//   SELECT *, catalog_page_sk FROM (%{ store_sales -> projection }%)
+//   """
+//   connection: "duckdb"
+// }
 
-sql: all_returns_sql is {
-  select: """
-  SELECT * FROM (%{ web_returns -> projection }%)
-  UNION ALL
-  SELECT * FROM (%{ catalog_returns -> projection }%)
-  UNION ALL
-  SELECT * FROM (%{ store_returns -> projection }%)
-  """
-  connection: "duckdb"
-}
+// sql: all_returns_sql is {
+//   select: """
+//   SELECT * FROM (%{ web_returns -> projection }%)
+//   UNION ALL
+//   SELECT * FROM (%{ catalog_returns -> projection }%)
+//   UNION ALL
+//   SELECT * FROM (%{ store_returns -> projection }%)
+//   """
+//   connection: "duckdb"
+// }
 
-source: all_returns is from_sql(all_returns_sql) {
-  join_one: date_dim with returned_date_sk
-  join_one: customer with customer_sk
-  join_one: item with item_sk
+// source: all_returns is from_sql(all_returns_sql) {
+//   join_one: date_dim with returned_date_sk
+//   join_one: customer with customer_sk
+//   join_one: item with item_sk
 
-  measure: total_returns is sum(return_amt)
-  measure: total_loss is sum(net_loss)
+//   measure: total_returns is sum(return_amt)
+//   measure: total_loss is sum(net_loss)
 
-  query: daily_profit_loss is {
-    group_by:
-      channel_category
-      channel_id
-      date_dim.d_date
+//   query: daily_profit_loss is {
+//     group_by:
+//       channel_category
+//       channel_id
+//       date_dim.d_date
 
-    aggregate:
-      sales is sum(0)
-      total_profit is sum(0)
-      return_amt is total_returns
-      net_loss is total_loss
-  }
-}
+//     aggregate:
+//       sales is sum(0)
+//       total_profit is sum(0)
+//       return_amt is total_returns
+//       net_loss is total_loss
+//   }
+// }
 
-source: all_sales is from_sql(all_sales_sql) {
-  join_one: date_dim with sold_date_sk
-  join_one: customer_demographics with cdemo_sk
-  join_one: customer with customer_sk
-  join_one: item with item_sk
-  join_one: promotion with promo_sk
-  join_one: customer_address with addr_sk
-  join_one: time_dim with sold_time_sk
-  join_one: all_returns
-    on order_number = all_returns.order_number
-    and item_sk = all_returns.item_sk
-  join_one: store
-    on channel_category = 'store channel'
-    and store_sk = store.s_store_sk
-  join_one: warehouse
-    on (channel_category ? 'web channel' | 'catalog channel')
-    and warehouse_sk = warehouse.w_warehouse_sk
-  join_one: ship_mode
-    on (channel_category ? 'web channel' | 'catalog channel')
-    and ship_mode_sk = ship_mode.sm_ship_mode_sk
-  join_one: catalog_page
-    on (channel_category = 'catalog channel')
-    and catalog_page_sk = catalog_page.cp_catalog_page_sk
-  join_one: web_site
-    on (channel_category = 'web channel')
-    and web_site_sk = web_site.web_site_sk
+// source: all_sales is from_sql(all_sales_sql) {
+//   join_one: date_dim with sold_date_sk
+//   join_one: customer_demographics with cdemo_sk
+//   join_one: customer with customer_sk
+//   join_one: item with item_sk
+//   join_one: promotion with promo_sk
+//   join_one: customer_address with addr_sk
+//   join_one: time_dim with sold_time_sk
+//   join_one: all_returns
+//     on order_number = all_returns.order_number
+//     and item_sk = all_returns.item_sk
+//   join_one: store
+//     on channel_category = 'store channel'
+//     and store_sk = store.s_store_sk
+//   join_one: warehouse
+//     on (channel_category ? 'web channel' | 'catalog channel')
+//     and warehouse_sk = warehouse.w_warehouse_sk
+//   join_one: ship_mode
+//     on (channel_category ? 'web channel' | 'catalog channel')
+//     and ship_mode_sk = ship_mode.sm_ship_mode_sk
+//   join_one: catalog_page
+//     on (channel_category = 'catalog channel')
+//     and catalog_page_sk = catalog_page.cp_catalog_page_sk
+//   join_one: web_site
+//     on (channel_category = 'web channel')
+//     and web_site_sk = web_site.web_site_sk
 
-  measure: total_sales is sum((ext_list_price - ext_wholesale_cost - ext_discount_amt + ext_sales_price) / 2)
-  measure: total_ext_sales_price is sum(ext_sales_price)
-  measure: total_profit is sum(net_profit)
-  measure: total_list_minus_discount is sum(ext_list_price - ext_discount_amt)
-  measure: avg_quantity is avg(quantity)
-  measure: avg_list_price is avg(list_price)
-  measure: avg_coupon_amt is avg(coupon_amt)
-  measure: avg_sales_price is avg(sales_price)
+//   measure: total_sales is sum((ext_list_price - ext_wholesale_cost - ext_discount_amt + ext_sales_price) / 2)
+//   measure: total_ext_sales_price is sum(ext_sales_price)
+//   measure: total_profit is sum(net_profit)
+//   measure: total_list_minus_discount is sum(ext_list_price - ext_discount_amt)
+//   measure: avg_quantity is avg(quantity)
+//   measure: avg_list_price is avg(list_price)
+//   measure: avg_coupon_amt is avg(coupon_amt)
+//   measure: avg_sales_price is avg(sales_price)
 
-  measure: count_store_sales is count(*) { where: channel_category = 'store channel' }
-  measure: count_web_sales is count(*) { where: channel_category = 'web channel' }
-  measure: count_catalog_sales is count(*) { where: channel_category = 'catalog channel' }
+//   measure: count_store_sales is count(*) { where: channel_category = 'store channel' }
+//   measure: count_web_sales is count(*) { where: channel_category = 'web channel' }
+//   measure: count_catalog_sales is count(*) { where: channel_category = 'catalog channel' }
 
-  query: daily_profit_loss is {
-    group_by:
-      channel_category
-      channel_id
-      date_dim.d_date
+//   query: daily_profit_loss is {
+//     group_by:
+//       channel_category
+//       channel_id
+//       date_dim.d_date
 
-    aggregate:
-      sales is total_ext_sales_price
-      total_profit
-      return_amt is sum(0)
-      net_loss is sum(0)
-  }
+//     aggregate:
+//       sales is total_ext_sales_price
+//       total_profit
+//       return_amt is sum(0)
+//       net_loss is sum(0)
+//   }
 
-  query: stats_by_item is {
-    group_by:
-      item.i_item_id
+//   query: stats_by_item is {
+//     group_by:
+//       item.i_item_id
     
-    aggregate:
-      avg_quantity
-      avg_list_price
-      avg_coupon_amt
-      avg_sales_price
+//     aggregate:
+//       avg_quantity
+//       avg_list_price
+//       avg_coupon_amt
+//       avg_sales_price
 
-    where:
-      customer_demographics.cd_gender = 'M'
-      and customer_demographics.cd_marital_status = 'S'
-      and customer_demographics.cd_education_status = 'College'
-      and (promotion.p_channel_email = 'N' or promotion.p_channel_event = 'N')
-      and date_dim.d_year = 2000
+//     where:
+//       customer_demographics.cd_gender = 'M'
+//       and customer_demographics.cd_marital_status = 'S'
+//       and customer_demographics.cd_education_status = 'College'
+//       and (promotion.p_channel_email = 'N' or promotion.p_channel_event = 'N')
+//       and date_dim.d_year = 2000
 
-    order_by:
-      i_item_id
+//     order_by:
+//       i_item_id
 
-    limit: 100
-  }
-}
+//     limit: 100
+//   }
+// }
 
