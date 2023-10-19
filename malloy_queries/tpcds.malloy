@@ -1,34 +1,34 @@
 // Dimensions
-source: call_center is table('duckdb:../data/call_center.parquet') {
+source: call_center is duckdb.table('../data/call_center.parquet') extend {
   primary_key: cc_call_center_sk
 }
 
-source: catalog_page is table('duckdb:../data/catalog_page.parquet') {
+source: catalog_page is duckdb.table('../data/catalog_page.parquet') extend {
   primary_key: cp_catalog_page_sk
 }
 
-source: customer_address is table('duckdb:../data/customer_address.parquet') {
+source: customer_address is duckdb.table('../data/customer_address.parquet') extend {
   primary_key: ca_address_sk
 }
 
-source: customer_demographics is table('duckdb:../data/customer_demographics.parquet') {
+source: customer_demographics is duckdb.table('../data/customer_demographics.parquet') extend {
   primary_key: cd_demo_sk
 }
 
-source: date_dim is table('duckdb:../data/date_dim.parquet') {
+source: date_dim is duckdb.table('../data/date_dim.parquet') extend {
   primary_key: d_date_sk
 }
 
-source: income_band is table('duckdb:../data/income_band.parquet') {
+source: income_band is duckdb.table('../data/income_band.parquet') extend {
   primary_key: ib_income_band_sk
 }
 
-source: household_demographics is table('duckdb:../data/household_demographics.parquet') {
+source: household_demographics is duckdb.table('../data/household_demographics.parquet') extend {
   primary_key: hd_demo_sk
   join_one: income_band with hd_income_band_sk
 }
 
-source: customer is table('duckdb:../data/customer.parquet') {
+source: customer is duckdb.table('../data/customer.parquet') extend {
   primary_key: c_customer_sk
   join_one: customer_address with c_current_addr_sk
   join_one: customer_demographics with c_current_cdemo_sk 
@@ -40,51 +40,51 @@ source: customer is table('duckdb:../data/customer.parquet') {
     ca_zip is substr(customer_address.ca_zip, 1, 5)
 }
 
-source: item is table('duckdb:../data/item.parquet') {
+source: item is duckdb.table('../data/item.parquet') extend {
   primary_key: i_item_sk
 }
 
-source: promotion is table('duckdb:../data/promotion.parquet') {
+source: promotion is duckdb.table('../data/promotion.parquet') extend {
   primary_key: p_promo_sk
 }
 
-source: reason is table('duckdb:../data/reason.parquet') {
+source: reason is duckdb.table('../data/reason.parquet') extend {
   primary_key: r_reason_sk
 }
 
-source: ship_mode is table('duckdb:../data/ship_mode.parquet') {
+source: ship_mode is duckdb.table('../data/ship_mode.parquet') extend {
   primary_key: sm_ship_mode_sk
 }
 
-source: store is table('duckdb:../data/store.parquet') {
+source: store is duckdb.table('../data/store.parquet') extend {
   primary_key: s_store_sk
 }
 
-source: time_dim is table('duckdb:../data/time_dim.parquet') {
+source: time_dim is duckdb.table('../data/time_dim.parquet') extend {
   primary_key: t_time_sk
 }
 
-source: warehouse is table('duckdb:../data/warehouse.parquet') {
+source: warehouse is duckdb.table('../data/warehouse.parquet') extend {
   primary_key: w_warehouse_sk
 }
 
-source: web_site is table('duckdb:../data/web_site.parquet') {
+source: web_site is duckdb.table('../data/web_site.parquet') extend {
   primary_key: web_site_sk
 }
 
-source: web_page is table('duckdb:../data/web_page.parquet') {
+source: web_page is duckdb.table('../data/web_page.parquet') extend {
   primary_key: wp_web_page_sk
 }
 
 // Facts
 
-source: inventory is table('duckdb:../data/inventory.parquet') {
+source: inventory is duckdb.table('../data/inventory.parquet') extend {
   join_one: date_dim with inv_date_sk
   join_one: item with inv_item_sk
   join_one: warehouse with inv_warehouse_sk
 }
 
-source: store_returns is table('duckdb:../data/store_returns.parquet') {
+source: store_returns is duckdb.table('../data/store_returns.parquet') extend {
   join_one: date_dim with sr_returned_date_sk
   join_one: store with sr_store_sk
   join_one: customer with sr_customer_sk
@@ -97,8 +97,8 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
   measure: avg_returns is avg(sr_return_amt)
   measure: total_loss is sum(sr_net_loss)
 
-  query: projection is {
-    project:
+  view: projection is {
+    select:
       channel_category
       channel_id
       customer_sk is sr_customer_sk
@@ -111,7 +111,7 @@ source: store_returns is table('duckdb:../data/store_returns.parquet') {
   }
 }
 
-source: store_sales is table('duckdb:../data/store_sales.parquet') {
+source: store_sales is duckdb.table('../data/store_sales.parquet') extend {
   join_one: date_dim with ss_sold_date_sk
   join_one: time_dim with ss_sold_time_sk
   join_one: store with ss_store_sk
@@ -132,8 +132,8 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
   measure: total_ext_sales is sum(ss_ext_sales_price)
   measure: total_profit is sum(ss_net_profit)
 
-  query: projection is {
-    project:
+  view: projection is {
+    select:
       channel_category
       channel_id
       store_sk is channel_category ?
@@ -182,7 +182,7 @@ source: store_sales is table('duckdb:../data/store_sales.parquet') {
 
 }
 
-source: catalog_returns is table('duckdb:../data/catalog_returns.parquet') {
+source: catalog_returns is duckdb.table('../data/catalog_returns.parquet') extend {
   join_one: date_dim with cr_returned_date_sk
   join_one: catalog_page with cr_catalog_page_sk
   join_one: customer with cr_refunded_customer_sk
@@ -197,8 +197,8 @@ source: catalog_returns is table('duckdb:../data/catalog_returns.parquet') {
   measure: avg_returns is avg(cr_return_amount)
   measure: total_loss is sum(cr_net_loss)
 
-  query: projection is {
-    project:
+  view: projection is {
+    select:
       channel_category
       channel_id
       customer_sk is cr_refunded_customer_sk
@@ -211,7 +211,7 @@ source: catalog_returns is table('duckdb:../data/catalog_returns.parquet') {
   }
 }
 
-source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
+source: catalog_sales is duckdb.table('../data/catalog_sales.parquet') extend {
   join_one: date_dim with cs_sold_date_sk
   join_one: catalog_page with cs_catalog_page_sk
   join_one: customer with cs_bill_customer_sk
@@ -235,8 +235,8 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
   measure: total_ext_sales is sum(cs_ext_sales_price)
   measure: total_profit is sum(cs_net_profit)
 
-  query: projection is {
-    project:
+  view: projection is {
+    select:
       channel_category
       channel_id
       store_sk is channel_category ?
@@ -281,7 +281,7 @@ source: catalog_sales is table('duckdb:../data/catalog_sales.parquet') {
 }
 
 // TODO: take a look at Query 5 -- most likely broke it by updating `channel_id`
-source: web_returns is table('duckdb:../data/web_returns.parquet') {
+source: web_returns is duckdb.table('../data/web_returns.parquet') extend {
   join_one: date_dim with wr_returned_date_sk
   join_one: customer with wr_refunded_customer_sk
   join_one: returning_customer is customer with wr_returning_customer_sk
@@ -301,8 +301,8 @@ source: web_returns is table('duckdb:../data/web_returns.parquet') {
   dimension: channel_category is 'web channel'
   dimension: channel_id is concat('web_site', web_page.wp_web_page_id)
 
-  query: projection is {
-    project:
+  view: projection is {
+    select:
       channel_category
       channel_id
       customer_sk is wr_refunded_customer_sk
@@ -315,7 +315,7 @@ source: web_returns is table('duckdb:../data/web_returns.parquet') {
   }
 }
 
-source: web_sales is table('duckdb:../data/web_sales.parquet') {
+source: web_sales is duckdb.table('../data/web_sales.parquet') extend {
   join_one: date_dim with ws_sold_date_sk
   join_one: time_dim with ws_sold_time_sk
   join_one: ship_date is date_dim with ws_ship_date_sk
@@ -337,8 +337,8 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
   measure: total_ext_sales is sum(ws_ext_sales_price)
   measure: total_profit is sum(ws_net_profit)
 
-  query: projection is {
-    project:
+  view: projection is {
+    select:
       channel_category
       channel_id
       store_sk is channel_category ?
@@ -383,29 +383,27 @@ source: web_sales is table('duckdb:../data/web_sales.parquet') {
 }
 
 // TODO: why do I need to add `catalog_page_sk` to the projection list?
-sql: all_sales_sql is {
-  select: """
-  SELECT *, catalog_page_sk FROM (%{ web_sales -> projection }%)
+query: all_sales_sql is duckdb.sql(
+   """
+  SELECT *, catalog_page_sk FROM (%{ web_sales -> projection })
   UNION ALL
-  SELECT *, catalog_page_sk FROM (%{ catalog_sales -> projection }%)
+  SELECT *, catalog_page_sk FROM (%{ catalog_sales -> projection })
   UNION ALL
-  SELECT *, catalog_page_sk FROM (%{ store_sales -> projection }%)
+  SELECT *, catalog_page_sk FROM (%{ store_sales -> projection })
   """
-  connection: "duckdb"
-}
+)
 
-sql: all_returns_sql is {
-  select: """
-  SELECT * FROM (%{ web_returns -> projection }%)
-  UNION ALL
-  SELECT * FROM (%{ catalog_returns -> projection }%)
-  UNION ALL
-  SELECT * FROM (%{ store_returns -> projection }%)
+query: all_returns_sql is duckdb.sql(
   """
-  connection: "duckdb"
-}
+  SELECT * FROM (%{ web_returns -> projection })
+  UNION ALL
+  SELECT * FROM (%{ catalog_returns -> projection })
+  UNION ALL
+  SELECT * FROM (%{ store_returns -> projection })
+  """
+)
 
-source: all_returns is from_sql(all_returns_sql) {
+source: all_returns is all_returns_sql extend {
   join_one: date_dim with returned_date_sk
   join_one: customer with customer_sk
   join_one: item with item_sk
@@ -413,7 +411,7 @@ source: all_returns is from_sql(all_returns_sql) {
   measure: total_returns is sum(return_amt)
   measure: total_loss is sum(net_loss)
 
-  query: daily_profit_loss is {
+  view: daily_profit_loss is {
     group_by:
       channel_category
       channel_id
@@ -427,7 +425,7 @@ source: all_returns is from_sql(all_returns_sql) {
   }
 }
 
-source: all_sales is from_sql(all_sales_sql) {
+source: all_sales is all_sales_sql extend {
   join_one: date_dim with sold_date_sk
   join_one: customer_demographics with cdemo_sk
   join_one: customer with customer_sk
@@ -463,11 +461,11 @@ source: all_sales is from_sql(all_sales_sql) {
   measure: avg_coupon_amt is avg(coupon_amt)
   measure: avg_sales_price is avg(sales_price)
 
-  measure: count_store_sales is count(*) { where: channel_category = 'store channel' }
-  measure: count_web_sales is count(*) { where: channel_category = 'web channel' }
-  measure: count_catalog_sales is count(*) { where: channel_category = 'catalog channel' }
+  measure: count_store_sales is count() { where: channel_category = 'store channel' }
+  measure: count_web_sales is count() { where: channel_category = 'web channel' }
+  measure: count_catalog_sales is count() { where: channel_category = 'catalog channel' }
 
-  query: daily_profit_loss is {
+  view: daily_profit_loss is {
     group_by:
       channel_category
       channel_id
@@ -480,7 +478,7 @@ source: all_sales is from_sql(all_sales_sql) {
       net_loss is sum(0)
   }
 
-  query: stats_by_item is {
+  view: stats_by_item is {
     group_by:
       item.i_item_id
     
