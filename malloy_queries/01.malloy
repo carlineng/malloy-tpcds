@@ -23,7 +23,7 @@ count(distinct customer) doesn't count null customers, so a second pass is used 
 
  */ 
 
-query: store_returns -> {
+run: store_returns -> {
   group_by:
     sr_customer_sk
     sr_store_sk
@@ -45,7 +45,7 @@ query: store_returns -> {
     avg_store_return is all(sum(customer_total_returns) / sum(count_customers), sr_store_sk)
 } ->
 {
-  project:
+  select:
     c_customer_id
   where: 
     customer_total_returns > avg_store_return * 1.2

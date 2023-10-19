@@ -1,9 +1,11 @@
 import "tpcds.malloy"
 
-query: inventory -> {
-  declare: 
-    inv_before is sum(inv_quantity_on_hand) { where: date_dim.d_date < @2000-03-11 }
-    inv_after is sum(inv_quantity_on_hand) { where: date_dim.d_date >= @2000-03-11 }
+run: inventory -> {
+  extend: {
+    measure:
+      inv_before is sum(inv_quantity_on_hand) { where: date_dim.d_date < @2000-03-11 }
+      inv_after is sum(inv_quantity_on_hand) { where: date_dim.d_date >= @2000-03-11 }
+  }
 
   group_by:
     warehouse.w_warehouse_name

@@ -1,10 +1,12 @@
 import "tpcds.malloy"
 
-query: all_sales -> {
-  join_one: item_category is from(item -> {
-    group_by: i_category
-    aggregate: avg_price is avg(i_current_price)
-  }) on item.i_category = item_category.i_category
+run: all_sales -> {
+  extend: {
+    join_one: item_category is item -> {
+      group_by: i_category
+      aggregate: avg_price is avg(i_current_price)
+    } on item.i_category = item_category.i_category
+  }
 
   group_by: 
     item.i_category
@@ -14,7 +16,7 @@ query: all_sales -> {
     avg_price is item_category.avg_price
 
   aggregate:
-    sale_cnt is count(*)
+    sale_cnt is count()
 
   where:
     date_dim.d_year = 2001

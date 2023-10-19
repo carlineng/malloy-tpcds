@@ -1,15 +1,15 @@
 import "tpcds.malloy"
 
-query: cs is catalog_sales + {
-  query: aggregations is {
+query: cs is catalog_sales extend {
+  view: aggregations is {
     aggregate:
       agg1 is avg(cs_quantity)
       agg2 is avg(cs_list_price)
       agg3 is avg(cs_coupon_amt)
       agg4 is avg(cs_sales_price)
       agg5 is avg(cs_net_profit)
-      agg6 is avg(customer.c_birth_year)
-      agg7 is avg(customer_demographics.cd_dep_count)
+      agg6 is customer.c_birth_year.avg()
+      agg7 is customer_demographics.cd_dep_count.avg()
   }
 } -> {
   nest:

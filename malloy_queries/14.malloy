@@ -10,8 +10,7 @@ import "tpcds.malloy"
 //      item_0."i_category_id" as "i_category_id"
 
 
-source: item_properties is from(
-  all_sales -> {
+source: item_properties is all_sales -> {
     group_by:
       item.i_brand_id
       item.i_class_id
@@ -30,11 +29,9 @@ source: item_properties is from(
       i_brand_id
       i_class_id
       i_category_id
-  }
-)
+}
 
-source: relevant_items is from(
-  item + {
+source: relevant_items is item extend {
     join_one: item_properties 
       on i_brand_id = item_properties.i_brand_id
       and i_class_id = item_properties.i_class_id
@@ -46,28 +43,26 @@ source: relevant_items is from(
       and item_properties.i_class_id != null
       and item_properties.i_category_id != null
   }
-) {
+extend {
   primary_key: item_sk
 }
 
 // TODO: this number isn't matching up due to some null filtering that's happening
 // in the `web/catalog/store_sales.projection` query
-source: avg_sales is from(
-  all_sales -> {
+source: avg_sales is all_sales -> {
     aggregate: 
       average_sales is avg(quantity * list_price)
     where: date_dim.d_year >= 1999 and date_dim.d_year <= 2001
   }
-)
 
-query: all_sales + {
+run: all_sales extend {
   join_one: relevant_items with item_sk
   join_one: avg_sales on true
-} -> {
-  declare:
-    sales is sum(quantity * list_price)
-    number_sales is count(*)
 
+  measure:
+    sales is sum(quantity * list_price)
+    number_sales is count()
+} -> {
   aggregate:
     sales
     number_sales

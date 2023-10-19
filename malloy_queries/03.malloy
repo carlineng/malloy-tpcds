@@ -14,7 +14,7 @@ SQL.
 
  */
 
-query: store_sales -> {
+run: store_sales -> {
   group_by: 
     d_year is date_dim.d_year
     brand_id is item.i_brand_id

@@ -5,7 +5,7 @@ import "tpcds.malloy"
 // a join on `cs_bill_customer_sk` when joining `catalog_sales`
 // to `customers`. The SQL version uses `cs_ship_customer_sk`.
 
-query: all_sales -> {
+run: all_sales -> {
   group_by:
     customer.customer_demographics.cd_gender
     customer.customer_demographics.cd_marital_status
@@ -17,7 +17,7 @@ query: all_sales -> {
     customer.customer_demographics.cd_dep_college_count
 
   aggregate:
-    customer_count is count(distinct customer_sk)
+    customer_count is count(customer_sk)
 
   where:
     date_dim.d_year = 2002

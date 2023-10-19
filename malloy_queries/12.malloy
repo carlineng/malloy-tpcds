@@ -1,15 +1,17 @@
 import "tpcds.malloy"
 
-query: web_sales -> {
+run: web_sales -> {
+
+  extend: {
+    measure: item_class_revenue is all(sum(ws_ext_sales_price), i_class)
+  }
+
   group_by:
     item.i_item_id
     item.i_item_desc
     item.i_category
     item.i_class
     item.i_current_price
-
-  declare:
-    item_class_revenue is all(sum(ws_ext_sales_price), i_class)
 
   aggregate:
     total_ext_sales

@@ -1,10 +1,10 @@
 import "tpcds.malloy"
 
-query: cs1 is catalog_sales + {
+run: catalog_sales extend {
   join_many: cs2 is catalog_sales on cs_order_number = cs2.cs_order_number
 } -> {
   aggregate:
-    order_count is count(distinct cs_order_number)
+    order_count is count(cs_order_number)
     total_shipping_cost is sum(cs_ext_ship_cost)
     total_net_profit is sum(cs_net_profit)
 

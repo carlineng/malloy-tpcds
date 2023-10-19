@@ -1,21 +1,20 @@
 import "tpcds.malloy"
 
 
-sql: daily_profit_loss_sql is {
-  select: """
-  SELECT * FROM (%{ all_sales -> daily_profit_loss }%)
-  UNION ALL
-  SELECT * FROM (%{ all_returns -> daily_profit_loss }%)
+query: daily_profit_loss_sql is duckdb.sql(
   """
-  connection: "duckdb"
-}
+  SELECT * FROM (%{ all_sales -> daily_profit_loss })
+  UNION ALL
+  SELECT * FROM (%{ all_returns -> daily_profit_loss })
+  """
+)
 
-source: daily_profit_loss is from_sql(daily_profit_loss_sql) {
+source: daily_profit_loss is daily_profit_loss_sql extend {
   measure: total_sales is sum(sales)
   measure: total_returns is sum(return_amt)
   measure: net_profit is sum(total_profit) - sum(net_loss)
 
-  query: by_category is {
+  view: by_category is {
     group_by: channel_category
     aggregate:
       total_sales
@@ -24,7 +23,7 @@ source: daily_profit_loss is from_sql(daily_profit_loss_sql) {
     order_by: channel_category
   }
 
-  query: by_channel_id is {
+  view: by_channel_id is {
     group_by: channel_id
     aggregate:
       total_sales
@@ -35,7 +34,7 @@ source: daily_profit_loss is from_sql(daily_profit_loss_sql) {
   }
 }
 
-query: daily_profit_loss -> {
+run: daily_profit_loss -> {
 
   aggregate:
     total_sales

@@ -1,12 +1,12 @@
 import "tpcds.malloy"
 
-query: store_sales -> {
+run: store_sales -> {
   aggregate:
-    bucket1_count is count(*) { where: ss_quantity >= 1 and ss_quantity <= 20 }
-    bucket2_count is count(*) { where: ss_quantity >= 21 and ss_quantity <= 40 }
-    bucket3_count is count(*) { where: ss_quantity >= 41 and ss_quantity <= 60 }
-    bucket4_count is count(*) { where: ss_quantity >= 61 and ss_quantity <= 80 }
-    bucket5_count is count(*) { where: ss_quantity >= 81 and ss_quantity <= 100 }
+    bucket1_count is count() { where: ss_quantity >= 1 and ss_quantity <= 20 }
+    bucket2_count is count() { where: ss_quantity >= 21 and ss_quantity <= 40 }
+    bucket3_count is count() { where: ss_quantity >= 41 and ss_quantity <= 60 }
+    bucket4_count is count() { where: ss_quantity >= 61 and ss_quantity <= 80 }
+    bucket5_count is count() { where: ss_quantity >= 81 and ss_quantity <= 100 }
 
     bucket1_avg_discount is avg(ss_ext_discount_amt) { where: ss_quantity >= 1 and ss_quantity <= 20 }
     bucket2_avg_discount is avg(ss_ext_discount_amt) { where: ss_quantity >= 21 and ss_quantity <= 40 }
@@ -20,7 +20,7 @@ query: store_sales -> {
     bucket4_avg_net_paid is avg(ss_net_paid) { where: ss_quantity >= 61 and ss_quantity <= 80 }
     bucket5_avg_net_paid is avg(ss_net_paid) { where: ss_quantity >= 81 and ss_quantity <= 100 }
 } -> {
-  project: 
+  select: 
     bucket1 is pick bucket1_avg_discount when bucket1_count > 74129
                else bucket1_avg_net_paid
 

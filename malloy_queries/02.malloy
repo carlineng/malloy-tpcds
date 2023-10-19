@@ -47,8 +47,8 @@ This query showcases a few interesting features of Malloy, namely:
   pipelines? Or do we need to define separate Sources for this?
 */
 
-sql: web_catalog_sales_qry is {
-  select: """
+query: web_catalog_sales_qry is duckdb.sql(
+  """
   SELECT
     ws_sold_date_sk as sold_date_sk,
     ws_ext_sales_price as sales_price
@@ -61,15 +61,13 @@ sql: web_catalog_sales_qry is {
     cs_ext_sales_price as sales_price
   FROM read_parquet('../data/catalog_sales.parquet')
   """
-  connection: "duckdb"
-}
+)
   
-source: web_catalog_sales is from_sql(web_catalog_sales_qry) {
+source: web_catalog_sales is web_catalog_sales_qry extend {
   join_one: date_dim on sold_date_sk = date_dim.d_date_sk
 }
 
-source: weekly_sales is from(
-  web_catalog_sales -> {
+source: weekly_sales is web_catalog_sales -> {
     group_by:
       date_dim.d_week_seq
 
@@ -81,12 +79,11 @@ source: weekly_sales is from(
       thu_sales is sum(sales_price) { where: date_dim.d_day_name = 'Thursday' }
       fri_sales is sum(sales_price) { where: date_dim.d_day_name = 'Friday' }
       sat_sales is sum(sales_price) { where: date_dim.d_day_name = 'Saturday' }
-  }
-) {
+  } extend {
   primary_key: d_week_seq
 }
 
-query: yoy_weekly_sales is weekly_sales {
+run: weekly_sales extend {
   join_many: date_dim on d_week_seq = date_dim.d_week_seq
   join_one: weekly_sales on d_week_seq = weekly_sales.d_week_seq - 53
 } -> {

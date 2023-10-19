@@ -1,13 +1,12 @@
 import "tpcds.malloy"
 
-source: preferred_customer_zip is from(
-  customer -> {
+source: preferred_customer_zip is customer -> {
     group_by:
       ca_zip
       ca_zip_prefix is substr(ca_zip, 1, 2)
 
     aggregate:
-      zip_count is count(*)
+      zip_count is count()
 
     where: 
       c_preferred_cust_flag = 'Y'
@@ -415,13 +414,12 @@ source: preferred_customer_zip is from(
       )
 
     having:
-      count(*) > 10
-  }
-) {
+      count() > 10
+  } extend {
   primary_key: ca_zip
 }
 
-query: store_sales + {
+run: store_sales extend {
   join_one: preferred_customer_zip on substr(store.s_zip, 1, 2) = preferred_customer_zip.ca_zip_prefix
 } -> {
   group_by:

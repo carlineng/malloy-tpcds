@@ -1,9 +1,11 @@
 import "tpcds.malloy"
 
-query: catalog_sales -> {
-  declare: 
-    zip is substr(customer.customer_address.ca_zip, 1, 5)
-    state is customer.customer_address.ca_state
+run: catalog_sales -> {
+  extend: {
+    dimension: 
+      zip is substr(customer.customer_address.ca_zip, 1, 5)
+      state is customer.customer_address.ca_state
+  }
 
   group_by: customer.customer_address.ca_zip
   aggregate: price_sum is sum(cs_sales_price)

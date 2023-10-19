@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: store_sales -> {
+run: store_sales -> {
   aggregate:
     avg1 is avg(ss_quantity)
     avg2 is avg(ss_ext_sales_price)

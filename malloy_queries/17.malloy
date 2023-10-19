@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: store_sales + {
+run: store_sales extend {
   join_one: sr is store_returns on
     ss_customer_sk = sr.sr_customer_sk
     and ss_item_sk = sr.sr_item_sk
@@ -22,20 +22,20 @@ query: store_sales + {
     store.s_state
 
   aggregate:
-    store_sales_quantitycount is count(*) { where: ss_quantity != null }
+    store_sales_quantitycount is count() { where: ss_quantity != null }
     store_sales_quantityave is avg(ss_quantity)
     store_sales_quantity_stddev is sum(0) + stddev_samp!(ss_quantity)
     store_sales_quantitycov is sum(0) + stddev_samp!(ss_quantity) / avg(ss_quantity)
 
-    store_returns_quantitycount is count(*) { where: sr.sr_return_quantity != null }
-    store_returns_quantityave is avg(sr.sr_return_quantity)
+    store_returns_quantitycount is count() { where: sr.sr_return_quantity != null }
+    store_returns_quantityave is sr.sr_return_quantity.avg()
     store_returns_quantity_stddev is sum(0) + stddev_samp!(sr.sr_return_quantity)
-    store_returns_quantitycov is sum(0) + stddev_samp!(sr.sr_return_quantity) / avg(sr.sr_return_quantity)
+    store_returns_quantitycov is sum(0) + stddev_samp!(sr.sr_return_quantity) / sr.sr_return_quantity.avg()
 
-    catalog_sales_quantitycount is count(*) { where: cs.cs_bill_customer_sk != null }
-    catalog_sales_quantity_ave is avg(cs.cs_quantity)
+    catalog_sales_quantitycount is count() { where: cs.cs_bill_customer_sk != null }
+    catalog_sales_quantity_ave is cs.cs_quantity.avg()
     catalog_sales_quantity_stddev is sum(0) + stddev_samp!(cs.cs_quantity)
-    catalog_sales_quantitycov is sum(0) + stddev_samp!(cs.cs_quantity) / avg(cs.cs_quantity)
+    catalog_sales_quantitycov is sum(0) + stddev_samp!(cs.cs_quantity) / cs.cs_quantity.avg()
 
   where:
     sr.sr_customer_sk != null

@@ -1,7 +1,9 @@
 import "tpcds.malloy"
 
-query: inventory -> {
-  declare: qoh is avg(inv_quantity_on_hand)
+run: inventory -> {
+  extend: {
+    measure: qoh is avg(inv_quantity_on_hand)
+  }
 
   aggregate: qoh
   nest: by_product_name is {
