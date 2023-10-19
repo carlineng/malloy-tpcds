@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: catalog_returns -> {
+run: catalog_returns -> {
   group_by:
     call_center is call_center.cc_call_center_id
     call_center_name is call_center.cc_name

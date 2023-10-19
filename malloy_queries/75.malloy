@@ -5,7 +5,7 @@ import "tpcds.malloy"
 // contains a clause like "store_id != null" to verify that the channel ID exists.
 // The SQL version doesn't contain this. Removing the != null clauses in each of the sources makes the results match.
 
-query: all_sales -> {
+run: all_sales -> {
   group_by:
     item.i_brand_id
     item.i_class_id
@@ -13,11 +13,11 @@ query: all_sales -> {
     item.i_manufact_id
 
   aggregate:
-    sales_cnt_prev_yr is sum(quantity - coalesce(all_returns.return_quantity, 0)) { where: date_dim.d_year = 2001 }
-    sales_cnt_curr_yr is sum(quantity - coalesce(all_returns.return_quantity, 0)) { where: date_dim.d_year = 2002 }
-    sales_amt_prev_yr is sum(ext_sales_price - coalesce(all_returns.return_amt, 0)) { where: date_dim.d_year = 2001 }
-    sales_amt_curr_yr is sum(ext_sales_price - coalesce(all_returns.return_amt, 0)) { where: date_dim.d_year = 2002 }
-    total_returns is sum(all_returns.return_amt)
+    sales_cnt_prev_yr is source.sum(quantity - coalesce(all_returns.return_quantity, 0)) { where: date_dim.d_year = 2001 }
+    sales_cnt_curr_yr is source.sum(quantity - coalesce(all_returns.return_quantity, 0)) { where: date_dim.d_year = 2002 }
+    sales_amt_prev_yr is source.sum(ext_sales_price - coalesce(all_returns.return_amt, 0)) { where: date_dim.d_year = 2001 }
+    sales_amt_curr_yr is source.sum(ext_sales_price - coalesce(all_returns.return_amt, 0)) { where: date_dim.d_year = 2002 }
+    total_returns is all_returns.return_amt.sum()
     cnt_prev_yr is sum(1) { where: date_dim.d_year = 2001 }
     cnt_curr_yr is sum(1) { where: date_dim.d_year = 2002 }
 
@@ -26,7 +26,7 @@ query: all_sales -> {
     and date_dim.d_year >= 2001
     and date_dim.d_year <= 2002
 } -> {
-  project: 
+  select: 
     prev_year is 2001
     curr_year is 2002
     i_brand_id

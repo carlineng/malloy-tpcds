@@ -1,11 +1,11 @@
 import "tpcds.malloy"
 
-query: store_sales + {
+run: store_sales extend {
   join_one: sr is store_returns
     on ss_item_sk = sr.sr_item_sk
     and ss_ticket_number = sr.sr_ticket_number
 } -> {
-  project: 
+  select: 
     ss_item_sk
     ss_ticket_number
     ss_customer_sk

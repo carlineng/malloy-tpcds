@@ -5,14 +5,14 @@ import "tpcds.malloy"
 // and gives the correct answer.
 // TODO: file an issue for this
 
-query: web_sales -> {
+run: web_sales -> {
   group_by:
     rsn is substr(web_returns.reason.r_reason_desc, 1, 20)
 
   aggregate:
     avg1 is avg(ws_quantity)
-    avg2 is avg(web_returns.wr_refunded_cash)
-    avg3 is avg(web_returns.wr_fee)
+    avg2 is web_returns.wr_refunded_cash.avg()
+    avg3 is web_returns.wr_fee.avg()
 
   where:
     date_dim.d_year = 2000

@@ -4,12 +4,11 @@ import "tpcds.malloy"
 // "semi-join" syntax in SQL is pretty convenient. In Malloy, I need
 // to extend the source with an in-line join, which isn't as nice.
 
-query: all_sales + {
-  join_one: music_items is from(item -> {
+run: all_sales extend {
+  join_one: music_items is item -> {
     group_by: i_item_id
     where: i_category = 'Music'
-  })
-    on item.i_item_id = music_items.i_item_id
+  } on item.i_item_id = music_items.i_item_id
 } -> {
   group_by:
     item.i_item_id

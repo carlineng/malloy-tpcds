@@ -1,13 +1,13 @@
 import "tpcds.malloy"
 
-query: store_sales -> {
+run: store_sales -> {
   group_by: 
     item.i_manager_id
     date_dim.d_month_seq
   
   aggregate:
     sum_sales is sum(ss_sales_price)
-    avg_monthly_sales is all(sum(ss_sales_price) / count(distinct date_dim.d_moy), i_manager_id)
+    avg_monthly_sales is all(sum(ss_sales_price) / count(date_dim.d_moy), i_manager_id)
 
   where:
     date_dim.d_month_seq >= 1200
@@ -26,7 +26,7 @@ query: store_sales -> {
     )
     and store.s_store_sk != null
 } -> {
-  project: *
+  select: *
 
   where:
     avg_monthly_sales > 0

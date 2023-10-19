@@ -1,7 +1,7 @@
 import "tpcds.malloy"
 
-query: store_sales + {
-  query: aggregations is {
+run: store_sales extend {
+  view: aggregations is {
     aggregate:
       agg1 is avg(ss_quantity)
       agg2 is avg(ss_list_price)

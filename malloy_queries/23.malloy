@@ -1,14 +1,13 @@
 import "tpcds.malloy"
 
-source: frequent_ss_items is from(
-  store_sales -> {
+source: frequent_ss_items is store_sales -> {
     group_by:
       itemdesc is substr(item.i_item_desc, 1, 30)
       item_sk is item.i_item_sk
       solddate is date_dim.d_date
 
     aggregate:
-      cnt is count(*)
+      cnt is count()
 
     where:
       item.i_item_sk != null
@@ -20,14 +19,12 @@ source: frequent_ss_items is from(
       )
 
     having:
-      count(*) > 4
-  }
-) {
+      count() > 4
+  } extend {
   primary_key: item_sk
 }
 
-source: max_store_sales is from(
-  store_sales -> {
+source: max_store_sales is store_sales -> {
     group_by:
       customer.c_customer_sk
 
@@ -42,14 +39,12 @@ source: max_store_sales is from(
         or date_dim.d_year = 2003
       )
       and customer.c_customer_sk != null
-  } -> {
-    aggregate:
-      cmax is max(csales)
-  }
-)
+} -> {
+  aggregate:
+    cmax is max(csales)
+}
 
-source: best_ss_customer is from(
-  store_sales + {
+source: best_ss_customer is store_sales extend {
     join_one: max_store_sales on true
   } -> {
     group_by:
@@ -63,13 +58,12 @@ source: best_ss_customer is from(
 
     having:
       sum(ss_quantity * ss_sales_price) > 0.5 * max(max_store_sales.cmax)
-  }
-) {
+  } extend {
   primary_key:
     customer_sk
 }
 
-query: all_sales + {
+run: all_sales extend {
   join_one: best_ss_customer with customer_sk
   join_one: frequent_ss_items with item_sk
 } -> {

@@ -3,8 +3,8 @@ import "tpcds.malloy"
 -- Don't have access to window functions in Malloy yet.
 -- Instead, use nesting w/ order_by and limit to mimic the functionality.
 
-query: store_sales + {
-  query: ranked_items is {
+run: store_sales extend {
+  view: ranked_items is {
     group_by:
       ss_item_sk
       ss_store_sk
@@ -16,27 +16,27 @@ query: store_sales + {
 
     where: ss_store_sk = 4
   } -> {
-    project: *
+    select: *
     where: rank_col > 0.9 * store_avg
   }
 } -> {
   nest: best_performing is ranked_items -> {
-    project:
+    select:
       i_product_name
       rank_col
     order_by: rank_col asc
     limit: 10
   } -> { 
-    project: i_product_name 
+    select: i_product_name 
   }
 
   nest: worst_performing is ranked_items -> { 
-    project:
+    select:
       i_product_name
       rank_col
     order_by: rank_col desc
     limit: 10
   } -> {
-    project: i_product_name
+    select: i_product_name
   }
 }

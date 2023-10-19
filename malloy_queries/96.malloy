@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: store_sales -> {
+run: store_sales -> {
   aggregate: cnt is count()
   where:
     time_dim.t_hour = 20

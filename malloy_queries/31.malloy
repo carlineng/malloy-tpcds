@@ -1,13 +1,15 @@
 import "tpcds.malloy"
 
-query: all_sales -> {
-  declare:
-    web_sales_q1 is total_ext_sales_price { where: date_dim.d_qoy = 1 and channel_category = 'web channel' }
-    web_sales_q2 is total_ext_sales_price { where: date_dim.d_qoy = 2 and channel_category = 'web channel' }
-    web_sales_q3 is total_ext_sales_price { where: date_dim.d_qoy = 3 and channel_category = 'web channel' }
-    store_sales_q1 is total_ext_sales_price { where: date_dim.d_qoy = 1 and channel_category = 'store channel' }
-    store_sales_q2 is total_ext_sales_price { where: date_dim.d_qoy = 2 and channel_category = 'store channel' }
-    store_sales_q3 is total_ext_sales_price { where: date_dim.d_qoy = 3 and channel_category = 'store channel' }
+run: all_sales -> {
+  extend: {
+    measure:
+      web_sales_q1 is total_ext_sales_price { where: date_dim.d_qoy = 1 and channel_category = 'web channel' }
+      web_sales_q2 is total_ext_sales_price { where: date_dim.d_qoy = 2 and channel_category = 'web channel' }
+      web_sales_q3 is total_ext_sales_price { where: date_dim.d_qoy = 3 and channel_category = 'web channel' }
+      store_sales_q1 is total_ext_sales_price { where: date_dim.d_qoy = 1 and channel_category = 'store channel' }
+      store_sales_q2 is total_ext_sales_price { where: date_dim.d_qoy = 2 and channel_category = 'store channel' }
+      store_sales_q3 is total_ext_sales_price { where: date_dim.d_qoy = 3 and channel_category = 'store channel' }
+  }
 
   group_by:
     customer_address.ca_county
@@ -22,7 +24,7 @@ query: all_sales -> {
   where:
     date_dim.d_year = 2000
 } -> {
-  project: *
+  select: *
   where:
     web_q1_q2_increase > 0
     and web_q1_q2_increase != null

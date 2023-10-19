@@ -1,31 +1,33 @@
 import "tpcds.malloy"
 
-query: all_sales -> {
-  declare: 
-    jan_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 1 and channel_category = 'web channel' }
-                + sum(sales_price * quantity) { where: date_dim.d_moy = 1 and channel_category = 'catalog channel' }
-    feb_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 2 and channel_category = 'web channel' }
-                + sum(sales_price * quantity) { where: date_dim.d_moy = 2 and channel_category = 'catalog channel' }
-    mar_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 3 and channel_category = 'web channel' }
-                + sum(sales_price * quantity) { where: date_dim.d_moy = 3 and channel_category = 'catalog channel' }
-    apr_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 4 and channel_category = 'web channel' }
-                + sum(sales_price * quantity) { where: date_dim.d_moy = 4 and channel_category = 'catalog channel' }
-    may_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 5 and channel_category = 'web channel' }
-                + sum(sales_price * quantity) { where: date_dim.d_moy = 5 and channel_category = 'catalog channel' }
-    jun_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 6 and channel_category = 'web channel' }
-                + sum(sales_price * quantity) { where: date_dim.d_moy = 6 and channel_category = 'catalog channel' }
-    jul_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 7 and channel_category = 'web channel' }
-                + sum(sales_price * quantity) { where: date_dim.d_moy = 7 and channel_category = 'catalog channel' }
-    aug_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 8 and channel_category = 'web channel' }
-                + sum(sales_price * quantity) { where: date_dim.d_moy = 8 and channel_category = 'catalog channel' }
-    sep_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 9 and channel_category = 'web channel' }
-                + sum(sales_price * quantity) { where: date_dim.d_moy = 9 and channel_category = 'catalog channel' }
-    oct_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 10 and channel_category = 'web channel' }
-                + sum(sales_price * quantity) { where: date_dim.d_moy = 10 and channel_category = 'catalog channel' }
-    nov_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 11 and channel_category = 'web channel' }
-                + sum(sales_price * quantity) { where: date_dim.d_moy = 11 and channel_category = 'catalog channel' }
-    dec_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 12 and channel_category = 'web channel' }
-                + sum(sales_price * quantity) { where: date_dim.d_moy = 12 and channel_category = 'catalog channel' }
+run: all_sales -> {
+  extend: {
+    measure:
+      jan_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 1 and channel_category = 'web channel' }
+                  + sum(sales_price * quantity) { where: date_dim.d_moy = 1 and channel_category = 'catalog channel' }
+      feb_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 2 and channel_category = 'web channel' }
+                  + sum(sales_price * quantity) { where: date_dim.d_moy = 2 and channel_category = 'catalog channel' }
+      mar_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 3 and channel_category = 'web channel' }
+                  + sum(sales_price * quantity) { where: date_dim.d_moy = 3 and channel_category = 'catalog channel' }
+      apr_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 4 and channel_category = 'web channel' }
+                  + sum(sales_price * quantity) { where: date_dim.d_moy = 4 and channel_category = 'catalog channel' }
+      may_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 5 and channel_category = 'web channel' }
+                  + sum(sales_price * quantity) { where: date_dim.d_moy = 5 and channel_category = 'catalog channel' }
+      jun_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 6 and channel_category = 'web channel' }
+                  + sum(sales_price * quantity) { where: date_dim.d_moy = 6 and channel_category = 'catalog channel' }
+      jul_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 7 and channel_category = 'web channel' }
+                  + sum(sales_price * quantity) { where: date_dim.d_moy = 7 and channel_category = 'catalog channel' }
+      aug_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 8 and channel_category = 'web channel' }
+                  + sum(sales_price * quantity) { where: date_dim.d_moy = 8 and channel_category = 'catalog channel' }
+      sep_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 9 and channel_category = 'web channel' }
+                  + sum(sales_price * quantity) { where: date_dim.d_moy = 9 and channel_category = 'catalog channel' }
+      oct_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 10 and channel_category = 'web channel' }
+                  + sum(sales_price * quantity) { where: date_dim.d_moy = 10 and channel_category = 'catalog channel' }
+      nov_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 11 and channel_category = 'web channel' }
+                  + sum(sales_price * quantity) { where: date_dim.d_moy = 11 and channel_category = 'catalog channel' }
+      dec_sales is sum(ext_sales_price * quantity) { where: date_dim.d_moy = 12 and channel_category = 'web channel' }
+                  + sum(sales_price * quantity) { where: date_dim.d_moy = 12 and channel_category = 'catalog channel' }
+  }
 
   group_by:
     warehouse.w_warehouse_name

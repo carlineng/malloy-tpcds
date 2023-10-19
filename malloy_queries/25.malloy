@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: store_sales + {
+run: store_sales extend {
   join_one: cs is catalog_sales
     on store_returns.sr_customer_sk = cs.cs_bill_customer_sk
     and store_returns.sr_item_sk = cs.cs_item_sk
@@ -13,8 +13,8 @@ query: store_sales + {
 
   aggregate:
     store_sales_profit is sum(ss_net_profit)
-    store_returns_loss is sum(store_returns.sr_net_loss)
-    catalog_sales_profit is sum(cs.cs_net_profit)
+    store_returns_loss is store_returns.sr_net_loss.sum()
+    catalog_sales_profit is cs.cs_net_profit.sum()
 
   where: 
     store_returns.sr_customer_sk != null

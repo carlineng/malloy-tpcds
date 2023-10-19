@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: all_sales -> {
+run: all_sales -> {
   group_by:
     customer.c_customer_id
     customer.c_first_name
@@ -17,7 +17,7 @@ query: all_sales -> {
     and date_dim.d_year >= 2001
     and date_dim.d_year <= 2002
 } -> {
-  project:
+  select:
     c_customer_id
     c_first_name
     c_last_name

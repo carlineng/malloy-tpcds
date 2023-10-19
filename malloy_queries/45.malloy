@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: web_sales -> {
+run: web_sales -> {
   group_by:
     customer.customer_address.ca_zip
     customer.customer_address.ca_city

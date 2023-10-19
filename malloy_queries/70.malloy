@@ -1,7 +1,7 @@
 import "tpcds.malloy"
 
-query: store_sales + {
-  join_one: top_states is from(store_sales -> {
+run: store_sales extend {
+  join_one: top_states is store_sales -> {
     group_by:
       state is store.s_state
 
@@ -14,9 +14,7 @@ query: store_sales + {
 
     order_by: net_profit desc
     limit: 5
-    }
-  )
-    on store.s_state = top_states.state
+    } on store.s_state = top_states.state
 } -> {
   aggregate: total_sum is sum(ss_net_profit)
   nest: by_state is {

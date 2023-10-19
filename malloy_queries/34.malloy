@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: store_sales -> {
+run: store_sales -> {
   group_by:
     customer.c_last_name
     customer.c_first_name
@@ -10,7 +10,7 @@ query: store_sales -> {
     ss_customer_sk
 
   aggregate:
-    cnt is count(*)
+    cnt is count()
 
   where:
     store.s_county = 'Williamson County'
@@ -27,7 +27,7 @@ query: store_sales -> {
     and household_demographics.hd_dep_count / household_demographics.hd_vehicle_count > 1.2
 
   having:
-    count(*) >= 15 and count(*) <= 20
+    count() >= 15 and count() <= 20
 
   order_by:
     c_last_name

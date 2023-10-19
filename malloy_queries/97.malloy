@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: all_sales -> {
+run: all_sales -> {
   group_by:
     customer_sk
     item_sk

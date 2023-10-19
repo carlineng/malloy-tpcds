@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: web_sales -> {
+run: web_sales -> {
   group_by:
     w_substr is substr(warehouse.w_warehouse_name, 1, 20)
     ship_mode.sm_type

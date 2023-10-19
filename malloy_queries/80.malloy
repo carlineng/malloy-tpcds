@@ -4,11 +4,11 @@ import "tpcds.malloy"
 // Individual channel ID totals look good
 // Rollup totals aren't matching
 
-query: all_sales -> {
+run: all_sales -> {
   aggregate:
     sales is sum(ext_sales_price)
-    returns is sum(all_returns.return_amt)
-    profit is sum(net_profit - coalesce(all_returns.net_loss, 0))
+    returns is all_returns.return_amt.sum()
+    profit is source.sum(net_profit - coalesce(all_returns.net_loss, 0))
 
   nest: by_category is {
     group_by:
@@ -16,8 +16,8 @@ query: all_sales -> {
 
     aggregate:
       sales is sum(ext_sales_price)
-      returns is sum(all_returns.return_amt)
-      profit is sum(net_profit - coalesce(all_returns.net_loss, 0))
+      returns is all_returns.return_amt.sum()
+      profit is source.sum(net_profit - coalesce(all_returns.net_loss, 0))
 
     order_by: channel_category
 
@@ -27,8 +27,8 @@ query: all_sales -> {
 
       aggregate:
         sales is sum(ext_sales_price)
-        returns is sum(all_returns.return_amt)
-        profit is sum(net_profit - coalesce(all_returns.net_loss, 0))
+        returns is all_returns.return_amt.sum()
+        profit is source.sum(net_profit - coalesce(all_returns.net_loss, 0))
 
       order_by: channel_id
     }

@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: item -> {
+run: item -> {
   group_by:
     i_product_name
     i_manufact
@@ -8,7 +8,7 @@ query: item -> {
 
   aggregate:
     item_count is all(
-      count(*) { 
+      count() { 
         where:
           (
             (

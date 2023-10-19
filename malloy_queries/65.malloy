@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: store_sales -> {
+run: store_sales -> {
   group_by:
     ss_store_sk
     ss_item_sk
@@ -12,7 +12,7 @@ query: store_sales -> {
   
   aggregate:
     revenue is sum(ss_sales_price)
-    ave is all(sum(ss_sales_price) / count(distinct ss_item_sk), ss_store_sk)
+    ave is all(sum(ss_sales_price) / count(ss_item_sk), ss_store_sk)
 
   where:
     date_dim.d_month_seq >= 1176
@@ -20,7 +20,7 @@ query: store_sales -> {
     and ss_sales_price != null
     and ss_store_sk != null
 } -> {
-  project: s_store_name, i_item_desc, revenue, i_current_price, i_wholesale_cost, i_brand
+  select: s_store_name, i_item_desc, revenue, i_current_price, i_wholesale_cost, i_brand
   where: revenue <= 0.1 * ave
   order_by: s_store_name, i_item_desc
   limit: 100

@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: all_sales -> {
+run: all_sales -> {
   group_by:
     date_dim.d_date
     customer.c_first_name
@@ -20,5 +20,5 @@ query: all_sales -> {
   having: count_web_sales > 0
   having: count_store_sales > 0
 } -> {
-  aggregate: hot is count(*)
+  aggregate: hot is count()
 }

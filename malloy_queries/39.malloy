@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: inventory -> {
+run: inventory -> {
   group_by:
     warehouse.w_warehouse_name
     warehouse.w_warehouse_sk
@@ -14,7 +14,7 @@ query: inventory -> {
   where:
     date_dim.d_year = 2001
 } -> {
-  project:
+  select:
     *
     cov is stdev / mean
   where:
@@ -34,8 +34,8 @@ query: inventory -> {
     mean2 is sum(mean) { where: d_moy = 2 }
     cov2 is sum(cov) { where: d_moy = 2 }
 
-  having: count(*) { where: d_moy = 1 } > 0
-  having: count(*) { where: d_moy = 2 } > 0
+  having: count() { where: d_moy = 1 } > 0
+  having: count() { where: d_moy = 2 } > 0
 
   order_by:
     w_warehouse_sk

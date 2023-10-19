@@ -2,7 +2,7 @@ import "tpcds.malloy"
 
 // Count distinct is insufficient because null wr_returning_customer_sk is included in average
 
-query: web_returns -> {
+run: web_returns -> {
   group_by:
     wr_returning_customer_sk
     returning_state is returning_addr.ca_state
@@ -50,7 +50,7 @@ query: web_returns -> {
   ave_return is all(avg(total_web_return), returning_state)
 
 } -> {
-  project:
+  select:
     c_customer_id
     c_salutation
     c_first_name

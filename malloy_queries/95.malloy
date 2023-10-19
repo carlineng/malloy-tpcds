@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: web_sales + {
+run: web_sales extend {
   join_many: ws_wh is web_sales
     on ws_order_number = ws_wh.ws_order_number
     and ws_warehouse_sk != ws_wh.ws_warehouse_sk
@@ -9,7 +9,7 @@ query: web_sales + {
     on ws_wh.ws_order_number = wr.wr_order_number
 } -> {
   aggregate:
-    order_count is count(distinct ws_order_number)
+    order_count is count(ws_order_number)
     total_shipping_cost is sum(ws_ext_ship_cost)
     total_net_profit is sum(ws_net_profit)
 

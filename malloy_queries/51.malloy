@@ -8,8 +8,7 @@ import "tpcds.malloy"
 //
 // TODO: once Turducken bug is fixed, re-implement this query
 
-source: v1 is from (
-  all_sales -> {
+source: v1 is all_sales -> {
     group_by:
       item_sk
       date_dim.d_date
@@ -23,45 +22,42 @@ source: v1 is from (
       and date_dim.d_month_seq <= 1211
       and item_sk != null
       and item_sk = 14
-  }
-) {
-  join_one: cumu_date is from(
-    date_dim -> {
-      project:
-        d_date_sk
-        d_date
+} extend {
+  join_one: cumu_date is date_dim -> {
+    select:
+      d_date_sk
+      d_date
 
-      where:
-        d_month_seq >= 1200
-        and d_month_seq <= 1211
-    }
-  ) on d_date <= cumu_date.d_date
+    where:
+      d_month_seq >= 1200
+      and d_month_seq <= 1211
+  } on d_date <= cumu_date.d_date
 
-  join_one: dates_with_sales is from(
-    all_sales -> {
-      group_by:
-        item_sk
-        date_dim.d_date
-
-      declare:
+  join_one: dates_with_sales is all_sales -> {
+    extend: {
+      measure:
         sales_count is count() { where: channel_category ? 'store channel' | 'web channel' }
+    }
+    group_by:
+      item_sk
+      date_dim.d_date
 
-      aggregate:
-        sales_count
+    aggregate:
+      sales_count
 
-      where:
-        date_dim.d_month_seq >= 1200
-        and date_dim.d_month_seq <= 1211
+    where:
+      date_dim.d_month_seq >= 1200
+      and date_dim.d_month_seq <= 1211
 
-      having:
-        sales_count > 0
-    } 
-  )
-    on item_sk = dates_with_sales.item_sk
-    and cumu_date.d_date = dates_with_sales.d_date
+    having:
+      sales_count > 0
+  } 
+
+  on item_sk = dates_with_sales.item_sk
+  and cumu_date.d_date = dates_with_sales.d_date
 }
 
-query: v1 -> {
+run: v1 -> {
   group_by:
     item_sk
     cumu_date.d_date

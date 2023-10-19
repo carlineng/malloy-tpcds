@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: all_sales -> {
+run: all_sales -> {
   group_by:
     item.i_item_id
 
@@ -15,7 +15,7 @@ query: all_sales -> {
     and date_dim.d_date <= @2000-01-03
     and item.i_item_id != null
 } -> {
-  project:
+  select:
     item_id is i_item_id
     store_rev
     ss_dev is store_rev / (total_rev / 3) * 100

@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: web_sales -> {
+run: web_sales -> {
   aggregate: total_sum is sum(ws_net_paid)
 
   nest: by_category is {

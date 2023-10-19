@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: catalog_sales -> {
+run: catalog_sales -> {
   group_by:
     item.i_item_desc
     inventory.warehouse.w_warehouse_name

@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: inventory + {
+run: inventory extend {
   join_many: store_sales on item.i_item_sk = store_sales.ss_item_sk
 } -> {
   group_by: 

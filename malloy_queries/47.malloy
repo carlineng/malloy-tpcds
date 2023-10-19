@@ -3,30 +3,28 @@ import "tpcds.malloy"
 // Ranking window function in the SQL isn't actually used anywhere.
 // Can emulate it by using a self-join in `d_month_seq`
 
-source: v1 is from(
-  store_sales -> {
-    where:
-      ss_sales_price != null
-      and ss_store_sk != null
-      and item.i_category != null
-      and item.i_brand != null
-      
-    group_by: 
-      item.i_category
-      item.i_brand
-      store.s_store_name
-      store.s_company_name
-      date_dim.d_year
-      date_dim.d_moy
-      date_dim.d_month_seq
+source: v1 is store_sales -> {
+  where:
+    ss_sales_price != null
+    and ss_store_sk != null
+    and item.i_category != null
+    and item.i_brand != null
+    
+  group_by: 
+    item.i_category
+    item.i_brand
+    store.s_store_name
+    store.s_company_name
+    date_dim.d_year
+    date_dim.d_moy
+    date_dim.d_month_seq
 
-    aggregate:
-      sum_sales is sum(ss_sales_price)
-      avg_monthly_sales is all(sum(ss_sales_price) / count(distinct date_dim.d_month_seq), i_category, i_brand, s_store_name, s_company_name, d_year)
-  }
-) {}
+  aggregate:
+    sum_sales is sum(ss_sales_price)
+    avg_monthly_sales is all(sum(ss_sales_price) / count(date_dim.d_month_seq), i_category, i_brand, s_store_name, s_company_name, d_year)
+}
 
-query: v1 + {
+run: v1 extend {
   join_one: v1lag is v1
       on i_category = v1lag.i_category
       and i_brand = v1lag.i_brand
@@ -41,7 +39,7 @@ query: v1 + {
       and s_company_name = v1lead.s_company_name
       and d_month_seq = v1lead.d_month_seq - 1
 } -> {
-  project: 
+  select: 
     i_category
     i_brand
     s_store_name

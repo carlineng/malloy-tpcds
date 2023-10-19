@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: all_returns -> {
+run: all_returns -> {
   group_by:
     item.i_item_id
 
@@ -8,15 +8,15 @@ query: all_returns -> {
     store_item_qty is sum(return_quantity) { where: channel_category = 'store channel' }
     catalog_item_qty is sum(return_quantity) { where: channel_category = 'catalog channel' }
     web_item_qty is sum(return_quantity) { where: channel_category = 'web channel' }
-    store_item_count is count(*) { where: channel_category = 'store channel' }
-    catalog_item_count is count(*) { where: channel_category = 'catalog channel' }
-    web_item_count is count(*) { where: channel_category = 'web channel' }
+    store_item_count is count() { where: channel_category = 'store channel' }
+    catalog_item_count is count() { where: channel_category = 'catalog channel' }
+    web_item_count is count() { where: channel_category = 'web channel' }
     total_qty is sum(return_quantity)
 
   where:
     (date_dim.d_week_seq ? 5244 | 5257 | 5264)
 } -> {
-  project: 
+  select: 
     i_item_id
     store_item_qty
     store_dev is store_item_qty / total_qty / 3 * 100

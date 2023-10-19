@@ -1,7 +1,7 @@
 import "tpcds.malloy"
 
-query: store_sales + {
-  query: margin_agg is {
+run: store_sales extend {
+  view: margin_agg is {
     aggregate:
       gross_margin is total_profit / total_ext_sales
   }

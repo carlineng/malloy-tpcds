@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: store_sales -> {
+run: store_sales -> {
   aggregate:
     h8_30_to_9 is count() { where: time_dim.t_hour = 8 and time_dim.t_minute >= 30 }
     h9_to_9_30 is count() { where: time_dim.t_hour = 9 and time_dim.t_minute < 30 }

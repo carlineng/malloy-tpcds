@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: store_sales -> {
+run: store_sales -> {
   group_by:
     customer.c_last_name
     customer.c_first_name
@@ -27,7 +27,7 @@ query: store_sales -> {
     and customer.customer_address.ca_city != customer_address.ca_city
 
 } -> {
-  project:
+  select:
     c_last_name
     c_first_name
     current_city

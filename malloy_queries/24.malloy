@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: store_sales_returns is store_sales + {
+query: store_sales_returns is store_sales extend {
   join_one: sr is store_returns
     on ss_ticket_number = sr.sr_ticket_number
     and ss_item_sk = sr.sr_item_sk

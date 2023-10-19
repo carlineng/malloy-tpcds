@@ -5,14 +5,14 @@ import "tpcds.malloy"
 -- unless I add the hacky `where` condition at the bottom:
 -- where cr_refunded_cash != null or cr_refunded_cash = null
 
-query: catalog_sales -> {
+run: catalog_sales -> {
   group_by: 
     warehouse.w_state
     item.i_item_id
 
   aggregate:
-    sales_before is sum(cs_sales_price - coalesce(catalog_returns.cr_refunded_cash, 0)) { where: date_dim.d_date < @2000-03-11 }
-    sales_after is sum(cs_sales_price - coalesce(catalog_returns.cr_refunded_cash, 0)) { where: date_dim.d_date >= @2000-03-11 }
+    sales_before is source.sum(cs_sales_price - coalesce(catalog_returns.cr_refunded_cash, 0)) { where: date_dim.d_date < @2000-03-11 }
+    sales_after is source.sum(cs_sales_price - coalesce(catalog_returns.cr_refunded_cash, 0)) { where: date_dim.d_date >= @2000-03-11 }
 
   where:
     item.i_current_price >= 0.99

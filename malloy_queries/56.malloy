@@ -1,14 +1,13 @@
 import "tpcds.malloy"
 
-query: all_sales + {
-  join_one: colored_items is from(item -> {
+run: all_sales extend {
+  join_one: colored_items is item -> {
     group_by:
       i_item_id
 
     where:
       i_color ? 'slate' | 'blanched' | 'burnished'
-  })
-    on item.i_item_id = colored_items.i_item_id
+  } on item.i_item_id = colored_items.i_item_id
 } -> {
   group_by: 
     item.i_item_id

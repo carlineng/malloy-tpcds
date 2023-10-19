@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: web_sales -> {
+run: web_sales -> {
   group_by:
     ws_ext_discount_amt
     item.i_manufact_id

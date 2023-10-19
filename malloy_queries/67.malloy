@@ -10,7 +10,7 @@ import "tpcds.malloy"
 // it's a non-sensical calculation anyway, so I'm not bothered that it's not
 // possible in Malloy.
 
-query: store_sales -> {
+run: store_sales -> {
   aggregate: sum_sales is sum(ss_sales_price * ss_quantity)
     nest: by_category is {
       group_by: item.i_category

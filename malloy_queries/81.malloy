@@ -2,7 +2,7 @@ import "tpcds.malloy"
 
 // Looks a lot like query 1
 
-query: catalog_returns -> {
+run: catalog_returns -> {
   group_by:
     returning_customer.c_customer_id
     returning_customer.c_salutation
@@ -13,14 +13,14 @@ query: catalog_returns -> {
 
   aggregate:
     ctr_total_return is sum(cr_return_amt_inc_tax)
-    avg_state_return is all(sum(cr_return_amt_inc_tax) / count(distinct cr_returning_customer_sk), ca_state)
+    avg_state_return is all(sum(cr_return_amt_inc_tax) / count(cr_returning_customer_sk), ca_state)
 
   where:
     date_dim.d_year = 2000
     and return_addr.ca_state != null
     and returning_customer.customer_address.ca_state = 'GA'
 } -> {
-  project:
+  select:
     c_customer_id
     c_salutation
     c_first_name

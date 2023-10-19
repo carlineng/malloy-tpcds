@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: catalog_sales -> {
+run: catalog_sales -> {
   group_by: 
     cs_item_sk 
     cs_ext_discount_amt

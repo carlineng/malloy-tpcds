@@ -1,6 +1,6 @@
 import "tpcds.malloy"
 
-query: all_sales -> {
+run: all_sales -> {
   group_by:
     date_dim.d_year
     item_sk
@@ -16,14 +16,14 @@ query: all_sales -> {
     
     web_qty is sum(quantity) { where: channel_category = 'web channel' }
     catalog_qty is sum(quantity) { where: channel_category = 'catalog channel' }
-    store_count is count(*) { where: channel_category = 'store channel' }
+    store_count is count() { where: channel_category = 'store channel' }
 
   where:
     all_returns.order_number = null
     and date_dim.d_year = 2000
     and customer_sk != null
 } -> {
-  project:
+  select:
     d_year
     item_sk
     customer_sk

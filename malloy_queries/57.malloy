@@ -1,7 +1,6 @@
 import "tpcds.malloy"
 
-source: v1 is from(
-  catalog_sales -> {
+source: v1 is catalog_sales -> {
     group_by:
       item.i_category
       item.i_brand
@@ -12,15 +11,15 @@ source: v1 is from(
 
     aggregate:
       sum_sales is sum(cs_sales_price)
-      avg_monthly_sales is all(sum(cs_sales_price) / count(distinct date_dim.d_month_seq), i_category, i_brand, cc_name, d_year)
+      avg_monthly_sales is all(sum(cs_sales_price) / count(date_dim.d_month_seq), i_category, i_brand, cc_name, d_year)
 
     where:
       call_center.cc_call_center_sk != null
       and item.i_item_sk != null
   }
-) {}
 
-query: v1 + {
+
+run: v1 extend {
   join_one: v1lag is v1
     on i_category = v1lag.i_category
     and i_brand = v1lag.i_brand
@@ -33,7 +32,7 @@ query: v1 + {
     and cc_name = v1lead.cc_name
     and d_month_seq = v1lead.d_month_seq - 1
 } -> {
-  project: 
+  select: 
     i_category
     i_brand
     cc_name

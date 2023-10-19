@@ -5,109 +5,97 @@ import "tpcds.malloy"
 // For now, the individual queries seem to be working,
 
 
-source: sr is from(
-  store_returns -> {
-    group_by:
-      channel is store.s_store_sk
+source: sr is store_returns -> {
+  group_by:
+    channel is store.s_store_sk
 
-    aggregate:
-      returns is sum(sr_return_amt)
-      profit_loss is sum(sr_net_loss)
+  aggregate:
+    returns is sum(sr_return_amt)
+    profit_loss is sum(sr_net_loss)
 
-    where:
-      date_dim.d_date >= @2000-08-23
-      and date_dim.d_date <= @2000-09-22
-  }
-)
+  where:
+    date_dim.d_date >= @2000-08-23
+    and date_dim.d_date <= @2000-09-22
+}
 
-source: ss is from(
-  store_sales -> {
-    group_by:
-      channel is store.s_store_sk
+source: ss is store_sales -> {
+  group_by:
+    channel is store.s_store_sk
 
-    aggregate:
-      sales is sum(ss_ext_sales_price)
-      profit is sum(ss_net_profit)
-    where:
-      date_dim.d_date >= @2000-08-23
-      and date_dim.d_date <= @2000-09-22
-  }
-) {
+  aggregate:
+    sales is sum(ss_ext_sales_price)
+    profit is sum(ss_net_profit)
+  where:
+    date_dim.d_date >= @2000-08-23
+    and date_dim.d_date <= @2000-09-22
+  } extend {
   join_one: sr on channel = sr.channel
 }
 
-source: cr is from (
-  catalog_returns -> {
-    group_by:
-      channel is cr_call_center_sk
+source: cr is catalog_returns -> {
+  group_by:
+    channel is cr_call_center_sk
 
-    aggregate:
-      returns is sum(cr_return_amount)
-      profit_loss is sum(cr_net_loss)
+  aggregate:
+    returns is sum(cr_return_amount)
+    profit_loss is sum(cr_net_loss)
 
-    where:
-      date_dim.d_date >= @2000-08-23 
-      and date_dim.d_date <= @2000-09-22
-  }
-)
+  where:
+    date_dim.d_date >= @2000-08-23 
+    and date_dim.d_date <= @2000-09-22
+}
 
-source: cs is from (
-  catalog_sales -> {
-    group_by:
-      channel is cs_call_center_sk
+source: cs is catalog_sales -> {
+  group_by:
+    channel is cs_call_center_sk
 
-    aggregate:
-      sales is sum(cs_ext_sales_price)
-      profit is sum(cs_net_profit)
+  aggregate:
+    sales is sum(cs_ext_sales_price)
+    profit is sum(cs_net_profit)
 
-    where:
-      date_dim.d_date >= @2000-08-23
-      and date_dim.d_date <= @2000-09-22
-  }
-) {
+  where:
+    date_dim.d_date >= @2000-08-23
+    and date_dim.d_date <= @2000-09-22
+} extend {
   join_one: cr on channel = cr.channel
 }
 
-source: wr is from(
-  web_returns -> {
-    group_by:
-      channel is web_page.wp_web_page_sk
+source: wr is web_returns -> {
+  group_by:
+    channel is web_page.wp_web_page_sk
 
-    aggregate:
-      returns is sum(wr_return_amt)
-      profit_loss is sum(wr_net_loss)
+  aggregate:
+    returns is sum(wr_return_amt)
+    profit_loss is sum(wr_net_loss)
 
-    where:
-      date_dim.d_date >= @2000-08-23
-      and date_dim.d_date <= @2000-09-22
-  }
-)
+  where:
+    date_dim.d_date >= @2000-08-23
+    and date_dim.d_date <= @2000-09-22
+}
 
-source: ws is from (
-  web_sales -> {
-    group_by:
-     channel is web_page.wp_web_page_sk
+source: ws is web_sales -> {
+  group_by:
+    channel is web_page.wp_web_page_sk
 
-    aggregate:
-      sales is sum(ws_ext_sales_price)
-      profit is sum(ws_net_profit)
+  aggregate:
+    sales is sum(ws_ext_sales_price)
+    profit is sum(ws_net_profit)
 
-    where:
-      date_dim.d_date >= @2000-08-23
-      and date_dim.d_date <= @2000-09-22
-  }
-) {
+  where:
+    date_dim.d_date >= @2000-08-23
+    and date_dim.d_date <= @2000-09-22
+} extend {
   join_one: wr on channel = wr.channel
 }
 
-query: ss -> {
+run: ss -> {
   aggregate:
     sales is sum(sales)
-    return is sum(sr.returns)
-    profit is sum(profit - sr.profit_loss)
+    return is sr.returns.sum()
+    profit is source.sum(profit - sr.profit_loss)
 
   nest: by_channel is {
-    project:
+    select:
       channel
       sales
       sr.returns
@@ -119,14 +107,14 @@ query: ss -> {
     channel != null
 }
 
-query: cs -> {
+run: cs -> {
   aggregate:
     sales is sum(sales)
-    return is sum(coalesce(cr.returns, 0))
-    profit is sum(profit - coalesce(cr.profit_loss, 0))
+    return is source.sum(coalesce(cr.returns, 0))
+    profit is source.sum(profit - coalesce(cr.profit_loss, 0))
 
   nest: by_channel is {
-    project:
+    select:
       channel
       sales
       cr.returns
@@ -135,14 +123,14 @@ query: cs -> {
   }
 }
 
-query: ws -> {
+run: ws -> {
   aggregate:
     sales is sum(sales)
-    return is sum(wr.returns)
-    profit is sum(profit - wr.profit_loss)
+    return is wr.returns.sum()
+    profit is source.sum(profit - wr.profit_loss)
 
   nest: by_channel is {
-    project:
+    select:
       channel
       sales
       wr.returns
